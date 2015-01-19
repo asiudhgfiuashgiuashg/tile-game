@@ -1,0 +1,18 @@
+Updated: 1/18/15 - First Entry
+
+Currently in game:
+Character movement(arrows and wasd)
+Walking animations(up, down left and right)
+	animations are generated through a method using a spritesheet when given the row number and length of frames
+Boundries(Character can't move beyond the visible screen)
+
+
+Known Problems:
+Walking animations pauses in the middle once the key is let go
+
+Things to add:
+Map
+Movement between maps
+Collisions
+NPC's
+Enemies
