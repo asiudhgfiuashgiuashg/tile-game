@@ -29,8 +29,8 @@ public class TheGame extends ApplicationAdapter
 	@Override
 	public void create()
 	{	
-		Player player = new Player();
-		SpriteBatch batch = new SpriteBatch();
+		player = new Player();
+		batch = new SpriteBatch();
 		player.create();
 		stateTime = 0f;
 	}
