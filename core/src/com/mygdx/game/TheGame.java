@@ -31,7 +31,8 @@ public class TheGame extends ApplicationAdapter
 
 	@Override
 	public void create()
-	{		
+	{	
+		Player player = new Player();
 		player.create();
 		stateTime = 0f;
 	}
