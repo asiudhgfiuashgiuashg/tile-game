@@ -34,6 +34,9 @@ public class Player extends Entity
     @Override
     public void create() {
     
+    	posX = 400;
+    	posY = 150;
+    	
         spriteSheet = new Texture(Gdx.files.internal("index.png"));
         tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
         
@@ -63,7 +66,7 @@ public class Player extends Entity
     
     @Override
     public void update(float stateTime) {
-
+    	
         if (Gdx.input.isKeyPressed(Keys.LEFT) && posX >= 0 || Gdx.input.isKeyPressed(Keys.A) && posX >= 0)
         {
             currentFrame = moveLeft.getKeyFrame(stateTime, true);

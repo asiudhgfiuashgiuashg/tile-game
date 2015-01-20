@@ -30,6 +30,7 @@ public class TheGame extends ApplicationAdapter
 	public void create()
 	{	
 		Player player = new Player();
+		SpriteBatch batch = new SpriteBatch();
 		player.create();
 		stateTime = 0f;
 	}
@@ -56,7 +57,7 @@ public class TheGame extends ApplicationAdapter
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stateTime += Gdx.graphics.getDeltaTime();
 		batch.begin();
-		
+
 		player.update(stateTime);
 		player.draw(batch);
 		
