@@ -1,5 +1,16 @@
 adding a file removal:
 git rm [name] -r
 
-pushing a branch:
+
+creating a new branch:
+git branch [name]
+
+switching branches:
+git checkout [name]
+
+pushing a new branch:
 git push -u origin [branchName]
+
+remove a file from being tracked:
+git rm --cached [name]
+
