@@ -7,21 +7,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class TheGame extends ApplicationAdapter 
 {
-/*	int FRAME_COLS = 13;
-	int FRAME_ROWS = 21;
-
-	Animation moveRight;
-	Animation moveLeft;
-	Animation moveUp;
-	Animation moveDown;
-	TextureRegion idleRight;
-	TextureRegion idleLeft;
-	TextureRegion idleUp;
-	TextureRegion idleDown;
-	Texture spriteSheet;
-	TextureRegion[][] tmp;
-	TextureRegion[] animationFrames;
-	TextureRegion currentFrame; */
 	Player player;
 	SpriteBatch batch;
 	float stateTime;
@@ -34,20 +19,6 @@ public class TheGame extends ApplicationAdapter
 		player.create();
 		stateTime = 0f;
 	}
-
-/*	public Animation animate(int row, int length)
-	{
-		animationFrames = new TextureRegion[length];
-		int index = 0;
-		for (int j = 0; j < length; j++)
-		{
-			animationFrames[index++] = tmp[row][j];
-		}
-		Animation movement = new Animation(0.025f, animationFrames);
-
-		return movement;
-	} */
-
 
 
 	@Override
