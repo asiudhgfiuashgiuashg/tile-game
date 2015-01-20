@@ -1,0 +1,5 @@
+adding a file removal:
+git rm [name] -r
+
+pushing a branch:
+git push -u origin [branchName]
