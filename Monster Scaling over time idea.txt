@@ -1,0 +1,64 @@
+I was thinking
+[3:51:18 PM] b1b1b122: If the hero is fighting ai
+[3:51:31 PM] b1b1b122: The computer can keep track of fights and outcomes
+[3:51:50 PM] b1b1b122: And then use genetic algorithms to effectively breed pairs of opponents
+[3:51:54 PM] b1b1b122: To create new opponents
+[3:52:37 PM] b1b1b122: Lol
+[3:53:37 PM] b1b1b122: Like an enemy might have a certain amount of armor and damage and does well so he is bred with another enemy that did well too to create some random combination or their stats
+[3:54:00 PM] b1b1b122: Soenemies will become more effective vs the player overtime
+[3:54:22 PM] b1b1b122: Unless the player uses different weapons or methods of killing etc
+[3:54:39 PM] b1b1b122: Offspring would also have potential for mutation
+[3:54:54 PM] b1b1b122: Like a random stat might get changed not based on parents
+[3:55:11 PM] b1b1b122: This system could Make random encounters in the game world
+Interesting
+[3:55:22 PM] b1b1b122: Forcing player to change their style from time to time
+[3:56:57 PM] Mark Dolson: that's not bad
+[3:57:19 PM] Mark Dolson: might be quite a bit over my current level right now, but something I would definitely be interested in
+[3:57:56 PM] b1b1b122: It is an abstract idea right now and soemhinf for way in future
+[3:58:06 PM] b1b1b122: It really isnt complicated though
+[3:58:22 PM] b1b1b122: Assume an enemy's genetic code is their stats
+[3:58:26 PM] Mark Dolson: if it's just stats, it might not be too hard
+[3:58:32 PM] b1b1b122: Ya
+[3:58:39 PM] b1b1b122: Other stuff could be hardcoded or somethinf
+[3:58:51 PM] b1b1b122: Every 10 fights, the enemies are paired
+[3:58:58 PM] b1b1b122: The oens that did most damage breed
+[3:59:08 PM] b1b1b122: The two
+Least damage breed
+[3:59:12 PM] b1b1b122: And in between
+[3:59:26 PM] b1b1b122: And their offspring are the next random enemies
+[3:59:45 PM] b1b1b122: Like 99 damage done breeds with 98 damahe done
+[3:59:53 PM] b1b1b122: 96 with 84
+[3:59:59 PM] b1b1b122: 10 with 0
+[4:00:08 PM] Mark Dolson: it'd take quite a bit of fine tuning though, to make sure that the player can actually keep up with the changes, especially later on down the line
+[4:00:15 PM] b1b1b122: Or u could use a different metric
+[4:00:21 PM] b1b1b122: Ya for sure
+[4:00:31 PM] b1b1b122: It can be added on top of actual game
+[4:00:56 PM] b1b1b122: Maybe damage done is worth some points of their fitness and damge taken is worth so much
+[4:01:03 PM] b1b1b122: etc
+[4:01:05 PM] Mark Dolson: plus, I think we would need some kind of non story based level progression
+[4:01:08 PM] b1b1b122: And u tweak the calies
+[4:01:25 PM] b1b1b122: Wellll i was thinking we make actual game with hard coded bosses and stuff
+[4:01:36 PM] b1b1b122: But like the crap u find in the middle
+Of mowhere
+[4:01:43 PM] b1b1b122: That randomly pops out
+Of grass
+[4:02:40 PM] Mark Dolson: well, either we should allow the bosses to scale based on player level or we would have to limit the breeding to a certain point until the boss is beat or some such
+[4:02:52 PM] Mark Dolson: it wouldn't do for the random fights to be harder then the next boss fight
+[4:02:53 PM] b1b1b122: Nyyyyywaaaaaaaaaaayyyyyyyyyyyy just an idea if we finish the important bits
+[4:03:25 PM] b1b1b122: Ya maybe the boss stats could scale with the stats of recent random enemies
+[4:03:48 PM] Mark Dolson: like the big bad boss eats the little bitty bugs and gains part of their stats
+[4:03:55 PM] b1b1b122: LOL
+[4:03:55 PM] Mark Dolson: or some such
+[4:04:05 PM] b1b1b122: And the game literallytells u that
+[4:04:08 PM] Mark Dolson: lol
+[4:04:19 PM] b1b1b122: U fucktadd u thoight u was training for te boss
+[4:04:20 PM] Mark Dolson: I was save that line for later then
+[4:04:25 PM] Mark Dolson: lol
+[4:04:27 PM] b1b1b122: But u didt pick ip the bodies
+[4:04:29 PM] b1b1b122: So he ate them
+[4:04:38 PM] b1b1b122: And the player is like wtf there was no pick up body option
+[4:04:44 PM] Mark Dolson: oh god
+[4:04:49 PM] b1b1b122: Evil game developers!
+[4:04:49 PM] Mark Dolson: this is brilliant
+[4:05:07 PM] Mark Dolson: we're doing this, I don't know how long it's gonna take, but we're doing it
+[4:05:19 PM] b1b1b122: Hahahha yessshh
