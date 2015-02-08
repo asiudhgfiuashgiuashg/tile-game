@@ -8,6 +8,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.mygdx.game;
 
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
@@ -33,7 +38,8 @@ public class Player extends Entity
 	Map currentMap;
 
     @Override
-    public void create() {
+    public void create()
+    {
     
     	posX = 400;
     	posY = 150;
@@ -53,7 +59,18 @@ public class Player extends Entity
         idleDown = tmp[10][0];
         currentFrame = idleUp;
         
+        try
+        {
+        	currentMap = new Map("Test.txt");
+        }
+        catch(IOException e){}
+        finally
+        {
+        	System.out.println("Failed to create map object");
+        }  
+        
     }
+    
     
     protected Animation animate(int row, int length)
     {

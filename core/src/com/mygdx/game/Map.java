@@ -31,15 +31,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class Map
 {
     private String title;
-    private String mapFile;
     private int row;
     private int col;
     private static final int TILE_WIDTH = 80;
     private static final int TILE_HEIGHT = 80;
     private int[][] mapTiles;
     
-    private int charPosX;
-    private int charPosY;
+    private int charPosX = 0;
+    private int charPosY = 0;
     private int sightX;
     private int sightY;
     
@@ -50,11 +49,13 @@ public class Map
     
     public Map(String mapFile) throws IOException
     {
+    	
+    	System.out.println("Scanner Test...");
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
-        this.mapFile = mapFile;
-        Scanner sc = new Scanner(new File(this.mapFile));
+        Scanner sc = new Scanner(new File(mapFile));
+        System.out.println("Success");
         title = sc.nextLine();
         row = Integer.parseInt(sc.nextLine());
         col = Integer.parseInt(sc.nextLine());
@@ -89,9 +90,17 @@ public class Map
                 g.drawImage(currTileImg, c * TILE_WIDTH, r * TILE_HEIGHT, null);
             }
         }
+        try
+        {
         ImageIO.write(bigImage, "PNG", new File(title + ".png"));
+       
         mapImage = new Texture(Gdx.files.internal(title + ".png"));
-        
+        }
+        catch(IOException e){}
+        finally
+        {
+        	System.out.println("Fucking sucks");
+        }
         
         fov = new TextureRegion(mapImage, 0, 0, 2*sightX, 2*sightY);
         sc.close();
@@ -107,9 +116,11 @@ public class Map
     
     public void update(float x, float y)
     {
+    	System.out.println("Test4");
         charPosX = Math.round(x);
         charPosY = Math.round(y);
-        fov.setRegion(charPosX - sightX, charPosY - sightY, 2*sightX, 2*sightY);   
+        fov.setRegion(charPosX - sightX, charPosY - sightY, 2*sightX, 2*sightY); 
+        System.out.println("Test");
     }
     
     public void draw(SpriteBatch batch)
