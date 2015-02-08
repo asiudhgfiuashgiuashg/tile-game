@@ -30,12 +30,15 @@ public class Player extends Entity
 	TextureRegion idleLeft;
 	TextureRegion idleUp;
 	TextureRegion idleDown;
+	Map currentMap;
 
     @Override
     public void create() {
     
     	posX = 400;
     	posY = 150;
+    	int sightX = 400;
+    	int sightY = 240;
     	
         spriteSheet = new Texture(Gdx.files.internal("index.png"));
         tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
@@ -49,6 +52,7 @@ public class Player extends Entity
         moveDown = animate(10, 9);
         idleDown = tmp[10][0];
         currentFrame = idleUp;
+        
     }
     
     protected Animation animate(int row, int length)
@@ -90,10 +94,13 @@ public class Player extends Entity
             currentFrame = moveDown.getKeyFrame(stateTime, true);
             posY -= 200 * Gdx.graphics.getDeltaTime();
         }
+        
+        currentMap.update(posX, posY);
     }
     
     @Override
     public void draw(SpriteBatch batch) {
         batch.draw(currentFrame, posX, posY);
+        currentMap.draw(batch);
     }
 }
