@@ -82,27 +82,25 @@ public class Map
                 BufferedImage currTileImg;
                 if (mapTiles[r][c] == 0)
                 {
-                    currTileImg = ImageIO.read(new File("whiteSquare.png"));
+                    currTileImg = ImageIO.read(new File("../core/assets/whiteSquare.png"));
                 } else //1
                 {
-                    currTileImg = ImageIO.read(new File("blackSquare.png"));
+                    currTileImg = ImageIO.read(new File("../core/assets/blackSquare.png"));
                 }
                 g.drawImage(currTileImg, c * TILE_WIDTH, r * TILE_HEIGHT, null);
             }
         }
         try
         {
-        ImageIO.write(bigImage, "PNG", new File(title + ".png"));
-       
-        mapImage = new Texture(Gdx.files.internal(title + ".png"));
+	        ImageIO.write(bigImage, "PNG", new File(title + ".png"));
+	        mapImage = new Texture(Gdx.files.internal(title + ".png"));
         }
-        catch(IOException e){}
-        finally
+        catch(IOException e)
         {
         	System.out.println("Fucking sucks");
         }
         
-        fov = new TextureRegion(mapImage, 0, 0, 2*sightX, 2*sightY);
+        fov = new TextureRegion(mapImage, 0, 0, 2 * sightX, 2 * sightY);
         sc.close();
     }
     
@@ -116,11 +114,9 @@ public class Map
     
     public void update(float x, float y)
     {
-    	System.out.println("Test4");
         charPosX = Math.round(x);
         charPosY = Math.round(y);
         fov.setRegion(charPosX - sightX, charPosY - sightY, 2*sightX, 2*sightY); 
-        System.out.println("Test");
     }
     
     public void draw(SpriteBatch batch)

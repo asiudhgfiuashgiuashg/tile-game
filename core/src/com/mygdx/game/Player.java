@@ -61,14 +61,15 @@ public class Player extends Entity
         
         try
         {
-        	currentMap = new Map("Test.txt");
+        	System.out.println("Working Directory = " + System.getProperty("user.dir"));
+        	currentMap = new Map("../core/assets/Test.txt");
+        	currentMap.setFOV(sightX, sightY);
         }
-        catch(IOException e){}
-        finally
+        catch(IOException e)
         {
+        	System.out.println(e.getMessage());
         	System.out.println("Failed to create map object");
-        }  
-        
+        }
     }
     
     
@@ -117,7 +118,7 @@ public class Player extends Entity
     
     @Override
     public void draw(SpriteBatch batch) {
+    	currentMap.draw(batch);
         batch.draw(currentFrame, posX, posY);
-        currentMap.draw(batch);
     }
 }
