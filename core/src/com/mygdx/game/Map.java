@@ -50,12 +50,10 @@ public class Map
     public Map(String mapFile) throws IOException
     {
     	
-    	System.out.println("Scanner Test...");
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
         Scanner sc = new Scanner(new File(mapFile));
-        System.out.println("Success");
         title = sc.nextLine();
         row = Integer.parseInt(sc.nextLine());
         col = Integer.parseInt(sc.nextLine());
@@ -121,7 +119,7 @@ public class Map
     
     public void draw(SpriteBatch batch)
     {
-        batch.draw(fov, charPosX - sightX, charPosY - sightY);
+        batch.draw(fov, 0, 0);
     }
 
 }
