@@ -16,6 +16,7 @@ import java.util.Scanner;
 import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -36,11 +37,24 @@ public class Map
     private static final int TILE_WIDTH = 80;
     private static final int TILE_HEIGHT = 80;
     private int[][] mapTiles;
+    private int mapWidth;
+    private int mapHeight;
+    private boolean mapMoveLeft;
+    private boolean mapMoveRight;
+    private boolean mapMoveUp;
+    private boolean mapMoveDown;
     
-    private int charPosX = 0;
-    private int charPosY = 0;
+    
+    private float charPosX = 200;
+    private float charPosY = 150;
+    private float charDrawPosX = 400;
+    private float charDrawPosY = 240;
+    private int mapPosX;
+    private int mapPosY;
     private int sightX;
     private int sightY;
+    private int winX = 400;
+    private int winY = 240;
     
     
     Texture mapImage;
@@ -49,7 +63,6 @@ public class Map
     
     public Map(String mapFile) throws IOException
     {
-    	
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
@@ -97,8 +110,13 @@ public class Map
         {
         	System.out.println("Fucking sucks");
         }
+        mapWidth = TILE_WIDTH * col;
+        mapHeight = TILE_HEIGHT * row;
         
-        fov = new TextureRegion(mapImage, 0, 0, 2 * sightX, 2 * sightY);
+        updatePosX(0);
+        updatePosY(0);
+            
+        fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
         sc.close();
     }
     
@@ -110,16 +128,176 @@ public class Map
         sightY = y;
     }
     
-    public void update(float x, float y)
+    public void update()
     {
-        charPosX = Math.round(x);
-        charPosY = Math.round(y);
-        fov.setRegion(charPosX - sightX, charPosY - sightY, 2*sightX, 2*sightY); 
+        fov.setRegion(mapPosX, mapPosY, 2*winX, 2*winY); 
     }
     
     public void draw(SpriteBatch batch)
     {
         batch.draw(fov, 0, 0);
     }
+    
+    public float getCharDrawPosX()
+    {
+    	return charDrawPosX;
+    }
+    public float getCharDrawPosY()
+    {
+    	return charDrawPosY;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////
+    // set's the initial map and character draw positions based on char position //
+    ///////////////////////////////////////////////////////////////////////////////
+    public void updatePosX(float movement)
+    {
+    	if (charPosX - winX < 0)
+    	{
+    		mapPosX = 0;
+    	}
+    	else if (charPosX - winX > 0)
+    	{
+    		mapPosX = (int)charPosX - winX;
+    	}
+    	
+    	if (charPosX + winX > mapWidth)
+    	{
+    		mapPosX = mapWidth - 2*winX;
+    	}
 
+    	
+    	mapMoveLeft = (mapPosX == 0) ? false : true;
+    	mapMoveRight = (mapPosX == (mapWidth - 2*winX)) ? false : true;
+    	
+    	if (mapMoveLeft == true && mapMoveRight == true)
+        {
+        	charDrawPosX = 400;
+        }
+		else
+        {
+        	if (mapMoveLeft == false || mapMoveRight == false)
+        	{
+        		charDrawPosX += movement;
+        	}
+        }
+    }
+    
+    public void updatePosY(float movement)
+    { 	
+    	mapMoveUp = (mapPosY == 0) ? false : true;
+    	mapMoveDown = (mapPosY == (mapHeight - 2*winY)) ? false : true;
+    	
+    	
+    	if (mapHeight - (charPosY + winY) < 0)
+    	{
+    		mapPosY = 0;
+    	}
+    	else if (mapHeight - (charPosY + winY) > 0)
+    	{
+    		mapPosY = mapHeight - (int)(charPosY + winY);
+    	}
+    	if (charPosY + winY > mapHeight)
+    	{
+    		mapPosY = mapHeight - 2*winY;
+    	}
+   
+    	
+    	if (mapMoveUp == true && mapMoveDown == true)
+        {
+        	charDrawPosY = 240;
+        }
+		else
+        {
+        	if (mapMoveUp == false || mapMoveDown == false)
+        	{
+        		charDrawPosY += movement;
+        	}
+        }
+    	
+    /*	if (charPosY > winY && charPosY < (mapHeight-winY))
+        {
+        	mapPosY = mapHeight - ((int)charPosY + winY);
+        	charDrawPosY = 240;
+        }       
+        else if (charPosY <= winY || charPosY >= (mapHeight - winY))
+        {
+        	if (charPosY <= winY)
+        	{
+        		mapPosY = mapHeight - (int)charPosY;
+        		charDrawPosY = charPosY;
+        	}
+        	else if (charPosY >= (mapHeight - winY))
+        	{
+        		mapPosY = mapHeight - (2 * winY);
+        		charDrawPosY = charPosY;
+        	}
+        }*/
+    }
+    
+    
+    /////////////////////
+    // player movement //
+    /////////////////////
+    
+    public boolean moveLeft()
+    {
+    	boolean success = false;
+    	if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A))
+    	{	
+    		if (charPosX > -15)
+    		{
+    			charPosX -= 200 * Gdx.graphics.getDeltaTime();
+    			success = true;
+    			
+    			updatePosX(-200 * Gdx.graphics.getDeltaTime());	
+    		}	
+    	}
+    	return success;
+    }
+    
+    public boolean moveRight()
+    {
+    	boolean success = false;
+    	if (Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D))
+    	{            
+    		if (charPosX < mapWidth - 50)
+    		{
+    			charPosX += 200 * Gdx.graphics.getDeltaTime();
+    			success = true;
+    			updatePosX(200 * Gdx.graphics.getDeltaTime());
+    		}
+    		         
+    	}
+    	return success;
+    }
+    public boolean moveUp()
+    {
+    	boolean success = false;
+    	if (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W))
+    	{         
+    		if (charPosY < mapHeight)
+    		{
+    			charPosY += 200 * Gdx.graphics.getDeltaTime();
+    			success = true;
+    			updatePosY(200 * Gdx.graphics.getDeltaTime());
+    		}
+        	      
+    	}
+    	return success;
+    }
+    public boolean moveDown()
+    {
+    	boolean success = false;
+    	if (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S))
+    	{         
+    		if (charPosY > 0)
+    		{
+    			charPosY -= 200 * Gdx.graphics.getDeltaTime();
+    			success = true;
+    			updatePosY(-200 * Gdx.graphics.getDeltaTime());
+    		}	
+    	}
+    	return success;
+    }
 }

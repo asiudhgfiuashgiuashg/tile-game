@@ -37,9 +37,6 @@ public class Player extends Entity
     @Override
     public void create()
     {
-    
-    	posX = 400;
-    	posY = 150;
     	int sightX = 400;
     	int sightY = 240;
     	
@@ -86,36 +83,44 @@ public class Player extends Entity
     @Override
     public void update(float stateTime) {
     	
-        if (Gdx.input.isKeyPressed(Keys.LEFT) && posX >= 0 || Gdx.input.isKeyPressed(Keys.A) && posX >= 0)
+        if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A))
         {
-            currentFrame = moveLeft.getKeyFrame(stateTime, true);
-            posX -= 200 * Gdx.graphics.getDeltaTime();  
+            if (currentMap.moveLeft())
+            {
+            	currentFrame = moveLeft.getKeyFrame(stateTime, true);
+            }
         }
         
-        if (Gdx.input.isKeyPressed(Keys.RIGHT) && posX <= 800 || Gdx.input.isKeyPressed(Keys.D) && posX <= 800)
+        else if (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D))
         {            
-            currentFrame = moveRight.getKeyFrame(stateTime, true);
-            posX += 200 * Gdx.graphics.getDeltaTime();         
+            if (currentMap.moveRight())
+            {
+            	currentFrame = moveRight.getKeyFrame(stateTime, true);
+            }
         }
         
-        if (Gdx.input.isKeyPressed(Keys.UP) && posY <= 480 || Gdx.input.isKeyPressed(Keys.W) && posY <= 480)
+        else if (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W))
         {
-            currentFrame = moveUp.getKeyFrame(stateTime, true);
-            posY += 200 * Gdx.graphics.getDeltaTime();      
+        	if (currentMap.moveUp())
+        	{
+        		currentFrame = moveUp.getKeyFrame(stateTime, true); 
+        	}
         }
         
-        if (Gdx.input.isKeyPressed(Keys.DOWN) && posY >= 0 || Gdx.input.isKeyPressed(Keys.S) && posY >= 0)
-        {
-            currentFrame = moveDown.getKeyFrame(stateTime, true);
-            posY -= 200 * Gdx.graphics.getDeltaTime();
+        else if (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S))
+        { 
+            if (currentMap.moveDown())
+            {
+            	currentFrame = moveDown.getKeyFrame(stateTime, true);
+            }
         }
         
-        currentMap.update(posX, posY);
     }
     
     @Override
     public void draw(SpriteBatch batch) {
     	currentMap.draw(batch);
-        batch.draw(currentFrame, posX, posY);
+    	currentMap.update();
+        batch.draw(currentFrame, currentMap.getCharDrawPosX(), currentMap.getCharDrawPosY());
     }
 }
