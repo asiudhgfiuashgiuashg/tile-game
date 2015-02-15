@@ -36,7 +36,7 @@ public class Map
     private int col;
     private static final int TILE_WIDTH = 80;
     private static final int TILE_HEIGHT = 80;
-    private int[][] mapTiles;
+    private Tile[][] mapTiles;
     private int mapWidth;
     private int mapHeight;
     private boolean mapMoveLeft;
@@ -61,29 +61,64 @@ public class Map
     TextureRegion fov;
     
     
-    public Map(String mapFile) throws IOException
+    public Map(String mapFile, String tileFile) throws IOException
     {
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
-        Scanner sc = new Scanner(new File(mapFile));
-        title = sc.nextLine();
-        row = Integer.parseInt(sc.nextLine());
-        col = Integer.parseInt(sc.nextLine());
-        mapTiles = new int[row][col];
-        for (int r = 0; r < row; r++)
-        {
-            String line = sc.nextLine();
-            String[] nums = line.split("\\s+");
-            for (int c = 0; c < nums.length; c++)
-            {
-                mapTiles[r][c] = Integer.parseInt(nums[c]);
-            }
+        Scanner mapFileScanner = new Scanner(new File(mapFile));
+        title = mapFileScanner.nextLine();
+        row = Integer.parseInt(mapFileScanner.nextLine());
+        col = Integer.parseInt(mapFileScanner.nextLine());
+        mapTiles = new Tile[row][col];
+        
+        Scanner tileFileScanner = new Scanner(new File(tileFile));
+        for (int r = 0; r < row; r++) {
+            String currentRow = mapFileScanner.nextLine();
+            String[] individualIds = currentRow.split("\\s+");
+            System.out.println(currentRow);
+            System.out.println("col is: " + col);
+        	for (int c = 0; c < col; c++/*ha*/) {
+        	    System.out.println("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        		System.out.println(c);
+        		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        		String individualTileId = individualIds[c];
+        		//find corresponding line in tileFile
+        		String currentTilesLine = null;
+        		String[] currentAttributes = new String[0];
+        		boolean found = false;
+        		while (!found)
+        		{
+        			currentTilesLine = tileFileScanner.nextLine();
+        			currentAttributes = currentTilesLine.split(", ");
+        			System.out.println(" :::: " + currentAttributes[1] + " / " + individualTileId);
+        			System.out.print(currentTilesLine);
+        			if (currentAttributes[1].equals(individualTileId)) { //id matches tile we want
+        				found = true;
+        			}
+        		}
+        		//now currentAttributes should have all the attributes needed to create our tile object
+        		//name, id, imageURI, left, right, top, bottom <--- order in Tiles.txt
+        		//String imageURI, String name, boolean leftWall, boolean rightWall, boolean topWall, boolean bottomWall <----- order in Tile()
+        		String imageURI = currentAttributes[2];
+        		String name = currentAttributes[0];
+        		boolean leftWall = Boolean.parseBoolean(currentAttributes[3]);
+        		boolean rightWall = Boolean.parseBoolean(currentAttributes[4]);
+        		boolean topWall = Boolean.parseBoolean(currentAttributes[5]);
+        		boolean bottomWall = Boolean.parseBoolean(currentAttributes[6]);
+        		//need to also get hazard once class Item is implemented
+        		Tile newTile = new Tile(imageURI, name, leftWall, rightWall, topWall, bottomWall);
+        		mapTiles[r][c] = newTile;
+        		tileFileScanner = new Scanner(new File(tileFile));
+        	}
         }
         
+        tileFileScanner.close();
+        mapFileScanner.close();
         ///////////////////////////////////////////////////////////
         // create and save png which is composite of tile images //
         ///////////////////////////////////////////////////////////
+        System.out.println("CREATING COMPOSITE MAP IMAGE");
         BufferedImage bigImage = new BufferedImage(TILE_WIDTH * col, TILE_HEIGHT * row, BufferedImage.TYPE_INT_ARGB); //made up of combined tiles
         Graphics g = bigImage.getGraphics();
         for (int r = 0; r < row; r++)
@@ -91,13 +126,7 @@ public class Map
             for (int c = 0; c < col; c++)
             {
                 BufferedImage currTileImg;
-                if (mapTiles[r][c] == 0)
-                {
-                    currTileImg = ImageIO.read(new File("../core/assets/whiteSquare.png"));
-                } else //1
-                {
-                    currTileImg = ImageIO.read(new File("../core/assets/blackSquare.png"));
-                }
+                currTileImg = ImageIO.read(new File("../core/assets/" + mapTiles[r][c].imageURI));
                 g.drawImage(currTileImg, c * TILE_WIDTH, r * TILE_HEIGHT, null);
             }
         }
@@ -119,7 +148,7 @@ public class Map
         updatePosY(0);
             
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
-        sc.close();
+        
     }
     
     
