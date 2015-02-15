@@ -115,8 +115,8 @@ public class Map
         
         initialCharPos();
         
-        updatePosX(0);
-        updatePosY(0);
+       updatePosX(0);
+       updatePosY(0);
             
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
         sc.close();
@@ -132,7 +132,7 @@ public class Map
     
     public void update()
     {
-        fov.setRegion(mapPosX, mapPosY, 2*winX, 2*winY); 
+        fov.setRegion(mapPosX, mapHeight - mapPosY, 2*winX, 2*winY); 
     }
     
     public void draw(SpriteBatch batch)
@@ -171,7 +171,7 @@ public class Map
     	}
     	else if (charPosY > mapHeight - winY)
     	{
-    		charDrawPosY = (charPosY - mapHeight + 2*winY);
+    		charDrawPosY = (charPosY - (mapHeight - winY) + winY);
     	}
     	
     }
@@ -211,21 +211,21 @@ public class Map
     
     public void updatePosY(float movement)
     { 	
-    	mapMoveUp = (mapPosY == 0) ? false : true;
-    	mapMoveDown = (mapPosY == (mapHeight - 2*winY)) ? false : true;
+    	mapMoveUp = (mapPosY == (mapHeight)) ? false : true;
+    	mapMoveDown = (mapPosY == 2*winY) ? false : true;
     	
     	
-    	if (mapHeight < charPosY + winY)
+    	if (charPosY < winY)
     	{
-    		mapPosY = 0;
+    		mapPosY = 2*winY;
     	}
     	else if (mapHeight - (charPosY + winY) > 0)
     	{
-    		mapPosY = mapHeight - (int)(charPosY + winY);
+    		mapPosY = (int)(charPosY + winY);
     	}
-    	if (charPosY < winY)
+    	if (mapHeight < charPosY + winY)
     	{
-    		mapPosY = mapHeight - 2*winY;
+    		mapPosY = mapHeight;
     	}
    
     	
