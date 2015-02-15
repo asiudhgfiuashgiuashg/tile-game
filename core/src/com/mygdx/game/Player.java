@@ -56,7 +56,7 @@ public class Player extends Entity
         try
         {
         	System.out.println("Working Directory = " + System.getProperty("user.dir"));
-        	currentMap = new Map("../core/assets/Test.txt");
+        	currentMap = new Map("../core/assets/Test.txt", "../core/assets/Tiles.txt");
         	currentMap.setFOV(sightX, sightY);
         }
         catch(IOException e)
