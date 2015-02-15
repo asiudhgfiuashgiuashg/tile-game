@@ -45,8 +45,8 @@ public class Map
     private boolean mapMoveDown;
     
     
-    private float charPosX = 1100;
-    private float charPosY = 150;
+    private float charPosX = 200;
+    private float charPosY = 860;
     private float charDrawPosX = 0;
     private float charDrawPosY = 0;
     private int mapPosX;
@@ -161,7 +161,7 @@ public class Map
     	}
     	else if (charPosX > mapWidth - winX)
     	{
-    		charDrawPosX = (charPosX -(mapWidth - winX) + winX);
+    		charDrawPosX = (charPosX - mapWidth + 2*winX);
     	}
     	
     	
@@ -169,7 +169,10 @@ public class Map
     	{
     		charDrawPosY = charPosY;
     	}
-    	
+    	else if (charPosY > mapHeight - winY)
+    	{
+    		charDrawPosY = (charPosY - mapHeight + 2*winY);
+    	}
     	
     }
     
