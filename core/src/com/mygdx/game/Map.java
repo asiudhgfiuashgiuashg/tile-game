@@ -189,7 +189,7 @@ public class Map
     	mapMoveDown = (mapPosY == (mapHeight - 2*winY)) ? false : true;
     	
     	
-    	if (mapHeight - (charPosY + winY) < 0)
+    	if (mapHeight < charPosY + winY)
     	{
     		mapPosY = 0;
     	}
@@ -197,7 +197,7 @@ public class Map
     	{
     		mapPosY = mapHeight - (int)(charPosY + winY);
     	}
-    	if (charPosY + winY > mapHeight)
+    	if (charPosY < winY)
     	{
     		mapPosY = mapHeight - 2*winY;
     	}
@@ -215,24 +215,6 @@ public class Map
         	}
         }
     	
-    /*	if (charPosY > winY && charPosY < (mapHeight-winY))
-        {
-        	mapPosY = mapHeight - ((int)charPosY + winY);
-        	charDrawPosY = 240;
-        }       
-        else if (charPosY <= winY || charPosY >= (mapHeight - winY))
-        {
-        	if (charPosY <= winY)
-        	{
-        		mapPosY = mapHeight - (int)charPosY;
-        		charDrawPosY = charPosY;
-        	}
-        	else if (charPosY >= (mapHeight - winY))
-        	{
-        		mapPosY = mapHeight - (2 * winY);
-        		charDrawPosY = charPosY;
-        	}
-        }*/
     }
     
     
@@ -276,7 +258,7 @@ public class Map
     	boolean success = false;
     	if (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W))
     	{         
-    		if (charPosY < mapHeight)
+    		if (charPosY < mapHeight -50)
     		{
     			charPosY += 200 * Gdx.graphics.getDeltaTime();
     			success = true;
