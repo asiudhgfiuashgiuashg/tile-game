@@ -45,8 +45,8 @@ public class Map
     private boolean mapMoveDown;
     
     
-    private float charPosX = 200;
-    private float charPosY = 860;
+    private float charPosX = 2000;
+    private float charPosY = 1100;
     private float charDrawPosX = 0;
     private float charDrawPosY = 0;
     private int mapPosX;
@@ -135,10 +135,11 @@ public class Map
         mapWidth = TILE_WIDTH * col;
         mapHeight = TILE_HEIGHT * row;
         
+        updatePosY(0);
         initialCharPos();
         
-       updatePosX(0);
-       updatePosY(0);
+        updatePosX(0);
+        
             
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
         
