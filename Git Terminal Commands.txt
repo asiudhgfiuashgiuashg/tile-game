@@ -11,6 +11,9 @@ git checkout [name]
 pushing a new branch:
 git push -u origin [branchName]
 
+tracking a remote branch:
+git checkout -b [localBranchName] origin/[remoteBranchName]
+
 remove a file from being tracked:
 git rm --cached [name]
 
