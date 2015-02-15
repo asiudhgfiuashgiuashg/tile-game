@@ -45,10 +45,10 @@ public class Map
     private boolean mapMoveDown;
     
     
-    private float charPosX = 200;
+    private float charPosX = 1100;
     private float charPosY = 150;
-    private float charDrawPosX = 400;
-    private float charDrawPosY = 240;
+    private float charDrawPosX = 0;
+    private float charDrawPosY = 0;
     private int mapPosX;
     private int mapPosY;
     private int sightX;
@@ -113,6 +113,8 @@ public class Map
         mapWidth = TILE_WIDTH * col;
         mapHeight = TILE_HEIGHT * row;
         
+        initialCharPos();
+        
         updatePosX(0);
         updatePosY(0);
             
@@ -147,9 +149,30 @@ public class Map
     	return charDrawPosY;
     }
     
-    ///////////////////////////////////////////////////////////////////////////////
-    // set's the initial map and character draw positions based on char position //
-    ///////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    // set's the map and character draw positions based on char position //
+    ///////////////////////////////////////////////////////////////////////
+    
+    public void initialCharPos()
+    {
+    	if (charPosX < winX)
+    	{
+    		charDrawPosX = charPosX;
+    	}
+    	else if (charPosX > mapWidth - winX)
+    	{
+    		charDrawPosX = (charPosX -(mapWidth - winX) + winX);
+    	}
+    	
+    	
+    	if (charPosY < winY)
+    	{
+    		charDrawPosY = charPosY;
+    	}
+    	
+    	
+    }
+    
     public void updatePosX(float movement)
     {
     	if (charPosX - winX < 0)
