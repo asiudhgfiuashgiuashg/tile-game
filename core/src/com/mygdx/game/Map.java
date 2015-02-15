@@ -76,12 +76,7 @@ public class Map
         for (int r = 0; r < row; r++) {
             String currentRow = mapFileScanner.nextLine();
             String[] individualIds = currentRow.split("\\s+");
-            System.out.println(currentRow);
-            System.out.println("col is: " + col);
         	for (int c = 0; c < col; c++/*ha*/) {
-        	    System.out.println("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        		System.out.println(c);
-        		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         		String individualTileId = individualIds[c];
         		//find corresponding line in tileFile
         		String currentTilesLine = null;
@@ -91,8 +86,6 @@ public class Map
         		{
         			currentTilesLine = tileFileScanner.nextLine();
         			currentAttributes = currentTilesLine.split(", ");
-        			System.out.println(" :::: " + currentAttributes[1] + " / " + individualTileId);
-        			System.out.print(currentTilesLine);
         			if (currentAttributes[1].equals(individualTileId)) { //id matches tile we want
         				found = true;
         			}
