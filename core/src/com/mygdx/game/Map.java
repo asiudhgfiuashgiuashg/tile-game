@@ -43,6 +43,8 @@ public class Map
     private boolean mapMoveRight;
     private boolean mapMoveUp;
     private boolean mapMoveDown;
+    private boolean smallWidth;
+	private boolean smallHeight;
     
     
     private float charPosX = 2000;
@@ -135,9 +137,9 @@ public class Map
         mapWidth = TILE_WIDTH * col;
         mapHeight = TILE_HEIGHT * row;
         
-        updatePosY(0);
-        initialCharPos();
         
+        initialCharPos();
+        updatePosY(0);
         updatePosX(0);
         
             
@@ -155,6 +157,8 @@ public class Map
     
     public void update()
     {
+    	//The setRegion uses the top left corner of the map as a starting point. 
+    	//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
         fov.setRegion(mapPosX, mapHeight - mapPosY, 2*winX, 2*winY); 
     }
     
@@ -178,92 +182,157 @@ public class Map
     
     public void initialCharPos()
     {
-    	if (charPosX < winX)
+    	
+    	if (mapWidth < 2*winX)
+    	{
+    		smallWidth = true;
+    	}
+    	else 
+    	{
+    		smallWidth = false;
+    	}
+    	if (mapHeight < 2*winY)
+    	{
+    		smallHeight = true;
+    	}
+    	else
+    	{
+    		smallHeight = false;
+    	}
+    	
+    	adjustCharPlacement();			//Omit this line if movement testing with exact coordinates is being done,
+    									//as this method just provides a fail safe in case the char is placed off the map
+    	
+    	if (charPosX < winX && smallWidth == false)
     	{
     		charDrawPosX = charPosX;
     	}
-    	else if (charPosX > mapWidth - winX)
+    	else if (charPosX > mapWidth - winX && smallWidth == false)
     	{
     		charDrawPosX = (charPosX - mapWidth + 2*winX);
     	}
     	
     	
-    	if (charPosY < winY)
+    	if (charPosY < winY && smallHeight == false)
     	{
     		charDrawPosY = charPosY;
     	}
-    	else if (charPosY > mapHeight - winY)
+    	else if (charPosY > mapHeight - winY && smallHeight == false)
     	{
     		charDrawPosY = (charPosY - (mapHeight - winY) + winY);
     	}
-    	
+    	if (smallWidth == true)
+    	{
+    		mapPosX = mapWidth/2 - winX;
+    	}
+    	if (smallHeight == true)
+    	{
+    		mapPosY = mapHeight/2 + winY;
+    	}
     }
     
+    
+    public void adjustCharPlacement()
+    {
+    	if (charPosX < -15)
+    	{
+    		charPosX = -15;
+    	}
+    	else if (charPosX > mapWidth - 50)
+    	{
+    		charPosX = mapWidth - 50;
+    	}
+    	if (charPosY < 5)
+    	{
+    		charPosY = 5;
+    	}
+    	else if (charPosY > mapHeight - 50)
+    	{
+    		charPosY = mapHeight - 55;
+    	}
+    	if (smallWidth)
+    	{
+    		charDrawPosX = charPosX + (winX - mapWidth/2);
+    	}
+    	if (smallHeight)
+    	{
+    		charDrawPosY = charPosY + (winY - mapHeight/2);
+    	}
+    }
     public void updatePosX(float movement)
     {
-    	if (charPosX - winX < 0)
+    	if (smallWidth == false)
     	{
-    		mapPosX = 0;
-    	}
-    	else if (charPosX - winX > 0)
-    	{
-    		mapPosX = (int)charPosX - winX;
-    	}
+    		if (charPosX - winX < 0)
+    		{
+    			mapPosX = 0;
+    		}
+    		else if (charPosX - winX > 0)
+    		{
+    			mapPosX = (int)charPosX - winX;
+    		}
     	
-    	if (charPosX + winX > mapWidth)
-    	{
-    		mapPosX = mapWidth - 2*winX;
-    	}
+    		if (charPosX + winX > mapWidth)
+    		{
+    			mapPosX = mapWidth - 2*winX;
+    		}
+    	
 
     	
-    	mapMoveLeft = (mapPosX == 0) ? false : true;
-    	mapMoveRight = (mapPosX == (mapWidth - 2*winX)) ? false : true;
+    		mapMoveLeft = (mapPosX == 0) ? false : true;
+    		mapMoveRight = (mapPosX == (mapWidth - 2*winX)) ? false : true;
     	
-    	if (mapMoveLeft == true && mapMoveRight == true)
-        {
-        	charDrawPosX = 400;
-        }
-		else
-        {
-        	if (mapMoveLeft == false || mapMoveRight == false)
-        	{
-        		charDrawPosX += movement;
-        	}
-        }
+    		if (mapMoveLeft == true && mapMoveRight == true)
+    		{
+    			charDrawPosX = 400;
+    		}
+    		else
+    		{
+    			if (mapMoveLeft == false || mapMoveRight == false)
+    			{
+    				charDrawPosX += movement;
+    			}
+    		}
+    	}
+    	else
+    	{
+    		charDrawPosX += movement;
+    	}
     }
     
     public void updatePosY(float movement)
     { 	
-    	mapMoveUp = (mapPosY == (mapHeight)) ? false : true;
-    	mapMoveDown = (mapPosY == 2*winY) ? false : true;
-    	
-    	
-    	if (charPosY < winY)
+    	if (smallHeight == false) 
     	{
-    		mapPosY = 2*winY;
-    	}
-    	else if (mapHeight - (charPosY + winY) > 0)
-    	{
-    		mapPosY = (int)(charPosY + winY);
-    	}
-    	if (mapHeight < charPosY + winY)
-    	{
+    		if (charPosY < winY)
+    		{
+    			mapPosY = 2*winY;
+    		}
+    		else if (mapHeight - (charPosY + winY) > 0)
+    		{
+    			mapPosY = (int)(charPosY + winY);
+    		}
+    		if (mapHeight < charPosY + winY)
+    		{
     		mapPosY = mapHeight;
+    		}
+    		
+    		mapMoveUp = (mapPosY == (mapHeight)) ? false : true;
+    		mapMoveDown = (mapPosY == 2*winY) ? false : true;
+    	
+    		if (mapMoveUp == true && mapMoveDown == true)
+    		{
+    			charDrawPosY = 240;
+    		}
+    		else if (mapMoveUp == false || mapMoveDown == false)
+    		{
+    				charDrawPosY += movement;
+    		}  		
     	}
-   
-    	
-    	if (mapMoveUp == true && mapMoveDown == true)
-        {
-        	charDrawPosY = 240;
-        }
-		else
-        {
-        	if (mapMoveUp == false || mapMoveDown == false)
-        	{
-        		charDrawPosY += movement;
-        	}
-        }
-    	
+    	else
+		{
+			charDrawPosY += movement;
+		}
     }
     
     
@@ -307,7 +376,7 @@ public class Map
     	boolean success = false;
     	if (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W))
     	{         
-    		if (charPosY < mapHeight -50)
+    		if (charPosY < mapHeight -55)
     		{
     			charPosY += 200 * Gdx.graphics.getDeltaTime();
     			success = true;
@@ -322,7 +391,7 @@ public class Map
     	boolean success = false;
     	if (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S))
     	{         
-    		if (charPosY > 0)
+    		if (charPosY > 5)
     		{
     			charPosY -= 200 * Gdx.graphics.getDeltaTime();
     			success = true;

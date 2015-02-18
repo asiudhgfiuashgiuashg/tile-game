@@ -9,6 +9,7 @@
 package com.mygdx.game;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -39,7 +40,10 @@ public class Player extends Entity
     {
     	int sightX = 400;
     	int sightY = 240;
-    	
+    	Scanner sc = new Scanner(System.in);
+    	System.out.println("Which map would you like to test?");
+    	String mapName = sc.nextLine();
+    	sc.close();
         spriteSheet = new Texture(Gdx.files.internal("index.png"));
         tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
         
@@ -56,7 +60,7 @@ public class Player extends Entity
         try
         {
         	System.out.println("Working Directory = " + System.getProperty("user.dir"));
-        	currentMap = new Map("../core/assets/Test.txt", "../core/assets/Tiles.txt");
+        	currentMap = new Map("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt");
         	currentMap.setFOV(sightX, sightY);
         }
         catch(IOException e)
