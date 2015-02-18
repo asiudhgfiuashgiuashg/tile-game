@@ -246,7 +246,7 @@ public class Map
     	{
     		charPosY = 5;
     	}
-    	else if (charPosY > mapHeight - 50)
+    	else if (charPosY > mapHeight - 55)
     	{
     		charPosY = mapHeight - 55;
     	}

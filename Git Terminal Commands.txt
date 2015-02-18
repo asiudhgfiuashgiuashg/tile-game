@@ -17,3 +17,6 @@ git checkout -b [localBranchName] origin/[remoteBranchName]
 remove a file from being tracked:
 git rm --cached [name]
 
+merging branches:(start in the base branch)
+git merge [branchName]
+
