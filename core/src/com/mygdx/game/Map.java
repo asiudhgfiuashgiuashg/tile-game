@@ -343,61 +343,47 @@ public class Map
     public boolean moveLeft()
     {
     	boolean success = false;
-    	if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A))
-    	{	
-    		if (charPosX > -15)
-    		{
-    			charPosX -= 200 * Gdx.graphics.getDeltaTime();
-    			success = true;
-    			
-    			updatePosX(-200 * Gdx.graphics.getDeltaTime());	
-    		}	
-    	}
+		if (charPosX > -15)
+		{
+			charPosX -= 200 * Gdx.graphics.getDeltaTime();
+			success = true;
+			
+			updatePosX(-200 * Gdx.graphics.getDeltaTime());	
+		}	
     	return success;
     }
     
     public boolean moveRight()
     {
-    	boolean success = false;
-    	if (Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D))
-    	{            
-    		if (charPosX < mapWidth - 50)
-    		{
-    			charPosX += 200 * Gdx.graphics.getDeltaTime();
-    			success = true;
-    			updatePosX(200 * Gdx.graphics.getDeltaTime());
-    		}
-    		         
-    	}
+    	boolean success = false;          
+		if (charPosX < mapWidth - 50)
+		{
+			charPosX += 200 * Gdx.graphics.getDeltaTime();
+			success = true;
+			updatePosX(200 * Gdx.graphics.getDeltaTime());
+		}
     	return success;
     }
     public boolean moveUp()
     {
-    	boolean success = false;
-    	if (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W))
-    	{         
-    		if (charPosY < mapHeight -55)
-    		{
-    			charPosY += 200 * Gdx.graphics.getDeltaTime();
-    			success = true;
-    			updatePosY(200 * Gdx.graphics.getDeltaTime());
-    		}
-        	      
-    	}
+    	boolean success = false;    
+		if (charPosY < mapHeight -50)
+		{
+			charPosY += 200 * Gdx.graphics.getDeltaTime();
+			success = true;
+			updatePosY(200 * Gdx.graphics.getDeltaTime());
+		}    	    
     	return success;
     }
     public boolean moveDown()
     {
-    	boolean success = false;
-    	if (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S))
-    	{         
-    		if (charPosY > 5)
-    		{
-    			charPosY -= 200 * Gdx.graphics.getDeltaTime();
-    			success = true;
-    			updatePosY(-200 * Gdx.graphics.getDeltaTime());
-    		}	
-    	}
+    	boolean success = false;      
+		if (charPosY > 0)
+		{
+			charPosY -= 200 * Gdx.graphics.getDeltaTime();
+			success = true;
+			updatePosY(-200 * Gdx.graphics.getDeltaTime());
+		}	
     	return success;
     }
 }
