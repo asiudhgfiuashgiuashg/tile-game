@@ -340,10 +340,10 @@ public class Map
     // player movement //
     /////////////////////
     
-    public boolean moveLeft()
+    public boolean moveLeft(Entity entity)
     {
     	boolean success = false;
-		if (charPosX > -15)
+		if (!collides(Direction.LEFT, 200 * Gdx.graphics.getDeltaTime(), entity))
 		{
 			charPosX -= 200 * Gdx.graphics.getDeltaTime();
 			success = true;
@@ -353,7 +353,7 @@ public class Map
     	return success;
     }
     
-    public boolean moveRight()
+    public boolean moveRight(Entity entity)
     {
     	boolean success = false;          
 		if (charPosX < mapWidth - 50)
@@ -364,7 +364,7 @@ public class Map
 		}
     	return success;
     }
-    public boolean moveUp()
+    public boolean moveUp(Entity entity)
     {
     	boolean success = false;    
 		if (charPosY < mapHeight -50)
@@ -375,7 +375,7 @@ public class Map
 		}    	    
     	return success;
     }
-    public boolean moveDown()
+    public boolean moveDown(Entity entity)
     {
     	boolean success = false;      
 		if (charPosY > 0)
@@ -386,4 +386,79 @@ public class Map
 		}	
     	return success;
     }
+    
+    public boolean collides(Direction direction, float speed, Entity entity)
+    {
+        float x1;
+        float y1;
+        float x2;
+        float y2;
+        
+        if (Direction.LEFT == direction)
+        {
+            //bottom left and top left corners
+            //bottom left corner
+            x1 = charPosX + entity.getLeft(); //right side of hitbox relative to bottom left corner of image of current frame kek
+            y1 = charPosY + entity.getBottom(); //bottom side of hitbox
+            
+            //top left corner
+            
+            y2 = charPosY + entity.getTop();
+            
+            //in the tile grid
+            int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
+            int tileToLeftY1 = ((int) y1 / TILE_HEIGHT);
+            int tileToLeftY2 = ((int) y2 / TILE_HEIGHT);
+            System.out.println(tileToLeftY1);
+            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
+            	System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
+            }
+            //handles both corners
+            //a or (b and c) = (a or b) and (a or c) 
+            if ((tileToLeftX > -1 && tileToLeftY1 > -1 && tileToLeftY2 > -1) && ((mapTiles[tileToLeftY1][tileToLeftX].hasRightWall()) || (mapTiles[tileToLeftY2][tileToLeftX].hasRightWall()))) {
+                int tileToLeftWallX = tileToLeftX * TILE_WIDTH + TILE_WIDTH - 1;
+                System.out.println("tileToLeftWallX: " + tileToLeftWallX + " x1 - speed: " + (x1 - speed));
+                if (x1 - speed <= tileToLeftWallX) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else if (Direction.RIGHT == direction)
+        {
+            //bottom and top right corners
+            x1 = entity.getRight();
+            y1 = entity.getBottom();
+            
+            x2 = entity.getRight();
+            y2 = entity.getTop();
+
+        }
+        else if (Direction.UP == direction)
+        {
+            //top left and top right corners
+            
+            x1 = entity.getRight();
+            y1 = entity.getTop();
+            
+            x2 = entity.getLeft();
+            y2 = entity.getTop();
+
+        }
+        else //(Direction.DOWN == direction)
+        {
+            //bottom left and bottom right corners
+            //bottom right
+            x1 = entity.getRight();
+            y1 = entity.getBottom();
+            
+            //bottom left
+            x2 = entity.getLeft();
+            y2 = entity.getBottom();
+            
+        }
+        System.out.println("welp, you done fucked up now! no valid directions");
+        return false;
+    }
+
 }

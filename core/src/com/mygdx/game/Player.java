@@ -18,32 +18,30 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-/**
- * (Insert a comment that briefly describes the purpose of this class definition.)
- *
- * <p/> Bugs: (List any known issues or unimplemented features here)
- * 
- * @author (Bhavishya Shah)
- *
- */
 public class Player extends Entity
 {
-	
-	TextureRegion idleRight;
-	TextureRegion idleLeft;
-	TextureRegion idleUp;
-	TextureRegion idleDown;
-	Map currentMap;
-
+    
+    TextureRegion idleRight;
+    TextureRegion idleLeft;
+    TextureRegion idleUp;
+    TextureRegion idleDown;
+    Map currentMap;
+    
     @Override
     public void create()
     {
-    	int sightX = 400;
-    	int sightY = 240;
-    	Scanner sc = new Scanner(System.in);
-    	System.out.println("Which map would you like to test?");
-    	String mapName = sc.nextLine();
-    	sc.close();
+    
+        left = 15;
+        right = 50;
+        up = 50;
+        down = 0;
+        
+        int sightX = 400;
+        int sightY = 240;
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Which map would you like to test?");
+        String mapName = sc.nextLine();
+        sc.close();
         spriteSheet = new Texture(Gdx.files.internal("index.png"));
         tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
         
@@ -59,14 +57,14 @@ public class Player extends Entity
         
         try
         {
-        	System.out.println("Working Directory = " + System.getProperty("user.dir"));
-        	currentMap = new Map("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt");
-        	currentMap.setFOV(sightX, sightY);
+            System.out.println("Working Directory = " + System.getProperty("user.dir"));
+            currentMap = new Map("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt");
+            currentMap.setFOV(sightX, sightY);
         }
         catch(IOException e)
         {
-        	System.out.println(e.getMessage());
-        	System.out.println("Failed to create map object");
+            System.out.println(e.getMessage());
+            System.out.println("Failed to create map object");
         }
     }
     
@@ -86,36 +84,36 @@ public class Player extends Entity
     
     @Override
     public void update(float stateTime) {
-    	
+        
         if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A))
         {
-            if (currentMap.moveLeft())
+            if (currentMap.moveLeft(this))
             {
-            	currentFrame = moveLeft.getKeyFrame(stateTime, true);
+                currentFrame = moveLeft.getKeyFrame(stateTime, true);
             }
         }
         
         else if (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D))
         {            
-            if (currentMap.moveRight())
+            if (currentMap.moveRight(this))
             {
-            	currentFrame = moveRight.getKeyFrame(stateTime, true);
+                currentFrame = moveRight.getKeyFrame(stateTime, true);
             }
         }
         
         else if (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W))
         {
-        	if (currentMap.moveUp())
-        	{
-        		currentFrame = moveUp.getKeyFrame(stateTime, true); 
-        	}
+            if (currentMap.moveUp(this))
+            {
+                currentFrame = moveUp.getKeyFrame(stateTime, true); 
+            }
         }
         
         else if (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S))
         { 
-            if (currentMap.moveDown())
+            if (currentMap.moveDown(this))
             {
-            	currentFrame = moveDown.getKeyFrame(stateTime, true);
+                currentFrame = moveDown.getKeyFrame(stateTime, true);
             }
         }
         
@@ -123,8 +121,29 @@ public class Player extends Entity
     
     @Override
     public void draw(SpriteBatch batch) {
-    	currentMap.draw(batch);
-    	currentMap.update();
+        currentMap.draw(batch);
+        currentMap.update();
         batch.draw(currentFrame, currentMap.getCharDrawPosX(), currentMap.getCharDrawPosY());
+        batch.draw(new Texture(Gdx.files.internal("red.png")), currentMap.getCharDrawPosX() + getLeft(), currentMap.getCharDrawPosY());
+    }
+    
+    @Override
+    public float getRight() {
+    	return right;
+    }
+    
+    @Override
+    public float getLeft() {
+    	return left;
+    }
+    
+    @Override
+    public float getTop() {
+    	return up;
+    }
+    
+    @Override
+    public float getBottom() {
+    	return down;
     }
 }
