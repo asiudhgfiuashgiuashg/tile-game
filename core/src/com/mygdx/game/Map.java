@@ -246,7 +246,7 @@ public class Map
     	{
     		charPosY = 5;
     	}
-    	else if (charPosY > mapHeight - 50)
+    	else if (charPosY > mapHeight - 55)
     	{
     		charPosY = mapHeight - 55;
     	}
@@ -257,6 +257,21 @@ public class Map
     	if (smallHeight)
     	{
     		charDrawPosY = charPosY + (winY - mapHeight/2);
+    	}
+    	boolean enclosed = true; 
+    	while (enclosed == true)
+    	{
+    		int x = (int) (charPosX - 15)/TILE_WIDTH;
+        	int y = (int) (charPosY)/TILE_HEIGHT;
+        	if (mapTiles[y][x].hasLeftWall() && mapTiles[y][x].hasRightWall() && mapTiles[y][x].hasTopWall() && mapTiles[y][x].hasBottomWall())
+        	{
+        		x +=TILE_WIDTH;
+        		y +=TILE_HEIGHT;
+        	}
+        	else
+        	{
+        		enclosed = false;
+        	}
     	}
     }
     public void updatePosX(float movement)
@@ -411,7 +426,10 @@ public class Map
             int tileToLeftY2 = ((int) y2 / TILE_HEIGHT);
             System.out.println(tileToLeftY1);
             if (tileToLeftY1 > 0 && tileToLeftX > 0) {
-            	System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
+            	
+            	//System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
+            	//System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
+            	
             }
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 

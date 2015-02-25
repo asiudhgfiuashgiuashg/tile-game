@@ -33,7 +33,7 @@ public class Player extends Entity
     
         left = 15;
         right = 50;
-        up = 50;
+        up = 55;
         down = 0;
         
         int sightX = 400;
