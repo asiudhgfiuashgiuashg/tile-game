@@ -32,8 +32,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class Map
 {
     private String title;
-    private int row;
-    private int col;
+    private int numRows;
+    private int numCols;
     private static final int TILE_WIDTH = 80;
     private static final int TILE_HEIGHT = 80;
     private Tile[][] mapTiles;
@@ -70,15 +70,15 @@ public class Map
         ///////////////////////////////////
         Scanner mapFileScanner = new Scanner(new File(mapFile));
         title = mapFileScanner.nextLine();
-        row = Integer.parseInt(mapFileScanner.nextLine());
-        col = Integer.parseInt(mapFileScanner.nextLine());
-        mapTiles = new Tile[row][col];
+        numRows = Integer.parseInt(mapFileScanner.nextLine());
+        numCols = Integer.parseInt(mapFileScanner.nextLine());
+        mapTiles = new Tile[numRows][numCols];
         
         Scanner tileFileScanner = new Scanner(new File(tileFile));
-        for (int r = 0; r < row; r++) {
+        for (int r = 0; r < numRows; r++) {
             String currentRow = mapFileScanner.nextLine();
             String[] individualIds = currentRow.split("\\s+");
-        	for (int c = 0; c < col; c++/*ha*/) {
+        	for (int c = 0; c < numCols; c++/*ha*/) {
         		String individualTileId = individualIds[c];
         		//find corresponding line in tileFile
         		String currentTilesLine = null;
@@ -114,11 +114,11 @@ public class Map
         // create and save png which is composite of tile images //
         ///////////////////////////////////////////////////////////
         System.out.println("CREATING COMPOSITE MAP IMAGE");
-        BufferedImage bigImage = new BufferedImage(TILE_WIDTH * col, TILE_HEIGHT * row, BufferedImage.TYPE_INT_ARGB); //made up of combined tiles
+        BufferedImage bigImage = new BufferedImage(TILE_WIDTH * numCols, TILE_HEIGHT * numRows, BufferedImage.TYPE_INT_ARGB); //made up of combined tiles
         Graphics g = bigImage.getGraphics();
-        for (int r = 0; r < row; r++)
+        for (int r = 0; r < numRows; r++)
         {
-            for (int c = 0; c < col; c++)
+            for (int c = 0; c < numCols; c++)
             {
                 BufferedImage currTileImg;
                 currTileImg = ImageIO.read(new File("../core/assets/" + mapTiles[r][c].imageURI));
@@ -134,8 +134,8 @@ public class Map
         {
         	System.out.println("Fucking sucks");
         }
-        mapWidth = TILE_WIDTH * col;
-        mapHeight = TILE_HEIGHT * row;
+        mapWidth = TILE_WIDTH * numCols;
+        mapHeight = TILE_HEIGHT * numRows;
         
         
         initialCharPos();
@@ -404,6 +404,10 @@ public class Map
     
     public boolean collides(Direction direction, float speed, Entity entity)
     {
+    	//////////////////////////////////////////////////
+    	//MAP IS INDEXED WITH (0,0) IN TOP LEFT         //
+    	//CHAR POS STARTS WITH (0,0) IN BOTTOM LEFT     //
+    	/////////////////////////////////////////////////
         float x1;
         float y1;
         float x2;
@@ -411,6 +415,7 @@ public class Map
         
         if (Direction.LEFT == direction)
         {
+        	
             //bottom left and top left corners
             //bottom left corner
             x1 = charPosX + entity.getLeft(); //right side of hitbox relative to bottom left corner of image of current frame kek
@@ -422,20 +427,24 @@ public class Map
             
             //in the tile grid
             int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
-            int tileToLeftY1 = ((int) y1 / TILE_HEIGHT);
-            int tileToLeftY2 = ((int) y2 / TILE_HEIGHT);
-            System.out.println(tileToLeftY1);
+            int tileToLeftY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
+            int tileToLeftY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
             if (tileToLeftY1 > 0 && tileToLeftX > 0) {
             	
             	//System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
             	//System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
             	
             }
+            ///////////print statements//////////////////
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            System.out.println("x1:  " + x1 + "    y1: " + y1 + "    y2: " + y2);
+            System.out.println("tile to left X: " + tileToLeftX + "   tileToLeftY1: " + tileToLeftY1 + "  tileToLeftY2:  " + tileToLeftY2);
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            ////////////////////////////////////////////
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
             if ((tileToLeftX > -1 && tileToLeftY1 > -1 && tileToLeftY2 > -1) && ((mapTiles[tileToLeftY1][tileToLeftX].hasRightWall()) || (mapTiles[tileToLeftY2][tileToLeftX].hasRightWall()))) {
                 int tileToLeftWallX = tileToLeftX * TILE_WIDTH + TILE_WIDTH - 1;
-                System.out.println("tileToLeftWallX: " + tileToLeftWallX + " x1 - speed: " + (x1 - speed));
                 if (x1 - speed <= tileToLeftWallX) {
                     return true;
                 }
@@ -478,5 +487,7 @@ public class Map
         System.out.println("welp, you done fucked up now! no valid directions");
         return false;
     }
-
+    private int bottomLeftIndexedRowToTopLeftIndexedRow(int row) {
+    	return this.numRows - 1 - row;
+    }
 }
