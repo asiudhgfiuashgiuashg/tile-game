@@ -358,7 +358,7 @@ public class Map
     public boolean moveLeft(Entity entity)
     {
     	boolean success = false;
-		if (!collides(Direction.LEFT, 200 * Gdx.graphics.getDeltaTime(), entity))
+		if (!collides(Direction.LEFT, 200 * Gdx.graphics.getDeltaTime(), entity) && charPosX> - entity.getLeft())
 		{
 			charPosX -= 200 * Gdx.graphics.getDeltaTime();
 			success = true;
@@ -418,7 +418,7 @@ public class Map
             
             //top left corner
             
-            y2 = charPosY + entity.getTop();
+            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : row;
             
             //in the tile grid
             int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
@@ -427,8 +427,8 @@ public class Map
             System.out.println(tileToLeftY1);
             if (tileToLeftY1 > 0 && tileToLeftX > 0) {
             	
-            	//System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
-            	//System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
+            	System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
+            	System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
             	
             }
             //handles both corners
