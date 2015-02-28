@@ -423,7 +423,7 @@ public class Map
             
             //top left corner
             
-            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : row;
+            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : numRows;
             
             //in the tile grid
             int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
