@@ -40,7 +40,7 @@ public class Player extends Entity
         int sightY = 240;
         Scanner sc = new Scanner(System.in);
         System.out.println("Which map would you like to test?");
-        String mapName = "test";//sc.nextLine();
+        String mapName = "Test";//sc.nextLine();
         
         sc.close();
         spriteSheet = new Texture(Gdx.files.internal("index.png"));
