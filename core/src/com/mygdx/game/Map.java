@@ -470,9 +470,19 @@ public class Map
             //top left corner
           
             y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : mapWidth - 2;
-          
+            
             //in the tile grid
             int tileToRightX = (((int) x1 / TILE_WIDTH) < numCols) ? ((int) x1 / TILE_WIDTH): numCols -1;
+            
+            if (((int) x1 / TILE_WIDTH) < numCols)
+            {
+            	tileToRightX = ((int) x1 / TILE_WIDTH);
+            }
+            else
+            {
+            	return false;
+            }
+            
             int tileToRightY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
             int tileToRightY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
             
@@ -497,12 +507,30 @@ public class Map
 
             int unconvertedTileAboveY =  ((int) y1 / TILE_HEIGHT) + 1;
 
-            int tileAboveY = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT) + 1);
+            int tileAboveY;
+            if (bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT) + 1) > -1)
+            	{
+            	tileAboveY = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT) + 1);
+            	}
+            else
+            {
+            	return false;
+            }
             int tileAboveX1 = ((int) x1 / TILE_WIDTH);
             int tileAboveX2 = ((int) x2 / TILE_WIDTH);
             
+            String ignore = "none";
+            if (tileAboveX1 < 0)
+            {
+            	ignore = "left";
+            }
+            else if (tileAboveX2 > numCols-1)
+            {
+            	ignore = "right";
+            }
+            
             System.out.println("Moving Up");
-            if (tileAboveX1 > 0 && tileAboveX2 > 0) {
+            if (ignore == "none") {
             	
             	System.out.println(mapTiles[tileAboveY][tileAboveX1].getName() +", " + mapTiles[tileAboveY][tileAboveX2].getName());
             	
@@ -514,7 +542,23 @@ public class Map
             ////////////////////////////////////////////
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
-            if ((tileAboveY > -1 && tileAboveX1 > -1 && tileAboveX2 > -1) && ((mapTiles[tileAboveY][tileAboveX1].hasBottomWall()) || (mapTiles[tileAboveY][tileAboveX2].hasBottomWall()))) {
+            if (ignore == "none" && tileAboveY > -1  && ((mapTiles[tileAboveY][tileAboveX1].hasBottomWall()) || (mapTiles[tileAboveY][tileAboveX2].hasBottomWall()))) {
+                int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
+                System.out.println("tileAboveWallY: " + tileAboveWallY);
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                if (y1 + speed >= tileAboveWallY ) {
+                    return true;
+                }
+            }
+            else if (ignore == "right" && tileAboveY > -1 && (mapTiles[tileAboveY][tileAboveX1].hasBottomWall())) {
+                int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
+                System.out.println("tileAboveWallY: " + tileAboveWallY);
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                if (y1 + speed >= tileAboveWallY ) {
+                    return true;
+                }
+            }
+            else if (ignore == "left" && tileAboveY > -1 && (mapTiles[tileAboveY][tileAboveX2].hasBottomWall())) {
                 int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
                 System.out.println("tileAboveWallY: " + tileAboveWallY);
                 System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -535,13 +579,30 @@ public class Map
            
 
             int unconvertedTileBelowY =  ((int) y1 / TILE_HEIGHT) - 1;
-
-            int tileBelowY = bottomLeftIndexedRowToTopLeftIndexedRow(unconvertedTileBelowY);
+            int tileBelowY;
+            if (bottomLeftIndexedRowToTopLeftIndexedRow(unconvertedTileBelowY) < numRows)
+            {
+            	tileBelowY = bottomLeftIndexedRowToTopLeftIndexedRow(unconvertedTileBelowY);
+            }
+            else
+            {
+            	return false;
+            }
+            String ignore = "none";
             int tileBelowX1 = ((int) x1 / TILE_WIDTH);
             int tileBelowX2 = ((int) x2 / TILE_WIDTH);
+            if (tileBelowX1 < 0)
+            {
+            	ignore = "left";
+            }
+            else if (tileBelowX2 > numCols-1)
+            {
+            	ignore = "right";
+            }
             
             System.out.println("Moving NOT (UP or left or right)");
-            if (tileBelowX1 > 0 && tileBelowX2 > 0) {
+            if (ignore == "none") 
+            {
             	
             	System.out.println(mapTiles[tileBelowY][tileBelowX1].getName() +", " + mapTiles[tileBelowY][tileBelowX2].getName());
             	
@@ -553,8 +614,27 @@ public class Map
             ////////////////////////////////////////////
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
-            if ((tileBelowY > -1 && tileBelowX1 > -1 && tileBelowX2 > -1) && ((mapTiles[tileBelowY][tileBelowX1].hasTopWall()) || (mapTiles[tileBelowY][tileBelowX2].hasTopWall()))) {
-                int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
+            if (ignore == "none" && tileBelowY > -1 && ((mapTiles[tileBelowY][tileBelowX2].hasTopWall()) || (mapTiles[tileBelowY][tileBelowX1].hasTopWall())))
+            {
+            	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
+                System.out.println("tileBelowWallY: " + tileBelowWallY);
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                if (y1 - speed <= tileBelowWallY + 1) {
+                    return true;
+                }
+            }
+            else if (ignore == "right" && tileBelowY > -1 &&  (mapTiles[tileBelowY][tileBelowX1].hasTopWall())) 
+            {
+            	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
+                System.out.println("tileBelowWallY: " + tileBelowWallY);
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                if (y1 - speed <= tileBelowWallY + 1) {
+                    return true;
+                }
+            }
+            else if (ignore == "left" && tileBelowY > -1 && (mapTiles[tileBelowY][tileBelowX2].hasTopWall()))
+            {
+            	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
                 System.out.println("tileBelowWallY: " + tileBelowWallY);
                 System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 if (y1 - speed <= tileBelowWallY + 1) {
