@@ -385,12 +385,12 @@ public class Map
     public boolean moveUp(Entity entity)
     {
     	boolean success = false;
-    	float deltaX = 200 * Gdx.graphics.getDeltaTime();
-		if (!collides(Direction.UP, deltaX, entity) && charPosY < mapHeight - entity.getTop())
+    	float deltaY = 200 * Gdx.graphics.getDeltaTime();
+		if (!collides(Direction.UP, deltaY, entity) && charPosY < mapHeight - entity.getTop())
 		{
-			charPosY += 200 * Gdx.graphics.getDeltaTime();
+			charPosY += deltaY;
 			success = true;
-			updatePosY(200 * Gdx.graphics.getDeltaTime());
+			updatePosY(deltaY);
 		}    	    
     	return success;
     }
@@ -435,22 +435,22 @@ public class Map
             int tileToLeftY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
             int tileToLeftY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
             
-            System.out.println("Moving Left");
-            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
+/*            System.out.println("Moving Left");*/
+/*            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
 
             	
             	System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
             	System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
             	
-            }
-            ///////////print statements//////////////////
+            }*/
+/*            ///////////print statements//////////////////
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             System.out.println("x1:  " + x1 + "    y1: " + y1 + "    y2: " + y2);
             System.out.println("tile to left X: " + tileToLeftX + "   tileToLeftY1: " + tileToLeftY1 + "  tileToLeftY2:  " + tileToLeftY2);
 
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             ////////////////////////////////////////////
-
+*/
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
             if ((tileToLeftX > -1 && tileToLeftY1 > -1 && tileToLeftY2 > -1) && ((mapTiles[tileToLeftY1][tileToLeftX].hasRightWall()) || (mapTiles[tileToLeftY2][tileToLeftX].hasRightWall()))) {
@@ -494,7 +494,9 @@ public class Map
             
             x2 = (charPosX + entity.getRight() <= mapWidth) ? (charPosX + entity.getRight()): mapWidth;
            
-            
+
+            int unconvertedTileAboveY =  ((int) y1 / TILE_HEIGHT) + 1;
+
             int tileAboveY = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT) + 1);
             int tileAboveX1 = ((int) x1 / TILE_WIDTH);
             int tileAboveX2 = ((int) x2 / TILE_WIDTH);
@@ -509,13 +511,14 @@ public class Map
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             System.out.println("y1:  " + y1 + "    x1: " + x1 + "    x2: " + x2);
             System.out.println("tile above Y: " + tileAboveY + "   tileAboveX1: " + tileAboveX1 + "  tileAboveX2:  " + tileAboveX2);
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             ////////////////////////////////////////////
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
             if ((tileAboveY > -1 && tileAboveX1 > -1 && tileAboveX2 > -1) && ((mapTiles[tileAboveY][tileAboveX1].hasBottomWall()) || (mapTiles[tileAboveY][tileAboveX2].hasBottomWall()))) {
-                int tileAboveWallY = tileAboveY * TILE_HEIGHT + TILE_HEIGHT;
-                if (y1 + speed <= tileAboveWallY ) {
+                int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
+                System.out.println("tileAboveWallY: " + tileAboveWallY);
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                if (y1 + speed >= tileAboveWallY ) {
                     return true;
                 }
             }
