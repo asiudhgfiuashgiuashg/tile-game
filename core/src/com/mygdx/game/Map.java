@@ -359,7 +359,7 @@ public class Map
     {
     	boolean success = false;
     	float deltaX = 200 * Gdx.graphics.getDeltaTime();
-		if (!collides(Direction.LEFT, deltaX, entity))
+		if (!collides(Direction.LEFT, deltaX, entity) && charPosX> - entity.getLeft())
 		{
 			charPosX -= deltaX;
 			success = true;
@@ -371,7 +371,7 @@ public class Map
     
     public boolean moveRight(Entity entity)
     {
-    	boolean success = false;          
+    	boolean success = false;        
 		if (charPosX < mapWidth - 50)
 		{
 			charPosX += 200 * Gdx.graphics.getDeltaTime();
@@ -382,8 +382,9 @@ public class Map
     }
     public boolean moveUp(Entity entity)
     {
-    	boolean success = false;    
-		if (charPosY < mapHeight -50)
+    	boolean success = false;
+    	float deltaX = 200 * Gdx.graphics.getDeltaTime();
+		if (!collides(Direction.UP, deltaX, entity) && charPosY < mapHeight - entity.getTop())
 		{
 			charPosY += 200 * Gdx.graphics.getDeltaTime();
 			success = true;
@@ -393,7 +394,8 @@ public class Map
     }
     public boolean moveDown(Entity entity)
     {
-    	boolean success = false;      
+    	boolean success = false; 
+    	float deltaX = 200 * Gdx.graphics.getDeltaTime();
 		if (charPosY > 0)
 		{
 			charPosY -= 200 * Gdx.graphics.getDeltaTime();
@@ -424,13 +426,13 @@ public class Map
             
             //top left corner
             
-            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : numRows;
+            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : mapHeight - 2;
             
             //in the tile grid
             int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
             int tileToLeftY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
             int tileToLeftY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
-            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
+            /*if (tileToLeftY1 > 0 && tileToLeftX > 0) {
             	
             	System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
             	System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
@@ -441,7 +443,7 @@ public class Map
             System.out.println("x1:  " + x1 + "    y1: " + y1 + "    y2: " + y2);
             System.out.println("tile to left X: " + tileToLeftX + "   tileToLeftY1: " + tileToLeftY1 + "  tileToLeftY2:  " + tileToLeftY2);
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            ////////////////////////////////////////////
+            ////////////////////////////////////////////*/
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
             if ((tileToLeftX > -1 && tileToLeftY1 > -1 && tileToLeftY2 > -1) && ((mapTiles[tileToLeftY1][tileToLeftX].hasRightWall()) || (mapTiles[tileToLeftY2][tileToLeftX].hasRightWall()))) {
@@ -466,11 +468,35 @@ public class Map
         {
             //top left and top right corners
             
-            x1 = entity.getRight();
-            y1 = entity.getTop();
+            x1 = charPosX + entity.getLeft();
+            y1 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : mapHeight - 2;
             
-            x2 = entity.getLeft();
-            y2 = entity.getTop();
+            x2 = (charPosX + entity.getRight() <= mapWidth) ? (charPosX + entity.getRight()): mapWidth;
+           
+            
+            int tileAboveY = bottomLeftIndexedRowToTopLeftIndexedRow((int) y1 / TILE_HEIGHT);
+            int tileAboveX1 = ((int) x1 / TILE_WIDTH);
+            int tileAboveX2 = ((int) x2 / TILE_WIDTH);
+            if (tileAboveX1 > 0 && tileAboveX2 > 0) {
+            	
+            	System.out.println(mapTiles[tileAboveY][tileAboveX1].getName() +", " + mapTiles[tileAboveY][tileAboveX2].getName());
+            	
+            }
+            ///////////print statements//////////////////
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            System.out.println("y1:  " + y1 + "    x1: " + x1 + "    x2: " + x2);
+            System.out.println("tile above Y: " + tileAboveY + "   tileAboveX1: " + tileAboveX1 + "  tileAboveX2:  " + tileAboveX2);
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            ////////////////////////////////////////////
+            //handles both corners
+            //a or (b and c) = (a or b) and (a or c) 
+            if ((tileAboveY > -1 && tileAboveX1 > -1 && tileAboveX2 > -1) && ((mapTiles[tileAboveY][tileAboveX1].hasBottomWall()) || (mapTiles[tileAboveY][tileAboveX2].hasBottomWall()))) {
+                int tileAboveWallY = tileAboveY * TILE_HEIGHT + TILE_HEIGHT;
+                if (y1 + speed <= tileAboveWallY ) {
+                    return true;
+                }
+            }
+            return false;
 
         }
         else //(Direction.DOWN == direction)
@@ -483,6 +509,9 @@ public class Map
             //bottom left
             x2 = entity.getLeft();
             y2 = entity.getBottom();
+            
+            
+            
             
         }
         System.out.println("welp, you done fucked up now! no valid directions");
