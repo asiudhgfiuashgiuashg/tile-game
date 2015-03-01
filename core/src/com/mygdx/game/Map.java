@@ -434,8 +434,9 @@ public class Map
             int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
             int tileToLeftY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
             int tileToLeftY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
-
-            /*if (tileToLeftY1 > 0 && tileToLeftX > 0) {
+            
+            System.out.println("Moving Left");
+            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
 
             	
             	System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
@@ -448,7 +449,7 @@ public class Map
             System.out.println("tile to left X: " + tileToLeftX + "   tileToLeftY1: " + tileToLeftY1 + "  tileToLeftY2:  " + tileToLeftY2);
 
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            ////////////////////////////////////////////*/
+            ////////////////////////////////////////////
 
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
@@ -468,14 +469,14 @@ public class Map
           
             //top left corner
           
-            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : numRows;
+            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : mapWidth - 2;
           
             //in the tile grid
-            int tileToRightX = ((int) x1 / TILE_WIDTH) + 1;
+            int tileToRightX = (((int) x1 / TILE_WIDTH) < numCols) ? ((int) x1 / TILE_WIDTH): numCols -1;
             int tileToRightY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
             int tileToRightY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
             
-            if ((tileToRightX > -1 && tileToRightY1 > -1 && tileToRightY2 > -1) && ((mapTiles[tileToRightY1][tileToRightX].hasLeftWall()) || (mapTiles[tileToRightY2][tileToRightX].hasLeftWall()))) {
+            if ((tileToRightX > -1 && tileToRightY1 > -1 && tileToRightY2 > -1 ) && ((mapTiles[tileToRightY1][tileToRightX].hasLeftWall()) || (mapTiles[tileToRightY2][tileToRightX].hasLeftWall()))) {
                 int tileToRightWallX = tileToRightX * TILE_WIDTH;
                 if (x1 + speed >= tileToRightWallX) {
                     return true;
@@ -497,6 +498,8 @@ public class Map
             int tileAboveY = bottomLeftIndexedRowToTopLeftIndexedRow((int) y1 / TILE_HEIGHT);
             int tileAboveX1 = ((int) x1 / TILE_WIDTH);
             int tileAboveX2 = ((int) x2 / TILE_WIDTH);
+            
+            System.out.println("Moving Up");
             if (tileAboveX1 > 0 && tileAboveX2 > 0) {
             	
             	System.out.println(mapTiles[tileAboveY][tileAboveX1].getName() +", " + mapTiles[tileAboveY][tileAboveX2].getName());
