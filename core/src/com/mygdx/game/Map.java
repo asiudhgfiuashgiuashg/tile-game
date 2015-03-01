@@ -371,14 +371,10 @@ public class Map
     
     public boolean moveRight(Entity entity)
     {
-<<<<<<< HEAD
-    	boolean success = false;        
-		if (charPosX < mapWidth - 50)
-=======
+
     	boolean success = false;
     	float deltaX = 200 * Gdx.graphics.getDeltaTime();
 		if (!collides(Direction.RIGHT, deltaX, entity) && charPosX < mapWidth - 50)
->>>>>>> 8ad19136c731018ad88565466f19eacae834a83d
 		{
 			charPosX += deltaX;
 			success = true;
@@ -438,27 +434,22 @@ public class Map
             int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
             int tileToLeftY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
             int tileToLeftY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
-<<<<<<< HEAD
+
             /*if (tileToLeftY1 > 0 && tileToLeftX > 0) {
-=======
-/*            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
->>>>>>> 8ad19136c731018ad88565466f19eacae834a83d
+
             	
             	System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
             	System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
             	
-            }*/
-/*            ///////////print statements//////////////////
+            }
+            ///////////print statements//////////////////
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             System.out.println("x1:  " + x1 + "    y1: " + y1 + "    y2: " + y2);
             System.out.println("tile to left X: " + tileToLeftX + "   tileToLeftY1: " + tileToLeftY1 + "  tileToLeftY2:  " + tileToLeftY2);
-<<<<<<< HEAD
+
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             ////////////////////////////////////////////*/
-=======
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");*/
-            ////////////////////////////////////////////
->>>>>>> 8ad19136c731018ad88565466f19eacae834a83d
+
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
             if ((tileToLeftX > -1 && tileToLeftY1 > -1 && tileToLeftY2 > -1) && ((mapTiles[tileToLeftY1][tileToLeftX].hasRightWall()) || (mapTiles[tileToLeftY2][tileToLeftX].hasRightWall()))) {
