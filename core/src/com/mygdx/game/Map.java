@@ -358,12 +358,13 @@ public class Map
     public boolean moveLeft(Entity entity)
     {
     	boolean success = false;
-		if (!collides(Direction.LEFT, 200 * Gdx.graphics.getDeltaTime(), entity) && charPosX> - entity.getLeft())
+    	float deltaX = 200 * Gdx.graphics.getDeltaTime();
+		if (!collides(Direction.LEFT, deltaX, entity))
 		{
-			charPosX -= 200 * Gdx.graphics.getDeltaTime();
+			charPosX -= deltaX;
 			success = true;
 			
-			updatePosX(-200 * Gdx.graphics.getDeltaTime());	
+			updatePosX(-deltaX);	
 		}	
     	return success;
     }
@@ -445,7 +446,7 @@ public class Map
             //a or (b and c) = (a or b) and (a or c) 
             if ((tileToLeftX > -1 && tileToLeftY1 > -1 && tileToLeftY2 > -1) && ((mapTiles[tileToLeftY1][tileToLeftX].hasRightWall()) || (mapTiles[tileToLeftY2][tileToLeftX].hasRightWall()))) {
                 int tileToLeftWallX = tileToLeftX * TILE_WIDTH + TILE_WIDTH - 1;
-                if (x1 - speed <= tileToLeftWallX) {
+                if (x1 - speed <= tileToLeftWallX + 1) {
                     return true;
                 }
             }
