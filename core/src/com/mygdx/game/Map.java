@@ -490,12 +490,12 @@ public class Map
             //top left and top right corners
             
             x1 = charPosX + entity.getLeft();
-            y1 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : mapHeight - 2;
+            y1 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()): mapHeight - 2;
             
             x2 = (charPosX + entity.getRight() <= mapWidth) ? (charPosX + entity.getRight()): mapWidth;
            
             
-            int tileAboveY = bottomLeftIndexedRowToTopLeftIndexedRow((int) y1 / TILE_HEIGHT);
+            int tileAboveY = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT) + 1);
             int tileAboveX1 = ((int) x1 / TILE_WIDTH);
             int tileAboveX2 = ((int) x2 / TILE_WIDTH);
             

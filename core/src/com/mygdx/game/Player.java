@@ -33,7 +33,7 @@ public class Player extends Entity
     
         left = 15;
         right = 50;
-        up = 55;
+        up = 50;
         down = 0;
         
         int sightX = 400;
@@ -126,6 +126,7 @@ public class Player extends Entity
         currentMap.update();
         batch.draw(currentFrame, currentMap.getCharDrawPosX(), currentMap.getCharDrawPosY());
         batch.draw(new Texture(Gdx.files.internal("red.png")), currentMap.getCharDrawPosX() + getLeft(), currentMap.getCharDrawPosY());
+        batch.draw(new Texture(Gdx.files.internal("red.png")), currentMap.getCharDrawPosX() + getLeft(), currentMap.getCharDrawPosY() + getTop());
     }
     
     @Override
