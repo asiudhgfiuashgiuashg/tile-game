@@ -371,12 +371,13 @@ public class Map
     
     public boolean moveRight(Entity entity)
     {
-    	boolean success = false;          
-		if (charPosX < mapWidth - 50)
+    	boolean success = false;
+    	float deltaX = 200 * Gdx.graphics.getDeltaTime();
+		if (!collides(Direction.RIGHT, deltaX, entity) && charPosX < mapWidth - 50)
 		{
-			charPosX += 200 * Gdx.graphics.getDeltaTime();
+			charPosX += deltaX;
 			success = true;
-			updatePosX(200 * Gdx.graphics.getDeltaTime());
+			updatePosX(deltaX);
 		}
     	return success;
     }
@@ -430,17 +431,17 @@ public class Map
             int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
             int tileToLeftY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
             int tileToLeftY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
-            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
+/*            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
             	
             	System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
             	System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
             	
-            }
-            ///////////print statements//////////////////
+            }*/
+/*            ///////////print statements//////////////////
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             System.out.println("x1:  " + x1 + "    y1: " + y1 + "    y2: " + y2);
             System.out.println("tile to left X: " + tileToLeftX + "   tileToLeftY1: " + tileToLeftY1 + "  tileToLeftY2:  " + tileToLeftY2);
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");*/
             ////////////////////////////////////////////
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
@@ -455,11 +456,25 @@ public class Map
         else if (Direction.RIGHT == direction)
         {
             //bottom and top right corners
-            x1 = entity.getRight();
-            y1 = entity.getBottom();
+    	    x1 = charPosX + entity.getRight(); //right side of hitbox relative to bottom left corner of image of current frame kek
+            y1 = charPosY + entity.getBottom(); //bottom side of hitbox
+          
+            //top left corner
+          
+            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : numRows;
+          
+            //in the tile grid
+            int tileToRightX = ((int) x1 / TILE_WIDTH) + 1;
+            int tileToRightY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
+            int tileToRightY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
             
-            x2 = entity.getRight();
-            y2 = entity.getTop();
+            if ((tileToRightX > -1 && tileToRightY1 > -1 && tileToRightY2 > -1) && ((mapTiles[tileToRightY1][tileToRightX].hasLeftWall()) || (mapTiles[tileToRightY2][tileToRightX].hasLeftWall()))) {
+                int tileToRightWallX = tileToRightX * TILE_WIDTH;
+                if (x1 + speed >= tileToRightWallX) {
+                    return true;
+                }
+            }
+            return false;
 
         }
         else if (Direction.UP == direction)
