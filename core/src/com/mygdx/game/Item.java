@@ -4,7 +4,7 @@ public class Item {
     private String name;
     private int id;
 
-    private static String classFileLocation;
+    public static final String classFileLocation = "../core/assets/Item.txt";
 
     private String inventoryImageURI;
     private String floorImageURI;

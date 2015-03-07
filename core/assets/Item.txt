@@ -1,0 +1,2 @@
+bowling_ball, 0, bowling_ball.jpg, bowling_ball.jpg, 32, 32
+baseball, 1, baseball.gif, baseball.gif, 17, 19
