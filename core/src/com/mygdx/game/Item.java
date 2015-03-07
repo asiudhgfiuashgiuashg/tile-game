@@ -1,8 +1,13 @@
 package com.mygdx.game;
 
+import java.io.File;
+import java.util.Scanner;
+
 public class Item {
     private String name;
     private int id;
+    private int xPos;
+    private int yPos;
 
     public static final String classFileLocation = "../core/assets/Item.txt";
 
@@ -10,6 +15,28 @@ public class Item {
     private String floorImageURI;
     
     private int width, height;
+    
+    Item(int id, int xPos, int yPos)
+    {
+    	this.id = id;
+    	this.xPos = xPos;
+    	this.yPos = yPos;
+    	
+    	Scanner itemFileScanner = new Scanner(new File("Item"));
+    	
+		//find corresponding line in tileFile
+		String currentLine = null;
+		String[] currentAttributes = new String[0];
+		boolean found = false;
+		while (!found)
+		{
+			currentLine = itemFileScanner.nextLine();
+			currentAttributes = currentTilesLine.split(", ");
+			if (currentAttributes[1].equals(individualTileId)) { //id matches tile we want
+				found = true;
+			}
+		}
+    }
     
     public int getId() {
         return id;    

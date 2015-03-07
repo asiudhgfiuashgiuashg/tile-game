@@ -63,6 +63,7 @@ public class Map
     TextureRegion fov;
     
     
+    
     public Map(String mapFile, String tileFile) throws IOException
     {
         ///////////////////////////////////
@@ -109,6 +110,13 @@ public class Map
         }
         
         tileFileScanner.close();
+        
+        int itemIndex = Integer.parseInt(mapFileScanner.nextLine());
+        if (itemIndex > 0)
+        {
+        	
+        }
+        
         mapFileScanner.close();
         ///////////////////////////////////////////////////////////
         // create and save png which is composite of tile images //
