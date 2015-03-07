@@ -27,4 +27,20 @@ public class Tile
     {
         imageURI = URI;
     }
+    
+    public boolean hasLeftWall() {
+    	return leftWall;
+    }
+    public boolean hasRightWall() {
+    	return rightWall;
+    }
+    public boolean hasTopWall() {
+    	return topWall;
+    }
+    public boolean hasBottomWall() {
+    	return bottomWall;
+    }
+    public String getName() {
+    	return name;
+    }
 }
