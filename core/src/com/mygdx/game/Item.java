@@ -25,7 +25,7 @@ public class Item {
     	
     	Scanner itemFileScanner = new Scanner(new File("Item"));
     	
-		//find corresponding line in tileFile
+		//find corresponding line in item file
 		String currentLine = null;
 		String[] currentAttributes = null;
 		boolean found = false;
@@ -34,7 +34,7 @@ public class Item {
 			currentLine = itemFileScanner.nextLine();
 			currentAttributes = currentLine.split(", ");
 			int idFromItemFile = Integer.parseInt(currentAttributes[1]);
-			if (idFromItemFile == this.id) { //id matches tile we want
+			if (idFromItemFile == this.id) { //id matches item we want
 				found = true;
 			}
 		}
