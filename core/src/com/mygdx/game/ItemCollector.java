@@ -36,5 +36,29 @@ public class ItemCollector
 		}
 	}
 	
-	public int getItem
+	public String getItemName(int index)
+	{
+		return itemList.get(index).getName();
+	}
+	
+	public int getXPos(int index)
+	{
+		return itemList.get(index).getXPos();
+	}
+	
+	public int getYPos(int index)
+	{
+		return itemList.get(index).getYPos();
+	}
+	
+	public String getFloorImage(int index)
+	{
+		return itemList.get(index).getFloorImage();
+	}
+	
+	public String getInvImage(int index)
+	{
+		return itemList.get(index).getInventoryImage();
+	}
+	
 }

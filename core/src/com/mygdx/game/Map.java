@@ -112,9 +112,12 @@ public class Map
         tileFileScanner.close();
         
         int itemIndex = Integer.parseInt(mapFileScanner.nextLine());
+        String[] currentAttributes = new String[0];
         if (itemIndex > 0)
         {
-        	
+        	String currentLine = mapFileScanner.nextLine();
+			currentAttributes = currentTilesLine.split(", ");
+			
         }
         
         mapFileScanner.close();
