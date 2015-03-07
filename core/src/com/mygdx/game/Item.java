@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Item {
@@ -16,7 +17,7 @@ public class Item {
     
     private int width, height;
     
-    Item(int id, int xPos, int yPos)
+    public Item(int id, int xPos, int yPos) throws FileNotFoundException
     {
     	this.id = id;
     	this.xPos = xPos;
@@ -26,16 +27,26 @@ public class Item {
     	
 		//find corresponding line in tileFile
 		String currentLine = null;
-		String[] currentAttributes = new String[0];
+		String[] currentAttributes = null;
 		boolean found = false;
 		while (!found)
 		{
 			currentLine = itemFileScanner.nextLine();
-			currentAttributes = currentTilesLine.split(", ");
-			if (currentAttributes[1].equals(individualTileId)) { //id matches tile we want
+			currentAttributes = currentLine.split(", ");
+			int idFromItemFile = Integer.parseInt(currentAttributes[1]);
+			if (idFromItemFile == this.id) { //id matches tile we want
 				found = true;
 			}
 		}
+		itemFileScanner.close();
+		//now currentAttributes should correspond to the attributes of the item we want from the item file
+		setName(currentAttributes[0]);
+		setId(Integer.parseInt(currentAttributes[1]));
+		setInventoryImage(currentAttributes[2]);
+		setFloorImageURI(currentAttributes[3]);
+		setWidth(Integer.parseInt(currentAttributes[4]));
+		setHeight(Integer.parseInt(currentAttributes[5]));
+		
     }
     
     public int getId() {
