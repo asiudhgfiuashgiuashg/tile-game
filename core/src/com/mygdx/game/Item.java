@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import com.badlogic.gdx.Gdx;
+
 public class Item {
     private String name;
     private int id;
@@ -23,8 +25,8 @@ public class Item {
     	this.xPos = xPos;
     	this.yPos = yPos;
     	
-    	Scanner itemFileScanner = new Scanner(new File("Item"));
-    	
+    	Scanner itemFileScanner = new Scanner(new File(classFileLocation));
+
 		//find corresponding line in item file
 		String currentLine = null;
 		String[] currentAttributes = null;
@@ -47,6 +49,8 @@ public class Item {
 		setWidth(Integer.parseInt(currentAttributes[4]));
 		setHeight(Integer.parseInt(currentAttributes[5]));
 		
+		System.out.println(xPos + ", " + yPos);
+		
     }
     
     public int getId() {
@@ -67,7 +71,7 @@ public class Item {
     }
     public String getFloorImage()
     {
-        return floorImageURI;
+        return ("../core/assets/" + floorImageURI);
     }
     public int getXPos()
     {

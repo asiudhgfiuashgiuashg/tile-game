@@ -61,7 +61,7 @@ public class Map
     
     Texture mapImage;
     TextureRegion fov;
-    
+    ItemCollector itemsOnField;
     
     
     public Map(String mapFile, String tileFile) throws IOException
@@ -112,7 +112,7 @@ public class Map
         tileFileScanner.close();
         
         //Initializes the ItemCollector object before giving it the information to create an array list of items.
-        ItemCollector itemsOnField = new ItemCollector();
+        itemsOnField = new ItemCollector();
         int itemIndex = Integer.parseInt(mapFileScanner.nextLine());
         String[] currentAttributes = null;
         String className;
@@ -190,6 +190,23 @@ public class Map
     public void draw(SpriteBatch batch)
     {
         batch.draw(fov, 0, 0);
+        System.out.println(mapPosX + ", " + (mapPosY));
+        for (int x = 0; x < itemsOnField.getItemListSize(); x++)
+        {
+        	//System.out.println("My shoulder's shot!");
+    		
+        	if (itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
+        	{
+        		batch.draw(new Texture(Gdx.files.internal("red.png")), mapPosX - itemsOnField.getXPos(x), mapPosY - itemsOnField.getYPos(x));
+        		//System.out.println("X value is Key");
+        		if(itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > (mapPosY - 2*winY) && itemsOnField.getYPos(x) < mapPosY)
+        		{
+        			//System.out.println("No! Y Value is Best!");
+        		}
+        	
+        		
+        	}
+        }
     }
     
     public float getCharDrawPosX()
@@ -554,8 +571,8 @@ public class Map
             	ignore = "right";
             }
             
-            System.out.println("Moving Up");
-            if (ignore == "none") {
+            //System.out.println("Moving Up");
+            /*if (ignore == "none") {
             	
             	System.out.println(mapTiles[tileAboveY][tileAboveX1].getName() +", " + mapTiles[tileAboveY][tileAboveX2].getName());
             	
@@ -564,29 +581,29 @@ public class Map
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             System.out.println("y1:  " + y1 + "    x1: " + x1 + "    x2: " + x2);
             System.out.println("tile above Y: " + tileAboveY + "   tileAboveX1: " + tileAboveX1 + "  tileAboveX2:  " + tileAboveX2);
-            ////////////////////////////////////////////
+            ////////////////////////////////////////////*/
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
             if (ignore == "none" && tileAboveY > -1  && ((mapTiles[tileAboveY][tileAboveX1].hasBottomWall()) || (mapTiles[tileAboveY][tileAboveX2].hasBottomWall()))) {
                 int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
-                System.out.println("tileAboveWallY: " + tileAboveWallY);
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //System.out.println("tileAboveWallY: " + tileAboveWallY);
+                //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 if (y1 + speed >= tileAboveWallY ) {
                     return true;
                 }
             }
             else if (ignore == "right" && tileAboveY > -1 && (mapTiles[tileAboveY][tileAboveX1].hasBottomWall())) {
                 int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
-                System.out.println("tileAboveWallY: " + tileAboveWallY);
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //System.out.println("tileAboveWallY: " + tileAboveWallY);
+                //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 if (y1 + speed >= tileAboveWallY ) {
                     return true;
                 }
             }
             else if (ignore == "left" && tileAboveY > -1 && (mapTiles[tileAboveY][tileAboveX2].hasBottomWall())) {
                 int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
-                System.out.println("tileAboveWallY: " + tileAboveWallY);
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //System.out.println("tileAboveWallY: " + tileAboveWallY);
+                //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 if (y1 + speed >= tileAboveWallY ) {
                     return true;
                 }
@@ -625,8 +642,8 @@ public class Map
             	ignore = "right";
             }
             
-            System.out.println("Moving NOT (UP or left or right)");
-            if (ignore == "none") 
+            //System.out.println("Moving NOT (UP or left or right)");
+            /*if (ignore == "none") 
             {
             	
             	System.out.println(mapTiles[tileBelowY][tileBelowX1].getName() +", " + mapTiles[tileBelowY][tileBelowX2].getName());
@@ -636,14 +653,14 @@ public class Map
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             System.out.println("y1:  " + y1 + "    x1: " + x1 + "    x2: " + x2);
             System.out.println("tile above Y: " + tileBelowY + "   tileBelowX1: " + tileBelowX1 + "  tileBelowX2:  " + tileBelowX2);
-            ////////////////////////////////////////////
+            ////////////////////////////////////////////*/
             //handles both corners
             //a or (b and c) = (a or b) and (a or c) 
             if (ignore == "none" && tileBelowY > -1 && ((mapTiles[tileBelowY][tileBelowX2].hasTopWall()) || (mapTiles[tileBelowY][tileBelowX1].hasTopWall())))
             {
             	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
-                System.out.println("tileBelowWallY: " + tileBelowWallY);
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //System.out.println("tileBelowWallY: " + tileBelowWallY);
+                //.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 if (y1 - speed <= tileBelowWallY + 1) {
                     return true;
                 }
@@ -651,8 +668,8 @@ public class Map
             else if (ignore == "right" && tileBelowY > -1 &&  (mapTiles[tileBelowY][tileBelowX1].hasTopWall())) 
             {
             	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
-                System.out.println("tileBelowWallY: " + tileBelowWallY);
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //System.out.println("tileBelowWallY: " + tileBelowWallY);
+                //.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 if (y1 - speed <= tileBelowWallY + 1) {
                     return true;
                 }
@@ -660,8 +677,8 @@ public class Map
             else if (ignore == "left" && tileBelowY > -1 && (mapTiles[tileBelowY][tileBelowX2].hasTopWall()))
             {
             	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
-                System.out.println("tileBelowWallY: " + tileBelowWallY);
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                //System.out.println("tileBelowWallY: " + tileBelowWallY);
+                //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 if (y1 - speed <= tileBelowWallY + 1) {
                     return true;
                 }

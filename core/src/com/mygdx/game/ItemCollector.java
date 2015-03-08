@@ -70,5 +70,18 @@ public class ItemCollector
 	{
 		return itemList.get(index).getInventoryImage();
 	}
+	public int getWidth(int index)
+	{
+		return itemList.get(index).getWidth();
+	}
+	public int getHeight(int index)
+	{
+		return itemList.get(index).getHeight();
+	}
+	
+	public int getItemListSize()
+	{
+		return itemList.size();
+	}
 	
 }
