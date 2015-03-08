@@ -65,11 +65,20 @@ public class Item {
     {
         return inventoryImageURI;
     }
- 
     public String getFloorImage()
     {
         return floorImageURI;
     }
+    public int getXPos()
+    {
+    	return xPos;
+    }
+    public int getYPos()
+    {
+    	return yPos;
+    }
+    
+    
     public void setId(int id){
         this.id = id;
     }

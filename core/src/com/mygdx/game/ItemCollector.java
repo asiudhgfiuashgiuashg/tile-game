@@ -10,6 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.mygdx.game;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -22,18 +23,27 @@ import java.util.ArrayList;
  */
 public class ItemCollector
 {
-	ArrayList<Item> itemList;
+	ArrayList<Item> itemList = new ArrayList<Item>();
+
 	
 	public void addItem(String className, int id, int xPos, int yPos)
 	{
-		if(className == "Weapon")
+		try
 		{
-			//not implemented
+			if(className == "Weapon")
+			{
+				//not implemented
+			}
+			else
+			{
+				itemList.add( new Item(id, xPos, yPos));
+			}
 		}
-		else
+		catch(FileNotFoundException e)
 		{
-			itemList.add( new Item(id, xPos, yPos));
+			System.out.println("Why would this even!");
 		}
+		
 	}
 	
 	public String getItemName(int index)

@@ -111,12 +111,26 @@ public class Map
         
         tileFileScanner.close();
         
+        //Initializes the ItemCollector object before giving it the information to create an array list of items.
+        ItemCollector itemsOnField = new ItemCollector();
         int itemIndex = Integer.parseInt(mapFileScanner.nextLine());
-        String[] currentAttributes = new String[0];
+        String[] currentAttributes = null;
+        String className;
+        int id;
+        int xPos;
+        int yPos;
         if (itemIndex > 0)
         {
+        	for(int x = 0; x < itemIndex; x++)
+        	{
         	String currentLine = mapFileScanner.nextLine();
-			currentAttributes = currentTilesLine.split(", ");
+			currentAttributes = currentLine.split(", ");
+			className = currentAttributes[0];
+			id = Integer.parseInt(currentAttributes[1]);
+			xPos = Integer.parseInt(currentAttributes[2]);
+			yPos = Integer.parseInt(currentAttributes[3]);
+			itemsOnField.addItem(className, id, xPos, yPos);
+        	}
 			
         }
         
