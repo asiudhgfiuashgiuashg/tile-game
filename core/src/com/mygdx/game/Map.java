@@ -46,9 +46,6 @@ public class Map
     private boolean smallWidth;
 	private boolean smallHeight;
     
-    
-    private float charPosX = 2000;
-    private float charPosY = 1100;
     private float charDrawPosX = 0;
     private float charDrawPosY = 0;
     private int mapPosX;
@@ -57,15 +54,16 @@ public class Map
     private int sightY;
     private int winX = 400;
     private int winY = 240;
-    
+    Entity player;
     
     Texture mapImage;
     TextureRegion fov;
     ItemCollector itemsOnField;
     
     
-    public Map(String mapFile, String tileFile) throws IOException
-    {
+    public Map(String mapFile, String tileFile, Entity player) throws IOException
+    {	
+    	this.player = player;
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
@@ -182,9 +180,8 @@ public class Map
     
     public void update()
     {
-    	//The setRegion uses the top left corner of the map as a starting point. 
     	//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
-        fov.setRegion(mapPosX, mapHeight - mapPosY, 2*winX, 2*winY); 
+        fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY); 
     }
     
     public void draw(SpriteBatch batch)
@@ -197,10 +194,11 @@ public class Map
     		
         	if (itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
         	{
-        		batch.draw(new Texture(Gdx.files.internal("red.png")), mapPosX - itemsOnField.getXPos(x), mapPosY - itemsOnField.getYPos(x));
+        		
         		//System.out.println("X value is Key");
-        		if(itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > (mapPosY - 2*winY) && itemsOnField.getYPos(x) < mapPosY)
+        		if(itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2*winX)
         		{
+        			batch.draw(new Texture(itemsOnField.getFloorImage(x)), itemsOnField.getXPos(x) - mapPosX, itemsOnField.getYPos(x) - mapPosY);
         			//System.out.println("No! Y Value is Best!");
         		}
         	
@@ -245,23 +243,23 @@ public class Map
     	adjustCharPlacement();			//Omit this line if movement testing with exact coordinates is being done,
     									//as this method just provides a fail safe in case the char is placed off the map
     	
-    	if (charPosX < winX && smallWidth == false)
+    	if (player.posX < winX && smallWidth == false)
     	{
-    		charDrawPosX = charPosX;
+    		charDrawPosX = player.posX;
     	}
-    	else if (charPosX > mapWidth - winX && smallWidth == false)
+    	else if (player.posX > mapWidth - winX && smallWidth == false)
     	{
-    		charDrawPosX = (charPosX - mapWidth + 2*winX);
+    		charDrawPosX = (player.posX - mapWidth + 2*winX);
     	}
     	
     	
-    	if (charPosY < winY && smallHeight == false)
+    	if (player.posY < winY && smallHeight == false)
     	{
-    		charDrawPosY = charPosY;
+    		charDrawPosY = player.posY;
     	}
-    	else if (charPosY > mapHeight - winY && smallHeight == false)
+    	else if (player.posY > mapHeight - winY && smallHeight == false)
     	{
-    		charDrawPosY = (charPosY - (mapHeight - winY) + winY);
+    		charDrawPosY = (player.posY - (mapHeight - winY) + winY);
     	}
     	if (smallWidth == true)
     	{
@@ -269,42 +267,42 @@ public class Map
     	}
     	if (smallHeight == true)
     	{
-    		mapPosY = mapHeight/2 + winY;
+    		mapPosY = mapHeight/2 - winY;
     	}
     }
     
     
     public void adjustCharPlacement()
     {
-    	if (charPosX < -15)
+    	if (player.posX < -15)
     	{
-    		charPosX = -15;
+    		player.posX = -15;
     	}
-    	else if (charPosX > mapWidth - 50)
+    	else if (player.posX > mapWidth - 50)
     	{
-    		charPosX = mapWidth - 50;
+    		player.posX = mapWidth - 50;
     	}
-    	if (charPosY < 5)
+    	if (player.posY < 5)
     	{
-    		charPosY = 5;
+    		player.posY = 5;
     	}
-    	else if (charPosY > mapHeight - 55)
+    	else if (player.posY > mapHeight - 55)
     	{
-    		charPosY = mapHeight - 55;
+    		player.posY = mapHeight - 55;
     	}
     	if (smallWidth)
     	{
-    		charDrawPosX = charPosX + (winX - mapWidth/2);
+    		charDrawPosX = player.posX + (winX - mapWidth/2);
     	}
     	if (smallHeight)
     	{
-    		charDrawPosY = charPosY + (winY - mapHeight/2);
+    		charDrawPosY = player.posY + (winY - mapHeight/2);
     	}
     	boolean enclosed = true; 
     	while (enclosed == true)
     	{
-    		int x = (int) (charPosX - 15)/TILE_WIDTH;
-        	int y = (int) (charPosY)/TILE_HEIGHT;
+    		int x = (int) (player.posX - 15)/TILE_WIDTH;
+        	int y = (int) (player.posY)/TILE_HEIGHT;
         	if (mapTiles[y][x].hasLeftWall() && mapTiles[y][x].hasRightWall() && mapTiles[y][x].hasTopWall() && mapTiles[y][x].hasBottomWall())
         	{
         		x +=TILE_WIDTH;
@@ -316,20 +314,21 @@ public class Map
         	}
     	}
     }
+    
     public void updatePosX(float movement)
     {
     	if (smallWidth == false)
     	{
-    		if (charPosX - winX < 0)
+    		if (player.posX < winX )
     		{
     			mapPosX = 0;
     		}
-    		else if (charPosX - winX > 0)
+    		else if (player.posX > winX)
     		{
-    			mapPosX = (int)charPosX - winX;
+    			mapPosX = (int)player.posX - winX;
     		}
     	
-    		if (charPosX + winX > mapWidth)
+    		if (player.posX + winX > mapWidth)
     		{
     			mapPosX = mapWidth - 2*winX;
     		}
@@ -361,21 +360,21 @@ public class Map
     { 	
     	if (smallHeight == false) 
     	{
-    		if (charPosY < winY)
+    		if (player.posY < winY)
     		{
-    			mapPosY = 2*winY;
+    			mapPosY = 0;
     		}
-    		else if (mapHeight - (charPosY + winY) > 0)
+    		else if (player.posY > winY)
     		{
-    			mapPosY = (int)(charPosY + winY);
+    			mapPosY = (int)player.posY - winY;
     		}
-    		if (mapHeight < charPosY + winY)
+    		if (player.posY + winY > mapHeight )
     		{
-    		mapPosY = mapHeight;
+    		mapPosY = mapHeight - 2*winY;
     		}
     		
-    		mapMoveUp = (mapPosY == (mapHeight)) ? false : true;
-    		mapMoveDown = (mapPosY == 2*winY) ? false : true;
+    		mapMoveDown = (mapPosY == 0) ? false : true;
+    		mapMoveUp = (mapPosY == (mapHeight - 2*winY)) ? false : true;
     	
     		if (mapMoveUp == true && mapMoveDown == true)
     		{
@@ -397,13 +396,13 @@ public class Map
     // player movement //
     /////////////////////
     
-    public boolean moveLeft(Entity entity)
+    public boolean moveLeft()
     {
     	boolean success = false;
     	float deltaX = 200 * Gdx.graphics.getDeltaTime();
-		if (!collides(Direction.LEFT, deltaX, entity) && charPosX> - entity.getLeft())
+		if (!collides(Direction.LEFT, deltaX) && player.posX > - player.getLeft())
 		{
-			charPosX -= deltaX;
+			player.posX -= deltaX;
 			success = true;
 			
 			updatePosX(-deltaX);	
@@ -411,45 +410,45 @@ public class Map
     	return success;
     }
     
-    public boolean moveRight(Entity entity)
+    public boolean moveRight()
     {
 
     	boolean success = false;
     	float deltaX = 200 * Gdx.graphics.getDeltaTime();
-		if (!collides(Direction.RIGHT, deltaX, entity) && charPosX < mapWidth - 50)
+		if (!collides(Direction.RIGHT, deltaX) && player.posX < mapWidth - 50)
 		{
-			charPosX += deltaX;
+			player.posX += deltaX;
 			success = true;
 			updatePosX(deltaX);
 		}
     	return success;
     }
-    public boolean moveUp(Entity entity)
+    public boolean moveUp()
     {
     	boolean success = false;
     	float deltaY = 200 * Gdx.graphics.getDeltaTime();
-		if (!collides(Direction.UP, deltaY, entity) && charPosY < mapHeight - entity.getTop())
+		if (!collides(Direction.UP, deltaY) && player.posY < mapHeight - player.getTop())
 		{
-			charPosY += deltaY;
+			player.posY += deltaY;
 			success = true;
 			updatePosY(deltaY);
 		}    	    
     	return success;
     }
-    public boolean moveDown(Entity entity)
+    public boolean moveDown()
     {
     	boolean success = false; 
     	float deltaY = 200 * Gdx.graphics.getDeltaTime();
-		if (!collides(Direction.DOWN, deltaY, entity) && charPosY > 0)
+		if (!collides(Direction.DOWN, deltaY) && player.posY > 0)
 		{
-			charPosY -= deltaY;
+			player.posY -= deltaY;
 			success = true;
 			updatePosY(-deltaY);
 		}	
     	return success;
     }
     
-    public boolean collides(Direction direction, float speed, Entity entity)
+    public boolean collides(Direction direction, float speed)
     {
     	//////////////////////////////////////////////////
     	//MAP IS INDEXED WITH (0,0) IN TOP LEFT         //
@@ -465,12 +464,12 @@ public class Map
         	
             //bottom left and top left corners
             //bottom left corner
-            x1 = charPosX + entity.getLeft(); //right side of hitbox relative to bottom left corner of image of current frame kek
-            y1 = charPosY + entity.getBottom(); //bottom side of hitbox
+            x1 = player.posX + player.getLeft(); //right side of hitbox relative to bottom left corner of image of current frame kek
+            y1 = player.posY + player.getBottom(); //bottom side of hitbox
             
             //top left corner
             
-            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : mapHeight - 2;
+            y2 = (player.posY + player.getTop() <= mapHeight) ? (player.posY + player.getTop()) : mapHeight - 2;
             
             //in the tile grid
             int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
@@ -506,12 +505,12 @@ public class Map
         else if (Direction.RIGHT == direction)
         {
             //bottom and top right corners
-    	    x1 = charPosX + entity.getRight(); //right side of hitbox relative to bottom left corner of image of current frame kek
-            y1 = charPosY + entity.getBottom(); //bottom side of hitbox
+    	    x1 = player.posX + player.getRight(); //right side of hitbox relative to bottom left corner of image of current frame kek
+            y1 = player.posY + player.getBottom(); //bottom side of hitbox
           
             //top left corner
           
-            y2 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()) : mapWidth - 2;
+            y2 = (player.posY + player.getTop() <= mapHeight) ? (player.posY + player.getTop()) : mapWidth - 2;
             
             //in the tile grid
             int tileToRightX = (((int) x1 / TILE_WIDTH) < numCols) ? ((int) x1 / TILE_WIDTH): numCols -1;
@@ -541,10 +540,10 @@ public class Map
         {
             //top left and top right corners
             
-            x1 = charPosX + entity.getLeft();
-            y1 = (charPosY + entity.getTop() <= mapHeight) ? (charPosY + entity.getTop()): mapHeight - 2;
+            x1 = player.posX + player.getLeft();
+            y1 = (player.posY + player.getTop() <= mapHeight) ? (player.posY + player.getTop()): mapHeight - 2;
             
-            x2 = (charPosX + entity.getRight() <= mapWidth) ? (charPosX + entity.getRight()): mapWidth;
+            x2 = (player.posX + player.getRight() <= mapWidth) ? (player.posX + player.getRight()): mapWidth;
            
 
             int unconvertedTileAboveY =  ((int) y1 / TILE_HEIGHT) + 1;
@@ -614,10 +613,10 @@ public class Map
         else //(Direction.DOWN == direction)
         {
         	//bottom  left and bottom right corners
-            x1 = charPosX + entity.getLeft();
-            y1 = (charPosY + entity.getBottom() <= mapHeight) ? (charPosY + entity.getBottom()): mapHeight - 2;
+            x1 = player.posX + player.getLeft();
+            y1 = (player.posY + player.getBottom() <= mapHeight) ? (player.posY + player.getBottom()): mapHeight - 2;
             
-            x2 = (charPosX + entity.getRight() <= mapWidth) ? (charPosX + entity.getRight()): mapWidth;
+            x2 = (player.posX + player.getRight() <= mapWidth) ? (player.posX + player.getRight()): mapWidth;
            
 
             int unconvertedTileBelowY =  ((int) y1 / TILE_HEIGHT) - 1;

@@ -35,6 +35,8 @@ public class Player extends Entity
         right = 50;
         up = 50;
         down = 0;
+        posX = 0;
+        posY = 0;
         
         int sightX = 400;
         int sightY = 240;
@@ -59,7 +61,7 @@ public class Player extends Entity
         try
         {
             System.out.println("Working Directory = " + System.getProperty("user.dir"));
-            currentMap = new Map("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt");
+            currentMap = new Map("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", this);
             currentMap.setFOV(sightX, sightY);
         }
         catch(IOException e)
@@ -86,33 +88,38 @@ public class Player extends Entity
     @Override
     public void update(float stateTime) {
         
-        if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A))
+    	boolean left = (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) ? true : false;
+    	boolean right = (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D)) ? true : false;
+    	boolean up = (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W)) ? true : false;
+    	boolean down = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
+    	
+        if (left && !right)
         {
-            if (currentMap.moveLeft(this))
+            if (currentMap.moveLeft())
             {
                 currentFrame = moveLeft.getKeyFrame(stateTime, true);
             }
         }
         
-        else if (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D))
+        else if (right && !left ) 
         {            
-            if (currentMap.moveRight(this))
+            if (currentMap.moveRight())
             {
                 currentFrame = moveRight.getKeyFrame(stateTime, true);
             }
         }
         
-        else if (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W))
+        else if (up && !down)
         {
-            if (currentMap.moveUp(this))
+            if (currentMap.moveUp())
             {
                 currentFrame = moveUp.getKeyFrame(stateTime, true); 
             }
         }
         
-        else if (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S))
+        else if (down && !up)
         { 
-            if (currentMap.moveDown(this))
+            if (currentMap.moveDown())
             {
                 currentFrame = moveDown.getKeyFrame(stateTime, true);
             }
@@ -128,6 +135,7 @@ public class Player extends Entity
         batch.draw(new Texture(Gdx.files.internal("red.png")), currentMap.getCharDrawPosX() + getLeft(), currentMap.getCharDrawPosY());
         batch.draw(new Texture(Gdx.files.internal("red.png")), currentMap.getCharDrawPosX() + getLeft(), currentMap.getCharDrawPosY() + getTop());
     }
+    
     
     @Override
     public float getRight() {
@@ -148,4 +156,5 @@ public class Player extends Entity
     public float getBottom() {
     	return down;
     }
+    
 }

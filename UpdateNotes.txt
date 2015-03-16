@@ -1,24 +1,35 @@
-Updated: 1/18/15 - First Entry
+Updated: 3/16/15 - The Prophesied Day of Item Drawing Completion
 
 Currently in game:
 Character movement(arrows and wasd)
+
 Walking animations(up, down left and right)
 	animations are generated through a method using a spritesheet when given the row number and length of frames
-Boundries(Character can't move beyond the visible screen)
+
 Basic scrolling map, using black and white tiles
+
+Tile collision, includes outer map boundries
+
+Basic item info and placement
 
 
 
 Known Problems:
 Walking animations pauses in the middle once the key is let go
-After moving the movement methods into the map class, 
-	pressing several arrow keys at the same times causes it to choose one of them and move in that direction
+
+moving alongside the very edge of a tile causes the player to check for collision adjacent to the tile, rather than where the player is moving
+
+As the character moves, items on the screen seem to lag behind a bit, causing them to shift position slighty
 
 
-Things to add:
+
+Features to add:
 More tiles
 Movement between maps
-Collisions
-items
+interacting with items
+objects
 NPC's
 Enemies
+
+
+Things to do:
