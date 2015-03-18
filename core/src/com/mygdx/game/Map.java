@@ -549,6 +549,7 @@ public class Map
         tilesRect = new Rectangle(tilesLeftSide, tilesRightSide, tilesTopSide, tilesBottomSide);
         //check for collision of tiles in Direction.x are not passable
         System.out.println("row 0: " + row0 + "col 0: " + col0 + "row 1: " + row1 + "col1: " + col1);
+        //first part of if statement avoids giving bothPassable args which would cause IndexOutOfBounds exception
         if (!(row0 < 0 || col0 < 0 || row1 < 0 || col1 < 0 || row0 >= mapHeight || row1 >= mapHeight || col0 >= mapWidth || col1 >= mapWidth) && !bothPassable(row0, col0, row1, col1)) {
         	return rectIntersect(futurePlayerRect, tilesRect);
         }
