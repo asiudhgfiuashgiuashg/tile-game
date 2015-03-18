@@ -1,2 +1,2 @@
-whiteSquare, 000, whiteSquare.png, true, true, true, true
-blackSquare, 001, blackSquare.png, false, false, false, false
+whiteSquare, 000, whiteSquare.png, false
+blackSquare, 001, blackSquare.png, true
