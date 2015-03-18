@@ -524,7 +524,21 @@ public class Map
             		
             
         } else if (Direction.DOWN == direction) {
-        	return false;
+        	int tileToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
+        	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
+        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT - 1);
+        	
+        	tilesRightSide = tileToRightXIndex * TILE_WIDTH + TILE_WIDTH;
+            tilesLeftSide = tileToLeftXIndex * TILE_WIDTH;
+            tilesTopSide = tilesYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
+            tilesBottomSide = tilesYIndex * TILE_HEIGHT;
+            
+            futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            
+            row0 = tilesYIndex;
+            col0 = tileToLeftXIndex;
+            row1 = row0;
+            col1 = tileToRightXIndex;
         } else {
         	return true;//throw new Exception("invalid Direction");
         }
@@ -540,6 +554,10 @@ public class Map
         }
         return false;
     }
+    
+    
+    
+    
     private boolean bothPassable(int row0, int col0, int row1, int col1) {
     	return mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row0)][col0].isPassable()
         		&& mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row1)][col1].isPassable();
