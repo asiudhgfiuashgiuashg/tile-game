@@ -484,6 +484,9 @@ public class Map
             col0 = tilesToLeftXIndex;
             row1 = topTileToLeftYIndex;
             col1 = col0;
+            
+            
+            
         } else if(Direction.RIGHT == direction) {
         	int tilesToRightXIndex = ((int) playerRightSide / TILE_WIDTH) + 1;
         	int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
@@ -500,8 +503,26 @@ public class Map
             col0 = tilesToRightXIndex;
             row1 = topTileToLeftYIndex;
             col1 = col0;
+            
+            
         } else if (Direction.UP == direction) {
-        	return false;
+        	int tileToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
+        	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
+        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT + 1);
+        	
+        	tilesRightSide = tileToRightXIndex * TILE_WIDTH + TILE_WIDTH;
+            tilesLeftSide = tileToLeftXIndex * TILE_WIDTH;
+            tilesTopSide = tilesYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
+            tilesBottomSide = tilesYIndex * TILE_HEIGHT;
+            
+            futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            
+            row0 = tilesYIndex;
+            col0 = tileToLeftXIndex;
+            row1 = row0;
+            col1 = tileToRightXIndex;
+            		
+            
         } else if (Direction.DOWN == direction) {
         	return false;
         } else {
