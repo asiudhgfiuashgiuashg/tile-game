@@ -32,6 +32,8 @@ public abstract class Entity
 
     float posY;
     float posX;
+    float drawPosX;
+    float drawPosY;
     //pixels relative to bottom left corner of current frame image
     float up;
     float down;

@@ -8,9 +8,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.mygdx.game;
 
-import java.io.IOException;
-import java.util.Scanner;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
@@ -26,6 +23,8 @@ public class Player extends Entity
     TextureRegion idleUp;
     TextureRegion idleDown;
     Map currentMap;
+    int sightX = 400;
+    int sightY = 240;
     
     @Override
     public void create()
@@ -37,14 +36,8 @@ public class Player extends Entity
         down = 0;
         posX = 0;
         posY = 0;
+
         
-        int sightX = 400;
-        int sightY = 240;
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Which map would you like to test?");
-        String mapName = "Test";//sc.nextLine();
-        
-        sc.close();
         spriteSheet = new Texture(Gdx.files.internal("index.png"));
         tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
         
@@ -58,19 +51,13 @@ public class Player extends Entity
         idleDown = tmp[10][0];
         currentFrame = idleUp;
         
-        try
-        {
-            System.out.println("Working Directory = " + System.getProperty("user.dir"));
-            currentMap = new Map("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", this);
-            currentMap.setFOV(sightX, sightY);
-        }
-        catch(IOException e)
-        {
-            System.out.println(e.getMessage());
-            System.out.println("Failed to create map object");
-        }
+
     }
     
+    public void setCurrentMap(Map currentMap)
+    {
+    	this.currentMap = currentMap;
+    }
     
     protected Animation animate(int row, int length)
     {
@@ -129,11 +116,10 @@ public class Player extends Entity
     
     @Override
     public void draw(SpriteBatch batch) {
-        currentMap.draw(batch);
-        currentMap.update();
-        batch.draw(currentFrame, currentMap.getCharDrawPosX(), currentMap.getCharDrawPosY());
-        batch.draw(new Texture(Gdx.files.internal("red.png")), currentMap.getCharDrawPosX() + getLeft(), currentMap.getCharDrawPosY());
-        batch.draw(new Texture(Gdx.files.internal("red.png")), currentMap.getCharDrawPosX() + getLeft(), currentMap.getCharDrawPosY() + getTop());
+        
+        batch.draw(currentFrame, drawPosX, drawPosY);
+        batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
+        batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
     }
     
     
@@ -155,6 +141,11 @@ public class Player extends Entity
     @Override
     public float getBottom() {
     	return down;
+    }
+    public void setFOV(int x, int y)
+    {
+        sightX = x;
+        sightY = y;
     }
     
 }

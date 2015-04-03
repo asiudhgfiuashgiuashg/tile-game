@@ -45,25 +45,25 @@ public class Map
     private boolean mapMoveDown;
     private boolean smallWidth;
 	private boolean smallHeight;
+	float stateTime;
     
-    private float charDrawPosX = 0;
-    private float charDrawPosY = 0;
     private int mapPosX;
     private int mapPosY;
-    private int sightX;
-    private int sightY;
+
     private int winX = 400;
     private int winY = 240;
-    Entity player;
+    Player player;
     
     Texture mapImage;
     TextureRegion fov;
     ItemCollector itemsOnField;
     
     
-    public Map(String mapFile, String tileFile, Entity player) throws IOException
+    public Map(String mapFile, String tileFile, Player player) throws IOException
     {	
     	this.player = player;
+    	player.setCurrentMap(this);
+    	
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
@@ -72,6 +72,7 @@ public class Map
         numRows = Integer.parseInt(mapFileScanner.nextLine());
         numCols = Integer.parseInt(mapFileScanner.nextLine());
         mapTiles = new Tile[numRows][numCols];
+        stateTime = 0f;
         
         Scanner tileFileScanner = new Scanner(new File(tileFile));
         for (int r = 0; r < numRows; r++) {
@@ -172,22 +173,14 @@ public class Map
     
     
     //updating and drawing the visible part of the map
-    public void setFOV(int x, int y)
-    {
-        sightX = x;
-        sightY = y;
-    }
     
-    public void update()
+    
+    public void update(SpriteBatch batch)
     {
     	//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
-        fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY); 
-    }
-    
-    public void draw(SpriteBatch batch)
-    {
-        batch.draw(fov, 0, 0);
-        System.out.println(mapPosX + ", " + (mapPosY));
+        fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY);
+        stateTime += Gdx.graphics.getDeltaTime();
+        player.update(stateTime);
         for (int x = 0; x < itemsOnField.getItemListSize(); x++)
         {
         	//System.out.println("My shoulder's shot!");
@@ -207,14 +200,16 @@ public class Map
         }
     }
     
-    public float getCharDrawPosX()
+    public void draw(SpriteBatch batch)
     {
-    	return charDrawPosX;
+    	
+        batch.draw(fov, 0, 0);
+        
+		player.draw(batch);
+        System.out.println(mapPosX + ", " + (mapPosY));
+        
     }
-    public float getCharDrawPosY()
-    {
-    	return charDrawPosY;
-    }
+    
     
     ///////////////////////////////////////////////////////////////////////
     // set's the map and character draw positions based on char position //
@@ -245,21 +240,21 @@ public class Map
     	
     	if (player.posX < winX && smallWidth == false)
     	{
-    		charDrawPosX = player.posX;
+    		player.drawPosX = player.posX;
     	}
     	else if (player.posX > mapWidth - winX && smallWidth == false)
     	{
-    		charDrawPosX = (player.posX - mapWidth + 2*winX);
+    		player.drawPosX = (player.posX - mapWidth + 2*winX);
     	}
     	
     	
     	if (player.posY < winY && smallHeight == false)
     	{
-    		charDrawPosY = player.posY;
+    		player.drawPosY = player.posY;
     	}
     	else if (player.posY > mapHeight - winY && smallHeight == false)
     	{
-    		charDrawPosY = (player.posY - (mapHeight - winY) + winY);
+    		player.drawPosY = (player.posY - (mapHeight - winY) + winY);
     	}
     	if (smallWidth == true)
     	{
@@ -292,11 +287,11 @@ public class Map
     	}
     	if (smallWidth)
     	{
-    		charDrawPosX = player.posX + (winX - mapWidth/2);
+    		player.drawPosX = player.posX + (winX - mapWidth/2);
     	}
     	if (smallHeight)
     	{
-    		charDrawPosY = player.posY + (winY - mapHeight/2);
+    		player.drawPosY = player.posY + (winY - mapHeight/2);
     	}
     	boolean enclosed = true; 
     	while (enclosed == true)
@@ -340,19 +335,19 @@ public class Map
     	
     		if (mapMoveLeft == true && mapMoveRight == true)
     		{
-    			charDrawPosX = 400;
+    			player.drawPosX = 400;
     		}
     		else
     		{
     			if (mapMoveLeft == false || mapMoveRight == false)
     			{
-    				charDrawPosX += movement;
+    				player.drawPosX += movement;
     			}
     		}
     	}
     	else
     	{
-    		charDrawPosX += movement;
+    		player.drawPosX += movement;
     	}
     }
     
@@ -378,16 +373,16 @@ public class Map
     	
     		if (mapMoveUp == true && mapMoveDown == true)
     		{
-    			charDrawPosY = 240;
+    			player.drawPosY = 240;
     		}
     		else if (mapMoveUp == false || mapMoveDown == false)
     		{
-    				charDrawPosY += movement;
+    				player.drawPosY += movement;
     		}  		
     	}
     	else
 		{
-			charDrawPosY += movement;
+			player.drawPosY += movement;
 		}
     }
     

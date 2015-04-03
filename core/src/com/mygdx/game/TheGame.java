@@ -1,5 +1,8 @@
 package com.mygdx.game;
 
+import java.io.IOException;
+import java.util.Scanner;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -9,7 +12,8 @@ public class TheGame extends ApplicationAdapter
 {
 	Player player;
 	SpriteBatch batch;
-	float stateTime;
+	
+	Map currentMap;
 
 	@Override
 	public void create()
@@ -17,7 +21,24 @@ public class TheGame extends ApplicationAdapter
 		player = new Player();
 		batch = new SpriteBatch();
 		player.create();
-		stateTime = 0f;
+		player.setFOV(player.sightX, player.sightY);
+		
+		Scanner sc = new Scanner(System.in);
+        System.out.println("Which map would you like to test?");
+        String mapName = "Test";//sc.nextLine();
+        
+        sc.close();
+        
+		try
+        {
+            System.out.println("Working Directory = " + System.getProperty("user.dir"));
+            currentMap = new Map("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", player);
+        }
+        catch(IOException e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to create map object");
+        }
 	}
 
 
@@ -26,11 +47,11 @@ public class TheGame extends ApplicationAdapter
 	{
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		stateTime += Gdx.graphics.getDeltaTime();
 		batch.begin();
 
-		player.update(stateTime);
-		player.draw(batch);
+		currentMap.draw(batch);
+        currentMap.update(batch);
+		
 		
 		batch.end();
 	}
