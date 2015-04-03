@@ -82,7 +82,7 @@ public class Map
         		String individualTileId = individualIds[c];
         		//find corresponding line in tileFile
         		String currentTilesLine = null;
-        		String[] currentAttributes = new String[0];
+        		String[] currentAttributes = null;
         		boolean found = false;
         		while (!found)
         		{
@@ -97,12 +97,9 @@ public class Map
         		//String imageURI, String name, boolean leftWall, boolean rightWall, boolean topWall, boolean bottomWall <----- order in Tile()
         		String imageURI = currentAttributes[2];
         		String name = currentAttributes[0];
-        		boolean leftWall = Boolean.parseBoolean(currentAttributes[3]);
-        		boolean rightWall = Boolean.parseBoolean(currentAttributes[4]);
-        		boolean topWall = Boolean.parseBoolean(currentAttributes[5]);
-        		boolean bottomWall = Boolean.parseBoolean(currentAttributes[6]);
+        		boolean passable = Boolean.parseBoolean(currentAttributes[3]);
         		//need to also get hazard once class Item is implemented
-        		Tile newTile = new Tile(imageURI, name, leftWall, rightWall, topWall, bottomWall);
+        		Tile newTile = new Tile(imageURI, name, passable);
         		mapTiles[r][c] = newTile;
         		tileFileScanner = new Scanner(new File(tileFile));
         	}
@@ -149,6 +146,7 @@ public class Map
                 g.drawImage(currTileImg, c * TILE_WIDTH, r * TILE_HEIGHT, null);
             }
         }
+        
         try
         {
 	        ImageIO.write(bigImage, "PNG", new File(title + ".png"));
@@ -160,15 +158,13 @@ public class Map
         }
         mapWidth = TILE_WIDTH * numCols;
         mapHeight = TILE_HEIGHT * numRows;
-        
-        
+
         initialCharPos();
         updatePosY(0);
         updatePosX(0);
         
             
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
-        
     }
     
     
@@ -181,6 +177,7 @@ public class Map
         fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY);
         stateTime += Gdx.graphics.getDeltaTime();
         player.update(stateTime);
+
         for (int x = 0; x < itemsOnField.getItemListSize(); x++)
         {
         	//System.out.println("My shoulder's shot!");
@@ -237,6 +234,7 @@ public class Map
     	
     	adjustCharPlacement();			//Omit this line if movement testing with exact coordinates is being done,
     									//as this method just provides a fail safe in case the char is placed off the map
+
     	
     	if (player.posX < winX && smallWidth == false)
     	{
@@ -298,7 +296,7 @@ public class Map
     	{
     		int x = (int) (player.posX - 15)/TILE_WIDTH;
         	int y = (int) (player.posY)/TILE_HEIGHT;
-        	if (mapTiles[y][x].hasLeftWall() && mapTiles[y][x].hasRightWall() && mapTiles[y][x].hasTopWall() && mapTiles[y][x].hasBottomWall())
+        	if (!mapTiles[y][x].isPassable())
         	{
         		x +=TILE_WIDTH;
         		y +=TILE_HEIGHT;
@@ -391,7 +389,7 @@ public class Map
     // player movement //
     /////////////////////
     
-    public boolean moveLeft()
+    public boolean moveLeft() throws Exception
     {
     	boolean success = false;
     	float deltaX = 200 * Gdx.graphics.getDeltaTime();
@@ -405,7 +403,7 @@ public class Map
     	return success;
     }
     
-    public boolean moveRight()
+    public boolean moveRight() throws Exception
     {
 
     	boolean success = false;
@@ -418,7 +416,7 @@ public class Map
 		}
     	return success;
     }
-    public boolean moveUp()
+    public boolean moveUp() throws Exception
     {
     	boolean success = false;
     	float deltaY = 200 * Gdx.graphics.getDeltaTime();
@@ -430,7 +428,7 @@ public class Map
 		}    	    
     	return success;
     }
-    public boolean moveDown()
+    public boolean moveDown() throws Exception
     {
     	boolean success = false; 
     	float deltaY = 200 * Gdx.graphics.getDeltaTime();
@@ -443,246 +441,131 @@ public class Map
     	return success;
     }
     
-    public boolean collides(Direction direction, float speed)
+
+    public boolean collides(Direction direction, float speed) throws Exception
     {
     	//////////////////////////////////////////////////
     	//MAP IS INDEXED WITH (0,0) IN TOP LEFT         //
     	//CHAR POS STARTS WITH (0,0) IN BOTTOM LEFT     //
-    	/////////////////////////////////////////////////
-        float x1;
-        float y1;
-        float x2;
-        float y2;
+    	//////////////////////////////////////////////////
+    	double playerLeftSide = player.posX + player.getLeft();
+    	double playerRightSide = player.posX + player.getRight();
+    	double playerBottomSide = player.posY + player.getBottom();
+    	double playerTopSide = player.posY + player.getTop();
+
+        double tilesLeftSide;
+        double tilesRightSide;
+        double tilesTopSide;
+        double tilesBottomSide;
+
+        int row0, col0, row1, col1;
         
+        Rectangle futurePlayerRect;
+        Rectangle tilesRect;
+        //calculate requested new position of character and the rows and cols of tiles to check for collision
         if (Direction.LEFT == direction)
         {
+            int tilesToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH) - 1;
+            int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
+            int topTileToLeftYIndex = (int) playerTopSide / TILE_HEIGHT;
+            
+            tilesRightSide = tilesToLeftXIndex * TILE_WIDTH + TILE_WIDTH;
+            tilesLeftSide = tilesToLeftXIndex * TILE_WIDTH;
+            tilesTopSide = topTileToLeftYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
+            tilesBottomSide = bottomTileToLeftYIndex * TILE_HEIGHT;
+
+            futurePlayerRect = new Rectangle(playerLeftSide - speed, playerRightSide - speed, playerTopSide, playerBottomSide);
+            
+            row0 = bottomTileToLeftYIndex;
+            col0 = tilesToLeftXIndex;
+            row1 = topTileToLeftYIndex;
+            col1 = col0;
+            
+            
+            
+        } else if(Direction.RIGHT == direction) {
+        	int tilesToRightXIndex = ((int) playerRightSide / TILE_WIDTH) + 1;
+        	int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
+            int topTileToLeftYIndex = (int) playerTopSide / TILE_HEIGHT;
+            
+            tilesRightSide = tilesToRightXIndex * TILE_WIDTH + TILE_WIDTH;
+            tilesLeftSide = tilesToRightXIndex * TILE_WIDTH;
+            tilesTopSide = topTileToLeftYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
+            tilesBottomSide = bottomTileToLeftYIndex * TILE_HEIGHT;
+            
+            futurePlayerRect = new Rectangle(playerLeftSide + speed, playerRightSide + speed, playerTopSide, playerBottomSide);
+            
+            row0 = bottomTileToLeftYIndex;
+            col0 = tilesToRightXIndex;
+            row1 = topTileToLeftYIndex;
+            col1 = col0;
+            
+            
+        } else if (Direction.UP == direction) {
+        	int tileToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
+        	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
+        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT + 1);
         	
-            //bottom left and top left corners
-            //bottom left corner
-            x1 = player.posX + player.getLeft(); //right side of hitbox relative to bottom left corner of image of current frame kek
-            y1 = player.posY + player.getBottom(); //bottom side of hitbox
+        	tilesRightSide = tileToRightXIndex * TILE_WIDTH + TILE_WIDTH;
+            tilesLeftSide = tileToLeftXIndex * TILE_WIDTH;
+            tilesTopSide = tilesYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
+            tilesBottomSide = tilesYIndex * TILE_HEIGHT;
             
-            //top left corner
+            futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
             
-            y2 = (player.posY + player.getTop() <= mapHeight) ? (player.posY + player.getTop()) : mapHeight - 2;
+            row0 = tilesYIndex;
+            col0 = tileToLeftXIndex;
+            row1 = row0;
+            col1 = tileToRightXIndex;
+            		
             
-            //in the tile grid
-            int tileToLeftX = ((int) x1 / TILE_WIDTH) - 1;
-            int tileToLeftY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
-            int tileToLeftY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
+        } else if (Direction.DOWN == direction) {
+        	int tileToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
+        	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
+        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT - 1);
+        	
+        	tilesRightSide = tileToRightXIndex * TILE_WIDTH + TILE_WIDTH;
+            tilesLeftSide = tileToLeftXIndex * TILE_WIDTH;
+            tilesTopSide = tilesYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
+            tilesBottomSide = tilesYIndex * TILE_HEIGHT;
             
-/*            System.out.println("Moving Left");*/
-/*            if (tileToLeftY1 > 0 && tileToLeftX > 0) {
-
-            	
-            	System.out.println(mapTiles[tileToLeftY2][tileToLeftX].getName());
-            	System.out.println(mapTiles[tileToLeftY1][tileToLeftX].getName());
-            	
-            }*/
-/*            ///////////print statements//////////////////
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            System.out.println("x1:  " + x1 + "    y1: " + y1 + "    y2: " + y2);
-            System.out.println("tile to left X: " + tileToLeftX + "   tileToLeftY1: " + tileToLeftY1 + "  tileToLeftY2:  " + tileToLeftY2);
-
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            ////////////////////////////////////////////
-*/
-            //handles both corners
-            //a or (b and c) = (a or b) and (a or c) 
-            if ((tileToLeftX > -1 && tileToLeftY1 > -1 && tileToLeftY2 > -1) && ((mapTiles[tileToLeftY1][tileToLeftX].hasRightWall()) || (mapTiles[tileToLeftY2][tileToLeftX].hasRightWall()))) {
-                int tileToLeftWallX = tileToLeftX * TILE_WIDTH + TILE_WIDTH - 1;
-                if (x1 - speed <= tileToLeftWallX + 1) {
-                    return true;
-                }
-            }
-            return false;
+            futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            
+            row0 = tilesYIndex;
+            col0 = tileToLeftXIndex;
+            row1 = row0;
+            col1 = tileToRightXIndex;
+        } else {
+        	throw new Exception("invalid Direction");
         }
-        else if (Direction.RIGHT == direction)
-        {
-            //bottom and top right corners
-    	    x1 = player.posX + player.getRight(); //right side of hitbox relative to bottom left corner of image of current frame kek
-            y1 = player.posY + player.getBottom(); //bottom side of hitbox
-          
-            //top left corner
-          
-            y2 = (player.posY + player.getTop() <= mapHeight) ? (player.posY + player.getTop()) : mapWidth - 2;
-            
-            //in the tile grid
-            int tileToRightX = (((int) x1 / TILE_WIDTH) < numCols) ? ((int) x1 / TILE_WIDTH): numCols -1;
-            
-            if (((int) x1 / TILE_WIDTH) < numCols)
-            {
-            	tileToRightX = ((int) x1 / TILE_WIDTH);
-            }
-            else
-            {
-            	return false;
-            }
-            
-            int tileToRightY1 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT));
-            int tileToRightY2 = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y2 / TILE_HEIGHT));
-            
-            if ((tileToRightX > -1 && tileToRightY1 > -1 && tileToRightY2 > -1 ) && ((mapTiles[tileToRightY1][tileToRightX].hasLeftWall()) || (mapTiles[tileToRightY2][tileToRightX].hasLeftWall()))) {
-                int tileToRightWallX = tileToRightX * TILE_WIDTH;
-                if (x1 + speed >= tileToRightWallX) {
-                    return true;
-                }
-            }
-            return false;
-
+        	
+        	
+        	
+        	
+        tilesRect = new Rectangle(tilesLeftSide, tilesRightSide, tilesTopSide, tilesBottomSide);
+        //check for collision of tiles in Direction.x are not passable
+        //System.out.println("row 0: " + row0 + "col 0: " + col0 + "row 1: " + row1 + "col1: " + col1);
+        //first part of if statement avoids giving bothPassable args which would cause IndexOutOfBounds exception
+        if (!(row0 < 0 || col0 < 0 || row1 < 0 || col1 < 0 || row0 >= mapHeight || row1 >= mapHeight || col0 >= mapWidth || col1 >= mapWidth) && !bothPassable(row0, col0, row1, col1)) {
+        	return rectIntersect(futurePlayerRect, tilesRect);
         }
-        else if (Direction.UP == direction)
-        {
-            //top left and top right corners
-            
-            x1 = player.posX + player.getLeft();
-            y1 = (player.posY + player.getTop() <= mapHeight) ? (player.posY + player.getTop()): mapHeight - 2;
-            
-            x2 = (player.posX + player.getRight() <= mapWidth) ? (player.posX + player.getRight()): mapWidth;
-           
-
-            int unconvertedTileAboveY =  ((int) y1 / TILE_HEIGHT) + 1;
-
-            int tileAboveY;
-            if (bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT) + 1) > -1)
-            	{
-            	tileAboveY = bottomLeftIndexedRowToTopLeftIndexedRow(((int) y1 / TILE_HEIGHT) + 1);
-            	}
-            else
-            {
-            	return false;
-            }
-            int tileAboveX1 = ((int) x1 / TILE_WIDTH);
-            int tileAboveX2 = ((int) x2 / TILE_WIDTH);
-            
-            String ignore = "none";
-            if (tileAboveX1 < 0)
-            {
-            	ignore = "left";
-            }
-            else if (tileAboveX2 > numCols-1)
-            {
-            	ignore = "right";
-            }
-            
-            //System.out.println("Moving Up");
-            /*if (ignore == "none") {
-            	
-            	System.out.println(mapTiles[tileAboveY][tileAboveX1].getName() +", " + mapTiles[tileAboveY][tileAboveX2].getName());
-            	
-            }
-            ///////////print statements//////////////////
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            System.out.println("y1:  " + y1 + "    x1: " + x1 + "    x2: " + x2);
-            System.out.println("tile above Y: " + tileAboveY + "   tileAboveX1: " + tileAboveX1 + "  tileAboveX2:  " + tileAboveX2);
-            ////////////////////////////////////////////*/
-            //handles both corners
-            //a or (b and c) = (a or b) and (a or c) 
-            if (ignore == "none" && tileAboveY > -1  && ((mapTiles[tileAboveY][tileAboveX1].hasBottomWall()) || (mapTiles[tileAboveY][tileAboveX2].hasBottomWall()))) {
-                int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
-                //System.out.println("tileAboveWallY: " + tileAboveWallY);
-                //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                if (y1 + speed >= tileAboveWallY ) {
-                    return true;
-                }
-            }
-            else if (ignore == "right" && tileAboveY > -1 && (mapTiles[tileAboveY][tileAboveX1].hasBottomWall())) {
-                int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
-                //System.out.println("tileAboveWallY: " + tileAboveWallY);
-                //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                if (y1 + speed >= tileAboveWallY ) {
-                    return true;
-                }
-            }
-            else if (ignore == "left" && tileAboveY > -1 && (mapTiles[tileAboveY][tileAboveX2].hasBottomWall())) {
-                int tileAboveWallY = unconvertedTileAboveY * TILE_HEIGHT;
-                //System.out.println("tileAboveWallY: " + tileAboveWallY);
-                //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                if (y1 + speed >= tileAboveWallY ) {
-                    return true;
-                }
-            }
-            return false;
-
-        }
-        else //(Direction.DOWN == direction)
-        {
-        	//bottom  left and bottom right corners
-            x1 = player.posX + player.getLeft();
-            y1 = (player.posY + player.getBottom() <= mapHeight) ? (player.posY + player.getBottom()): mapHeight - 2;
-            
-            x2 = (player.posX + player.getRight() <= mapWidth) ? (player.posX + player.getRight()): mapWidth;
-           
-
-            int unconvertedTileBelowY =  ((int) y1 / TILE_HEIGHT) - 1;
-            int tileBelowY;
-            if (bottomLeftIndexedRowToTopLeftIndexedRow(unconvertedTileBelowY) < numRows)
-            {
-            	tileBelowY = bottomLeftIndexedRowToTopLeftIndexedRow(unconvertedTileBelowY);
-            }
-            else
-            {
-            	return false;
-            }
-            String ignore = "none";
-            int tileBelowX1 = ((int) x1 / TILE_WIDTH);
-            int tileBelowX2 = ((int) x2 / TILE_WIDTH);
-            if (tileBelowX1 < 0)
-            {
-            	ignore = "left";
-            }
-            else if (tileBelowX2 > numCols-1)
-            {
-            	ignore = "right";
-            }
-            
-            //System.out.println("Moving NOT (UP or left or right)");
-            /*if (ignore == "none") 
-            {
-            	
-            	System.out.println(mapTiles[tileBelowY][tileBelowX1].getName() +", " + mapTiles[tileBelowY][tileBelowX2].getName());
-            	
-            }
-            ///////////print statements//////////////////
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            System.out.println("y1:  " + y1 + "    x1: " + x1 + "    x2: " + x2);
-            System.out.println("tile above Y: " + tileBelowY + "   tileBelowX1: " + tileBelowX1 + "  tileBelowX2:  " + tileBelowX2);
-            ////////////////////////////////////////////*/
-            //handles both corners
-            //a or (b and c) = (a or b) and (a or c) 
-            if (ignore == "none" && tileBelowY > -1 && ((mapTiles[tileBelowY][tileBelowX2].hasTopWall()) || (mapTiles[tileBelowY][tileBelowX1].hasTopWall())))
-            {
-            	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
-                //System.out.println("tileBelowWallY: " + tileBelowWallY);
-                //.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                if (y1 - speed <= tileBelowWallY + 1) {
-                    return true;
-                }
-            }
-            else if (ignore == "right" && tileBelowY > -1 &&  (mapTiles[tileBelowY][tileBelowX1].hasTopWall())) 
-            {
-            	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
-                //System.out.println("tileBelowWallY: " + tileBelowWallY);
-                //.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                if (y1 - speed <= tileBelowWallY + 1) {
-                    return true;
-                }
-            }
-            else if (ignore == "left" && tileBelowY > -1 && (mapTiles[tileBelowY][tileBelowX2].hasTopWall()))
-            {
-            	int tileBelowWallY = unconvertedTileBelowY * TILE_HEIGHT + TILE_HEIGHT - 1;
-                //System.out.println("tileBelowWallY: " + tileBelowWallY);
-                //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                if (y1 - speed <= tileBelowWallY + 1) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        //System.out.println("welp, you done fucked up now! no valid directions");
-        //return false;
+        return false;
+    }
+    
+    
+    
+    
+    private boolean bothPassable(int row0, int col0, int row1, int col1) {
+    	return mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row0)][col0].isPassable()
+        		&& mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row1)][col1].isPassable();
     }
     private int bottomLeftIndexedRowToTopLeftIndexedRow(int row) {
     	return this.numRows - 1 - row;
+    }
+    private boolean rectIntersect(Rectangle a, Rectangle b) {
+    	return (a.left <= b.right &&
+    			b.left <= a.right &&
+    		    a.top >= b.bottom &&
+    		    b.top >= a.bottom);
     }
 }

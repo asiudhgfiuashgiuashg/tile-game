@@ -80,38 +80,41 @@ public class Player extends Entity
     	boolean up = (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W)) ? true : false;
     	boolean down = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
     	
-        if (left && !right)
-        {
-            if (currentMap.moveLeft())
-            {
-                currentFrame = moveLeft.getKeyFrame(stateTime, true);
-            }
-        }
-        
-        else if (right && !left ) 
-        {            
-            if (currentMap.moveRight())
-            {
-                currentFrame = moveRight.getKeyFrame(stateTime, true);
-            }
-        }
-        
-        else if (up && !down)
-        {
-            if (currentMap.moveUp())
-            {
-                currentFrame = moveUp.getKeyFrame(stateTime, true); 
-            }
-        }
-        
-        else if (down && !up)
-        { 
-            if (currentMap.moveDown())
-            {
-                currentFrame = moveDown.getKeyFrame(stateTime, true);
-            }
-        }
-        
+    	try {
+	        if (left && !right)
+	        {
+	            if (currentMap.moveLeft())
+	            {
+	                currentFrame = moveLeft.getKeyFrame(stateTime, true);
+	            }
+	        }
+	        
+	        else if (right && !left ) 
+	        {            
+	            if (currentMap.moveRight())
+	            {
+	                currentFrame = moveRight.getKeyFrame(stateTime, true);
+	            }
+	        }
+	        
+	        else if (up && !down)
+	        {
+	            if (currentMap.moveUp())
+	            {
+	                currentFrame = moveUp.getKeyFrame(stateTime, true); 
+	            }
+	        }
+	        
+	        else if (down && !up)
+	        { 
+	            if (currentMap.moveDown())
+	            {
+	                currentFrame = moveDown.getKeyFrame(stateTime, true);
+	            }
+	        }
+    	} catch(Exception e) {
+    		System.out.println(e.getMessage());
+    	}
     }
     
     @Override

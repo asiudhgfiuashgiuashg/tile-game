@@ -7,20 +7,14 @@ public class Tile
     private int id; 
     public String door;
     public int[] doorExitPos;
-    public boolean leftWall;
-    public boolean rightWall;
-    public boolean topWall;
-    public boolean bottomWall;
+    private boolean passable;
     //public Item hazard;
     
-    Tile(String imageURI, String name, boolean leftWall, boolean rightWall, boolean topWall, boolean bottomWall)
+    Tile(String imageURI, String name, boolean passable)
     {
         this.imageURI = imageURI;
         this.name = name;
-        this.leftWall = leftWall;
-        this.rightWall = rightWall;
-        this.topWall = topWall;
-        this.bottomWall = bottomWall;
+        this.passable = passable;
     }
     
     public void setImageURI(String URI)
@@ -28,17 +22,8 @@ public class Tile
         imageURI = URI;
     }
     
-    public boolean hasLeftWall() {
-    	return leftWall;
-    }
-    public boolean hasRightWall() {
-    	return rightWall;
-    }
-    public boolean hasTopWall() {
-    	return topWall;
-    }
-    public boolean hasBottomWall() {
-    	return bottomWall;
+    public boolean isPassable() {
+    	return passable;
     }
     public String getName() {
     	return name;
