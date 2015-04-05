@@ -167,6 +167,10 @@ public class Map
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
     }
     
+    public ItemCollector getItemList()
+    {
+    	return itemsOnField;
+    }
     
     //updating and drawing the visible part of the map
     
