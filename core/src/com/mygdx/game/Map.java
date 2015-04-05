@@ -204,9 +204,9 @@ public class Map
     {
     	
         batch.draw(fov, 0, 0);
-        
+
 		player.draw(batch);
-		System.out.println(player.drawPosX + ", " + player.drawPosY);
+		
         
     }
     
@@ -549,7 +549,7 @@ public class Map
         //check for collision of tiles in Direction.x are not passable
         //System.out.println("row 0: " + row0 + "col 0: " + col0 + "row 1: " + row1 + "col1: " + col1);
         //first part of if statement avoids giving bothPassable args which would cause IndexOutOfBounds exception
-        if (!(row0 < 0 || col0 < 0 || row1 < 0 || col1 < 0 || row0 >= mapHeight || row1 >= mapHeight || col0 >= mapWidth || col1 >= mapWidth) && !bothPassable(row0, col0, row1, col1)) {
+        if (!(row0 < 0 || col0 < 0 || row1 < 0 || col1 < 0 || row0 >= mapHeight/TILE_HEIGHT || row1 >= mapHeight/TILE_HEIGHT || col0 >= mapWidth/TILE_WIDTH || col1 >= mapWidth/TILE_WIDTH) && !bothPassable(row0, col0, row1, col1)) {
         	return rectIntersect(futurePlayerRect, tilesRect);
         }
         return false;
@@ -559,6 +559,8 @@ public class Map
     
     
     private boolean bothPassable(int row0, int col0, int row1, int col1) {
+    	System.out.println(row0 + ", " + col0 + " || " + row1 + ", " + col1 + " || ");
+    	
     	return mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row0)][col0].isPassable()
         		&& mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row1)][col1].isPassable();
     }
