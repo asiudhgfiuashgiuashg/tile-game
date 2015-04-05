@@ -249,7 +249,7 @@ public class Map
     	ItemCollector nearbyItemList = new ItemCollector();
     	nearbyItemList = itemsOnField.createSubCollection(test);
     	System.out.println(nearbyItemList.isEmpty());
-    	return itemsOnField.createSubCollection(indexValues);
+    	return nearbyItemList;
     }
     
     

@@ -78,10 +78,14 @@ public class ItemCollector
 		ItemCollector childItemCollector = new ItemCollector(childItemList);
 		for (int x = 0; x < indexValues.size(); x++)
 		{
-			System.out.println("Size: " indexValues.size() + );
+			System.out.println("Size: " + indexValues.size() + "\nName: " + childItemCollector.getItem(x));
 			
 		}
 		return childItemCollector;
+	}
+	public Item getItem(int index)
+	{
+		return itemList.get(index);
 	}
 	
 	public String getItemName(int index)
