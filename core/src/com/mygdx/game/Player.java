@@ -26,10 +26,13 @@ public class Player extends Entity
     int sightX = 400;
     int sightY = 240;
     
+    private boolean canMove;
+    
     @Override
     public void create()
     {
-    
+    	canMove = true;
+    	
         left = 15;
         right = 50;
         up = 50;
@@ -74,52 +77,52 @@ public class Player extends Entity
     
     @Override
     public void update(float stateTime) {
-        
-    	boolean left = (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) ? true : false;
-    	boolean right = (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D)) ? true : false;
-    	boolean up = (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W)) ? true : false;
-    	boolean down = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
-    	
-    	try {
-	        if (left && !right)
-	        {
-	            if (currentMap.moveLeft())
-	            {
-	                currentFrame = moveLeft.getKeyFrame(stateTime, true);
-	            }
-	        }
-	        
-	        else if (right && !left ) 
-	        {            
-	            if (currentMap.moveRight())
-	            {
-	                currentFrame = moveRight.getKeyFrame(stateTime, true);
-	            }
-	        }
-	        
-	        else if (up && !down)
-	        {
-	            if (currentMap.moveUp())
-	            {
-	                currentFrame = moveUp.getKeyFrame(stateTime, true); 
-	            }
-	        }
-	        
-	        else if (down && !up)
-	        { 
-	            if (currentMap.moveDown())
-	            {
-	                currentFrame = moveDown.getKeyFrame(stateTime, true);
-	            }
-	        }
-    	} catch(Exception e) {
-    		System.out.println(e.getMessage());
+    	if (canMove()) {
+	    	boolean left = (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) ? true : false;
+	    	boolean right = (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D)) ? true : false;
+	    	boolean up = (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W)) ? true : false;
+	    	boolean down = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
+	    	
+	    	try {
+		        if (left && !right)
+		        {
+		            if (currentMap.moveLeft())
+		            {
+		                currentFrame = moveLeft.getKeyFrame(stateTime, true);
+		            }
+		        }
+		        
+		        else if (right && !left ) 
+		        {            
+		            if (currentMap.moveRight())
+		            {
+		                currentFrame = moveRight.getKeyFrame(stateTime, true);
+		            }
+		        }
+		        
+		        else if (up && !down)
+		        {
+		            if (currentMap.moveUp())
+		            {
+		                currentFrame = moveUp.getKeyFrame(stateTime, true); 
+		            }
+		        }
+		        
+		        else if (down && !up)
+		        { 
+		            if (currentMap.moveDown())
+		            {
+		                currentFrame = moveDown.getKeyFrame(stateTime, true);
+		            }
+		        }
+	    	} catch(Exception e) {
+	    		System.out.println(e.getMessage());
+	    	}
     	}
     }
     
     @Override
     public void draw(SpriteBatch batch) {
-        
         batch.draw(currentFrame, drawPosX, drawPosY);
         batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
         batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
@@ -150,5 +153,10 @@ public class Player extends Entity
         sightX = x;
         sightY = y;
     }
-    
+    public void setCanMove(boolean canMove) {
+    	this.canMove = canMove;
+    }
+    public boolean canMove() {
+    	return canMove;
+    }
 }

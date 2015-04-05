@@ -82,9 +82,11 @@ public class TheGame extends ApplicationAdapter
 					
 					theGuiManager.addElement(guiItemList);
 					itemListExists = true;
+					player.setCanMove(false);
 				} else {
 					theGuiManager.clearElements();
 					itemListExists = false;
+					player.setCanMove(true);
 				}
 				gPressed = true;
 			}
