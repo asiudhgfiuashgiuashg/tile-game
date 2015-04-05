@@ -68,7 +68,7 @@ public class TheGame extends ApplicationAdapter
 		if (Gdx.input.isKeyPressed(Keys.G)) {
 			if (!itemListExists) {
 				ItemCollector items = currentMap.getItemList();
-				GuiItemList guiItemList = new GuiItemList();
+				GuiItemList guiItemList = new GuiItemList(currentMap.player);
 				guiItemList.setItemList(items.itemList);
 				
 				theGuiManager.addElement(guiItemList);

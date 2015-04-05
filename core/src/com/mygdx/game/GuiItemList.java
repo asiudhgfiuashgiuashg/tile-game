@@ -29,11 +29,21 @@ public class GuiItemList extends GuiElement
     ArrayList<Item> itemList;
     private int numberOfItems = 9;
     private BitmapFont font = new BitmapFont();
+    Player player;
     
-    public GuiItemList()
+    public GuiItemList(Player player)
     {
-    	posX = 800;
-        posY = 300;
+    	this.player = player;
+    	posX = player.drawPosX;
+    	
+    	if (player.drawPosY < 600)
+    	{	
+    		posY = player.drawPosY + player.up + 50;
+    	}
+    	else
+    	{
+    		posY = player.drawPosY - 100;
+    	}
     }
     
     public void setItemList(ArrayList<Item> list)
@@ -44,6 +54,7 @@ public class GuiItemList extends GuiElement
     @Override
     public void update()
     {
+    	
     }
     
     

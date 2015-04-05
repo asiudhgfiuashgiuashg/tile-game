@@ -206,7 +206,7 @@ public class Map
         batch.draw(fov, 0, 0);
         
 		player.draw(batch);
-        System.out.println(mapPosX + ", " + (mapPosY));
+		System.out.println(player.drawPosX + ", " + player.drawPosY);
         
     }
     
