@@ -106,4 +106,9 @@ public class Item {
         this.floorImageURI = URI;   
     }
     
+    @Override
+    public String toString() {
+    	return name;
+    }
+    
 }
