@@ -209,10 +209,10 @@ public class Map
     
     public ItemCollector getNearbyItemList()
     {
-    	float itemRefPosX = 0;
-    	float itemRefPosY = 0;
-    	float charRefPosX = player.getLeft();
-    	float charRefPosY = player.getBottom();
+    	float itemRefPosX;
+    	float itemRefPosY;
+    	float charRefPosX = player.posX + player.getLeft();
+    	float charRefPosY = player.posY + player.getBottom();
     	ArrayList<Integer> indexValues = new ArrayList<Integer>(); 
     	
     	for (int x = 0; x < itemsOnField.getItemListSize(); x++)
@@ -224,7 +224,7 @@ public class Map
     		else 
     		{
     			itemRefPosX = itemsOnField.getXPos(x);
-    			charRefPosX = player.getRight();
+    			charRefPosX = player.posX + player.getRight();
 			}
     		
     		if (player.posY > itemsOnField.getYPos(x) + itemsOnField.getHeight(x))
@@ -234,21 +234,18 @@ public class Map
     		else 
     		{
     			itemRefPosY = itemsOnField.getYPos(x);
-    			charRefPosY = player.getTop();
+    			charRefPosY = player.posY + player.getTop();
     		}
     		
     		if (Math.sqrt(Math.pow(itemRefPosX - charRefPosX, 2) + Math.pow(itemRefPosY - charRefPosY, 2)) <= 100)	
     		{
     			indexValues.add(x);
     		}
-    		System.out.println(Math.sqrt(Math.pow(itemRefPosX - charRefPosX, 2) + Math.pow(itemRefPosY - charRefPosY, 2)));
-    		System.out.println(Math.sqrt(Math.pow(3, 2) + Math.pow(4, 2)));
     	}
-    	ArrayList<Integer> test = new ArrayList<Integer>();
-    	test.add(1);
-    	ItemCollector nearbyItemList = new ItemCollector();
-    	nearbyItemList = itemsOnField.createSubCollection(test);
-    	System.out.println(nearbyItemList.isEmpty());
+    	
+    	ItemCollector nearbyItemList = new ItemCollector();    	
+    	nearbyItemList = itemsOnField.createSubCollection(indexValues);
+    	
     	return nearbyItemList;
     }
     

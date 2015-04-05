@@ -73,14 +73,10 @@ public class ItemCollector
 		
 		for (int x = 0; x < indexValues.size(); x++)
 		{
-			childItemList.add(itemList.get(x));
+			childItemList.add(itemList.get(indexValues.get(x)));
 		}
 		ItemCollector childItemCollector = new ItemCollector(childItemList);
-		for (int x = 0; x < indexValues.size(); x++)
-		{
-			System.out.println("Size: " + indexValues.size() + "\nName: " + childItemCollector.getItem(x));
-			
-		}
+		
 		return childItemCollector;
 	}
 	public Item getItem(int index)

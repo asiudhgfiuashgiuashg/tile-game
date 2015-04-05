@@ -81,7 +81,6 @@ public class GuiItemList extends GuiElement
     			}
     		}
     	}
-    	System.out.println("selected index: " + selectedIndex);
     }
     
     
@@ -102,7 +101,7 @@ public class GuiItemList extends GuiElement
     }
     
     public void drawArrow(SpriteBatch batch) {
-    	batch.draw(arrowTexture, posX - arrowTexture.getWidth(), posY - selectedIndex * font.getLineHeight() - arrowTexture.getHeight());
+    	batch.draw(arrowTexture, posX - arrowTexture.getWidth() - 10, posY - selectedIndex * font.getLineHeight() - arrowTexture.getHeight());
     }
     
     public void giveInput(int key) {
