@@ -57,7 +57,7 @@ public class TheGame extends ApplicationAdapter
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 
-		//currentMap.draw(batch);
+		currentMap.draw(batch);
         currentMap.update(batch);
 		theGuiManager.draw(batch);
 		
