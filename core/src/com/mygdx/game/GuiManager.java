@@ -31,15 +31,23 @@ public class GuiManager {
     List<GuiElement> listOfElements;
     List<GuiElement> visibleElements;
     private boolean listeningForInput;
+    private static State theState;
+    
     
     public GuiManager() {
         listOfElements = new ArrayList<GuiElement>();
         visibleElements = new ArrayList<GuiElement>();
+        theState = State.MAP_MODE;
     }
     
     public void addElement(GuiElement element) {
         listOfElements.add(element);
         visibleElements.add(element);
+    }
+    
+    public void clearElements() {
+    	listOfElements.clear();
+    	visibleElements.clear();
     }
     
     public void update() {
@@ -66,5 +74,13 @@ public class GuiManager {
     //stop listening for input
     public void stopListening() {
         listeningForInput = false;
+    }
+    
+    protected static enum State {
+    	MAP_MODE, //gui is currently displaying on top of the map
+    }
+    
+    public State getState() {
+    	return theState;
     }
 }
