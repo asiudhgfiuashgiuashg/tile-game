@@ -36,7 +36,7 @@ public class GuiItemList extends GuiElement
     	this.player = player;
     	posX = player.drawPosX;
     	
-    	if (player.drawPosY < 600)
+    	if (player.drawPosY < 500)
     	{	
     		posY = player.drawPosY + player.up + 50;
     	}
@@ -66,7 +66,7 @@ public class GuiItemList extends GuiElement
             tempItemList += itemList.get(x).toString() + "\n";
         }
         System.out.println(posX);
-        font.drawMultiLine(batch, tempItemList, posY, posY);
+        font.drawMultiLine(batch, tempItemList, posX, posY);
         System.out.println(tempItemList);
     }
     
