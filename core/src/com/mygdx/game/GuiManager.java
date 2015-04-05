@@ -31,7 +31,6 @@ public class GuiManager {
     List<GuiElement> listOfElements;
     List<GuiElement> visibleElements;
     private boolean listeningForInput;
-    SpriteBatch batch;
     
     public GuiManager() {
         listOfElements = new ArrayList<GuiElement>();
@@ -54,7 +53,7 @@ public class GuiManager {
         }
     }
     
-    public void draw() {
+    public void draw(SpriteBatch batch) {
         for (GuiElement element: visibleElements) {
             element.draw(batch);
         }

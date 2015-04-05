@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -14,6 +15,9 @@ public class TheGame extends ApplicationAdapter
 	SpriteBatch batch;
 	
 	Map currentMap;
+	GuiManager theGuiManager;
+	
+	boolean itemListExists = false;
 
 	@Override
 	public void create()
@@ -39,20 +43,37 @@ public class TheGame extends ApplicationAdapter
             System.out.println(e.getMessage());
             System.out.println("Failed to create map object");
         }
+		
+		theGuiManager = new GuiManager();
 	}
 
 
 	@Override
 	public void render()
 	{
+		keyListening();
+		
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
 
-		currentMap.draw(batch);
+		//currentMap.draw(batch);
         currentMap.update(batch);
-		
+		theGuiManager.draw(batch);
 		
 		batch.end();
+	}
+	
+	public void keyListening() {
+		if (Gdx.input.isKeyPressed(Keys.G)) {
+			if (!itemListExists) {
+				ItemCollector items = currentMap.getItemList();
+				GuiItemList guiItemList = new GuiItemList();
+				guiItemList.setItemList(items.itemList);
+				
+				theGuiManager.addElement(guiItemList);
+				itemListExists = true;
+			}
+		}
 	}
 }

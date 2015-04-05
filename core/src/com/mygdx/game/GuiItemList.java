@@ -30,7 +30,7 @@ public class GuiItemList extends GuiElement
     private int numberOfItems = 9;
     private BitmapFont font = new BitmapFont();
     
-    void GuiElement()
+    public GuiItemList()
     {
     	posX = 800;
         posY = 300;
@@ -50,11 +50,13 @@ public class GuiItemList extends GuiElement
     public void displayItems(SpriteBatch batch)
     {
         String tempItemList = "";
-        for (int x = 0; x < numberOfItems; x++)
+        for (int x = 0; x < numberOfItems && x < itemList.size(); x++)
         {
             tempItemList += itemList.get(x).toString() + "\n";
         }
-        font.draw(batch, tempItemList, posY, posY);
+        System.out.println(posX);
+        font.drawMultiLine(batch, tempItemList, posY, posY);
+        System.out.println(tempItemList);
     }
     
     @Override
