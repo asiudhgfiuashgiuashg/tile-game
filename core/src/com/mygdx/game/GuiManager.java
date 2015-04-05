@@ -13,6 +13,8 @@ package com.mygdx.game;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 
@@ -43,6 +45,9 @@ public class GuiManager {
     public void addElement(GuiElement element) {
         listOfElements.add(element);
         visibleElements.add(element);
+        if (visibleElements.size() == 1) {
+        	focused = element;
+        }
     }
     
     public void clearElements() {
@@ -56,8 +61,12 @@ public class GuiManager {
         }
         
         //listen for gui control input
-        if (listeningForInput) {
-        
+        if (null != focused) {
+	        if (listeningForInput) {
+	        	focused.listen();
+	        } else {
+	        	focused.stopListening();
+	        }
         }
     }
     
@@ -82,5 +91,8 @@ public class GuiManager {
     
     public State getState() {
     	return theState;
+    }
+    public void setFocused(GuiElement guiElement) {
+    	
     }
 }

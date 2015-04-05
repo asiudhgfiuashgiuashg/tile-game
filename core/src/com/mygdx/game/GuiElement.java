@@ -26,7 +26,17 @@ public abstract class GuiElement {
     int width;
     int height;
     String imageLocation;
+    protected boolean listeningForInput;
     
     public abstract void update();
     public abstract void draw(SpriteBatch batch);
+    
+    //listen for input
+    public void listen() {
+        listeningForInput = true;
+    }
+    //stop listening for input
+    public void stopListening() {
+        listeningForInput = false;
+    }
 }

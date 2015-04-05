@@ -20,6 +20,7 @@ public class TheGame extends ApplicationAdapter
 	boolean itemListExists;
 	
 	//key toggle booleans
+	//try haskeyjustbbeenpressed() instead
 	boolean gPressed;
 
 	@Override
@@ -65,6 +66,7 @@ public class TheGame extends ApplicationAdapter
 		currentMap.draw(batch);
         currentMap.update(batch);
 		theGuiManager.draw(batch);
+		theGuiManager.update();
 		
 		batch.end();
 	}
@@ -82,8 +84,10 @@ public class TheGame extends ApplicationAdapter
 					guiItemList.setItemList(items.itemList);
 					
 					theGuiManager.addElement(guiItemList);
+					theGuiManager.setFocused(guiItemList);
 					itemListExists = true;
 					player.setCanMove(false);
+					theGuiManager.listen();
 				} else {
 					theGuiManager.clearElements();
 					itemListExists = false;
