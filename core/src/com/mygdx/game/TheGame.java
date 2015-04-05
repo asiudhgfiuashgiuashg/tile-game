@@ -75,8 +75,9 @@ public class TheGame extends ApplicationAdapter
 			if (!Gdx.input.isKeyPressed(Keys.G)) {
 				gPressed = false;
 			} else if (Gdx.input.isKeyPressed(Keys.G) && !gPressed) {
-				if (!itemListExists) {
-					ItemCollector items = currentMap.getItemList();
+				System.out.println("Naw nigga, you kill yo'self");
+				if (!itemListExists && !currentMap.getNearbyItemList().isEmpty()) {
+					ItemCollector items = currentMap.getNearbyItemList();
 					GuiItemList guiItemList = new GuiItemList(currentMap.player);
 					guiItemList.setItemList(items.itemList);
 					

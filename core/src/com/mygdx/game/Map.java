@@ -11,7 +11,9 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
+import java.lang.Math;
 
 import javax.imageio.ImageIO;
 
@@ -166,14 +168,7 @@ public class Map
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
     }
     
-    public ItemCollector getItemList()
-    {
-    	return itemsOnField;
-    }
-    
     //updating and drawing the visible part of the map
-    
-    
     public void update(SpriteBatch batch)
     {
     	//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
@@ -182,20 +177,13 @@ public class Map
         player.update(stateTime);
 
         for (int x = 0; x < itemsOnField.getItemListSize(); x++)
-        {
-        	//System.out.println("My shoulder's shot!");
-    		
+        {    		
         	if (itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
         	{
-        		
-        		//System.out.println("X value is Key");
         		if(itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2*winX)
         		{
         			batch.draw(new Texture(itemsOnField.getFloorImage(x)), itemsOnField.getXPos(x) - mapPosX, itemsOnField.getYPos(x) - mapPosY);
-        			//System.out.println("No! Y Value is Best!");
         		}
-        	
-        		
         	}
         }
     }
@@ -208,6 +196,60 @@ public class Map
 		player.draw(batch);
 		
         
+    }
+    
+    //////////////////////////
+    // ItemCollector methods//
+    //////////////////////////
+
+    public ItemCollector getItemList()
+    {
+    	return itemsOnField;
+    }
+    
+    public ItemCollector getNearbyItemList()
+    {
+    	float itemRefPosX = 0;
+    	float itemRefPosY = 0;
+    	float charRefPosX = player.getLeft();
+    	float charRefPosY = player.getBottom();
+    	ArrayList<Integer> indexValues = new ArrayList<Integer>(); 
+    	
+    	for (int x = 0; x < itemsOnField.getItemListSize(); x++)
+    	{
+    		if (player.posX > itemsOnField.getXPos(x) + itemsOnField.getWidth(x))
+    		{
+    			itemRefPosX = itemsOnField.getXPos(x) + itemsOnField.getWidth(x);
+    		}
+    		else 
+    		{
+    			itemRefPosX = itemsOnField.getXPos(x);
+    			charRefPosX = player.getRight();
+			}
+    		
+    		if (player.posY > itemsOnField.getYPos(x) + itemsOnField.getHeight(x))
+    		{
+    			itemRefPosY = itemsOnField.getYPos(x) + itemsOnField.getHeight(x);
+    		}
+    		else 
+    		{
+    			itemRefPosY = itemsOnField.getYPos(x);
+    			charRefPosY = player.getTop();
+    		}
+    		
+    		if (Math.sqrt(Math.pow(itemRefPosX - charRefPosX, 2) + Math.pow(itemRefPosY - charRefPosY, 2)) <= 100)	
+    		{
+    			indexValues.add(x);
+    		}
+    		System.out.println(Math.sqrt(Math.pow(itemRefPosX - charRefPosX, 2) + Math.pow(itemRefPosY - charRefPosY, 2)));
+    		System.out.println(Math.sqrt(Math.pow(3, 2) + Math.pow(4, 2)));
+    	}
+    	ArrayList<Integer> test = new ArrayList<Integer>();
+    	test.add(1);
+    	ItemCollector nearbyItemList = new ItemCollector();
+    	nearbyItemList = itemsOnField.createSubCollection(test);
+    	System.out.println(nearbyItemList.isEmpty());
+    	return itemsOnField.createSubCollection(indexValues);
     }
     
     
@@ -411,7 +453,7 @@ public class Map
 
     	boolean success = false;
     	float deltaX = 200 * Gdx.graphics.getDeltaTime();
-		if (!collides(Direction.RIGHT, deltaX) && player.posX < mapWidth - 50)
+		if (!collides(Direction.RIGHT, deltaX) && player.posX < mapWidth - player.getRight())
 		{
 			player.posX += deltaX;
 			success = true;
@@ -435,7 +477,7 @@ public class Map
     {
     	boolean success = false; 
     	float deltaY = 200 * Gdx.graphics.getDeltaTime();
-		if (!collides(Direction.DOWN, deltaY) && player.posY > 0)
+		if (!collides(Direction.DOWN, deltaY) && player.posY > player.getBottom())
 		{
 			player.posY -= deltaY;
 			success = true;
@@ -558,9 +600,7 @@ public class Map
     
     
     
-    private boolean bothPassable(int row0, int col0, int row1, int col1) {
-    	System.out.println(row0 + ", " + col0 + " || " + row1 + ", " + col1 + " || ");
-    	
+    private boolean bothPassable(int row0, int col0, int row1, int col1) {    	
     	return mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row0)][col0].isPassable()
         		&& mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row1)][col1].isPassable();
     }

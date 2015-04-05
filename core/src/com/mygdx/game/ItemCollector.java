@@ -24,7 +24,16 @@ import java.util.ArrayList;
 public class ItemCollector
 {
 	ArrayList<Item> itemList = new ArrayList<Item>();
-
+	
+	ItemCollector()
+	{
+		
+	}
+	
+	ItemCollector(ArrayList<Item> items)
+	{
+		itemList = items;
+	}
 	
 	public void addItem(String className, int id, int xPos, int yPos)
 	{
@@ -44,6 +53,35 @@ public class ItemCollector
 			System.out.println("Why would this even!");
 		}
 		
+	}
+
+	public boolean isEmpty()
+	{
+		if (itemList.isEmpty())
+		{
+			return true;
+		}
+		else
+		{
+		return false;
+		}
+	}
+	
+	public ItemCollector createSubCollection(ArrayList<Integer> indexValues)
+	{	
+		ArrayList<Item> childItemList = new ArrayList<Item>();
+		
+		for (int x = 0; x < indexValues.size(); x++)
+		{
+			childItemList.add(itemList.get(x));
+		}
+		ItemCollector childItemCollector = new ItemCollector(childItemList);
+		for (int x = 0; x < indexValues.size(); x++)
+		{
+			System.out.println("Size: " indexValues.size() + );
+			
+		}
+		return childItemCollector;
 	}
 	
 	public String getItemName(int index)
