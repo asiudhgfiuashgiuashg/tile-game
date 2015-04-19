@@ -28,6 +28,8 @@ public class Player extends Entity
     
     private boolean canMove;
     
+    public ItemCollector inv;
+    
     @Override
     public void create()
     {
@@ -53,7 +55,8 @@ public class Player extends Entity
         moveDown = animate(10, 9);
         idleDown = tmp[10][0];
         currentFrame = idleUp;
-        
+
+        inv = new ItemCollector();
 
     }
     

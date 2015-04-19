@@ -67,11 +67,19 @@ public class GuiItemList extends GuiElement
     	if (listeningForInput) {
     		if (Gdx.input.isKeyJustPressed(Keys.DOWN) && selectedIndex < itemList.size() - 1) {
     			selectedIndex++;
-    		} else {
-    			if (Gdx.input.isKeyJustPressed(Keys.UP) && selectedIndex > 0) {
+    		} 
+    		else 
+    		{ 
+    			if (Gdx.input.isKeyJustPressed(Keys.UP) && selectedIndex > 0) 
+    			{
 	    			selectedIndex--;
     			}
     		}
+    		if(Gdx.input.isKeyJustPressed(Keys.Z))
+    		{
+    			
+    		}
+    			
     	}
     }
     

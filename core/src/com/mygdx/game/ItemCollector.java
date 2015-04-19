@@ -67,6 +67,11 @@ public class ItemCollector
 		}
 	}
 	
+	public void moveItem(ItemCollector fromList)
+	{
+		
+	}
+	
 	public ItemCollector createSubCollection(ArrayList<Integer> indexValues)
 	{	
 		ArrayList<Item> childItemList = new ArrayList<Item>();
