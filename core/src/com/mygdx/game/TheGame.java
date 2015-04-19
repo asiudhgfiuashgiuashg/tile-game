@@ -18,10 +18,6 @@ public class TheGame extends ApplicationAdapter
 	GuiManager theGuiManager;
 	
 	boolean itemListExists;
-	
-	//key toggle booleans
-	//try haskeyjustbbeenpressed() instead
-	boolean gPressed;
 
 	@Override
 	public void create()
@@ -50,7 +46,6 @@ public class TheGame extends ApplicationAdapter
 		
 		theGuiManager = new GuiManager();
 		itemListExists = false;
-		gPressed = false;
 	}
 
 
@@ -74,9 +69,7 @@ public class TheGame extends ApplicationAdapter
 	public void keyListening() {
 
 		if (theGuiManager.getState().equals(GuiManager.State.MAP_MODE)) {
-			if (!Gdx.input.isKeyPressed(Keys.G)) {
-				gPressed = false;
-			} else if (Gdx.input.isKeyPressed(Keys.G) && !gPressed) {
+			if (Gdx.input.isKeyJustPressed(Keys.G)) {
 				if (!itemListExists && !currentMap.getNearbyItemList().isEmpty()) {
 					ItemCollector items = currentMap.getNearbyItemList();
 					GuiItemList guiItemList = new GuiItemList(currentMap.player);
@@ -92,7 +85,6 @@ public class TheGame extends ApplicationAdapter
 					itemListExists = false;
 					player.setCanMove(true);
 				}
-				gPressed = true;
 			}
 		}
 	}
