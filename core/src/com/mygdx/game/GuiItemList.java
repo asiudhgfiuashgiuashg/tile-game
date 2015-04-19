@@ -29,6 +29,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class GuiItemList extends GuiElement
 {
     ItemCollector itemList;
+    ItemCollector deletedList;
     private int numberOfItems = 9;
     private BitmapFont font;
     Player player;
@@ -54,6 +55,7 @@ public class GuiItemList extends GuiElement
     	font = new BitmapFont();
     	arrowFileURI = "itemlist_arrow.png";
     	arrowTexture = new Texture(Gdx.files.internal("itemlist_arrow.png"));
+    	deletedList = new ItemCollector();
     }
     
     public void setItemList(ItemCollector list)
@@ -75,23 +77,29 @@ public class GuiItemList extends GuiElement
 	    			selectedIndex--;
     			}
     		}
-    		if(Gdx.input.isKeyJustPressed(Keys.Z))
+    		if(Gdx.input.isKeyJustPressed(Keys.Z) && !itemList.isEmpty())
     		{
-    	
+    			System.out.println("\ndeleted: " + itemList.getItem(selectedIndex) + "\n");
+    			deletedList.addItem(itemList.getItem(selectedIndex));
     			player.inv.moveItem(itemList,selectedIndex);
     		}
     		if(Gdx.input.isKeyJustPressed(Keys.F))
     		{
+    			System.out.println("---------INVENYORY---------");
     			for (int x = 0; x < player.inv.getListSize(); x++)
     			{
     				System.out.println(player.inv.getItemName(x));
     			}
-    			System.out.println("__________________________");
+    			System.out.println("___________________________");
     		}
     			
     	}
     }
     
+    public ItemCollector getDeletedItemList()
+    {
+    	return deletedList;
+    }
     
     public void displayItems(SpriteBatch batch)
     {

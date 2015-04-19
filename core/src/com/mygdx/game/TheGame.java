@@ -89,11 +89,19 @@ public class TheGame extends ApplicationAdapter
 					itemListExists = true;
 					player.setCanMove(false);
 					currentManager.listen();
+					if (!guiItemList.deletedList.isEmpty())
+					{
+						currentMap.itemsOnField.deleteSet(guiItemList.getDeletedItemList());
+					}
+					
+					
 				} else {
+					
 					currentManager.clearElements();
 					itemListExists = false;
 					player.setCanMove(true);
 				}
+				
 			}
 		}
 /*		} else if (currentManager.equals(mainMenuGuiManager) {

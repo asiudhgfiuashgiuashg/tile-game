@@ -78,6 +78,14 @@ public class ItemCollector
 		rootList.deleteItem(index);
 	}
 	
+	public void deleteSet(ItemCollector deletedList)
+	{
+		for (int x = 0; x < deletedList.getListSize(); x++)
+		{
+			itemList.remove(deletedList.getItem(x));
+		}
+	}
+	
 	public ItemCollector createSubCollection(ArrayList<Integer> indexValues)
 	{	
 		ArrayList<Item> childItemList = new ArrayList<Item>();
