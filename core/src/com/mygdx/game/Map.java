@@ -176,7 +176,7 @@ public class Map
         stateTime += Gdx.graphics.getDeltaTime();
         player.update(stateTime);
 
-        for (int x = 0; x < itemsOnField.getItemListSize(); x++)
+        for (int x = 0; x < itemsOnField.getListSize(); x++)
         {    		
         	if (itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
         	{
@@ -215,7 +215,7 @@ public class Map
     	float charRefPosY = player.posY + player.getBottom();
     	ArrayList<Integer> indexValues = new ArrayList<Integer>(); 
     	
-    	for (int x = 0; x < itemsOnField.getItemListSize(); x++)
+    	for (int x = 0; x < itemsOnField.getListSize(); x++)
     	{
     		if (player.posX > itemsOnField.getXPos(x) + itemsOnField.getWidth(x))
     		{

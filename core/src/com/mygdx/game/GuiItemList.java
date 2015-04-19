@@ -28,7 +28,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class GuiItemList extends GuiElement
 {
-    ArrayList<Item> itemList;
+    ItemCollector itemList;
     private int numberOfItems = 9;
     private BitmapFont font;
     Player player;
@@ -56,16 +56,16 @@ public class GuiItemList extends GuiElement
     	arrowTexture = new Texture(Gdx.files.internal("itemlist_arrow.png"));
     }
     
-    public void setItemList(ArrayList<Item> list)
+    public void setItemList(ItemCollector list)
     {
-        itemList = new ArrayList<Item>(list);
+        itemList = list;
     }
     
     @Override
     public void update()
     {
     	if (listeningForInput) {
-    		if (Gdx.input.isKeyJustPressed(Keys.DOWN) && selectedIndex < itemList.size() - 1) {
+    		if (Gdx.input.isKeyJustPressed(Keys.DOWN) && selectedIndex < itemList.getListSize() - 1) {
     			selectedIndex++;
     		} 
     		else 
@@ -77,7 +77,16 @@ public class GuiItemList extends GuiElement
     		}
     		if(Gdx.input.isKeyJustPressed(Keys.Z))
     		{
-    			
+    	
+    			player.inv.moveItem(itemList,selectedIndex);
+    		}
+    		if(Gdx.input.isKeyJustPressed(Keys.F))
+    		{
+    			for (int x = 0; x < player.inv.getListSize(); x++)
+    			{
+    				System.out.println(player.inv.getItemName(x));
+    			}
+    			System.out.println("__________________________");
     		}
     			
     	}
@@ -87,9 +96,9 @@ public class GuiItemList extends GuiElement
     public void displayItems(SpriteBatch batch)
     {
         String tempItemList = "";
-        for (int x = 0; x < numberOfItems && x < itemList.size(); x++)
+        for (int x = 0; x < numberOfItems && x < itemList.getListSize(); x++)
         {
-            tempItemList += itemList.get(x).toString() + "\n";
+            tempItemList += itemList.getItemName(x) + "\n";
         }
         font.drawMultiLine(batch, tempItemList, posX, posY);
     }
