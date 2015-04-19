@@ -15,8 +15,9 @@ public class TheGame extends ApplicationAdapter
 	SpriteBatch batch;
 	
 	Map currentMap;
-	GuiManager theGuiManager;
-	
+	GuiManager mapGuiManager; //holds all gui elements which are displayed when map is visible
+	//GuiManager mainMenuGuiManager
+	//etc
 	boolean itemListExists;
 
 	@Override
@@ -44,7 +45,9 @@ public class TheGame extends ApplicationAdapter
             System.out.println("Failed to create map object");
         }
 		
-		theGuiManager = new GuiManager();
+		//initialize various GuiManagers, giving them appropriate GuiElements
+		mapGuiManager = new GuiManager();
+		GuiManager.setGuiManager(mapGuiManager);
 		itemListExists = false;
 	}
 
@@ -52,6 +55,12 @@ public class TheGame extends ApplicationAdapter
 	@Override
 	public void render()
 	{
+		/*
+		 * logic for switching between various GuiManagers could go here
+		 * if (character.health <= 0) {
+		 * 		GuiManager.setCurrentGuiManager(mainMenuGuiManager);
+		 * } else if (...
+		 */
 		keyListening();
 		
 		Gdx.gl.glClearColor(1, 0, 0, 1);
@@ -60,32 +69,43 @@ public class TheGame extends ApplicationAdapter
 
 		currentMap.draw(batch);
         currentMap.update(batch);
-		theGuiManager.draw(batch);
-		theGuiManager.update();
+		GuiManager.currentManager.draw(batch);
+		GuiManager.currentManager.update();
 		
 		batch.end();
 	}
 	
 	public void keyListening() {
-
-		if (theGuiManager.getState().equals(GuiManager.State.MAP_MODE)) {
+		GuiManager currentManager = GuiManager.getCurrentManager();
+		if (currentManager.equals(mapGuiManager)) {
 			if (Gdx.input.isKeyJustPressed(Keys.G)) {
 				if (!itemListExists && !currentMap.getNearbyItemList().isEmpty()) {
 					ItemCollector items = currentMap.getNearbyItemList();
 					GuiItemList guiItemList = new GuiItemList(currentMap.player);
 					guiItemList.setItemList(items.itemList);
 					
-					theGuiManager.addElement(guiItemList);
-					theGuiManager.setFocused(guiItemList);
+					currentManager.addElement(guiItemList);
+					currentManager.setFocused(guiItemList);
 					itemListExists = true;
 					player.setCanMove(false);
-					theGuiManager.listen();
+					currentManager.listen();
 				} else {
-					theGuiManager.clearElements();
+					currentManager.clearElements();
 					itemListExists = false;
 					player.setCanMove(true);
 				}
 			}
 		}
+/*		} else if (currentManager.equals(mainMenuGuiManager) {
+			some other behavior
+		} else if (currentManager.equals(someOtherGuiManager) {
+			some other behavior
+		}
+		.
+		.
+		.
+*/
+		
+		
 	}
 }
