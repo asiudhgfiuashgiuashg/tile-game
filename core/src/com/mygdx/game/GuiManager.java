@@ -28,7 +28,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
  *
  */
 public class GuiManager {
-
+	public static GuiManager currentManager;
+	
     private GuiElement focused;
     List<GuiElement> listOfElements;
     List<GuiElement> visibleElements;
@@ -38,7 +39,9 @@ public class GuiManager {
         listOfElements = new ArrayList<GuiElement>();
         visibleElements = new ArrayList<GuiElement>();  
     }
-    
+    public static void setGuiManager(GuiManager newManager) {
+    	currentManager = newManager;
+    }
     public void addElement(GuiElement element) {
         listOfElements.add(element);
         visibleElements.add(element);
@@ -84,5 +87,8 @@ public class GuiManager {
     
     public void setFocused(GuiElement guiElement) {
     	
+    }
+    public static GuiManager getCurrentManager() {
+    	return currentManager;
     }
 }
