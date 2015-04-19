@@ -39,7 +39,7 @@ public class GuiManager {
         listOfElements = new ArrayList<GuiElement>();
         visibleElements = new ArrayList<GuiElement>();  
     }
-    public static void setGuiManager(GuiManager newManager) {
+    public static void setCurrentManager(GuiManager newManager) {
     	currentManager = newManager;
     }
     public void addElement(GuiElement element) {

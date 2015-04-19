@@ -47,7 +47,7 @@ public class TheGame extends ApplicationAdapter
 		
 		//initialize various GuiManagers, giving them appropriate GuiElements
 		mapGuiManager = new GuiManager();
-		GuiManager.setGuiManager(mapGuiManager);
+		GuiManager.setCurrentManager(mapGuiManager);
 		itemListExists = false;
 	}
 
