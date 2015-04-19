@@ -36,7 +36,6 @@ public class GuiItemList extends GuiElement
     
     String arrowFileURI;
     Texture arrowTexture;
-    boolean[] keysPressed;
     
     public GuiItemList(Player player)
     {
@@ -55,7 +54,6 @@ public class GuiItemList extends GuiElement
     	font = new BitmapFont();
     	arrowFileURI = "itemlist_arrow.png";
     	arrowTexture = new Texture(Gdx.files.internal("itemlist_arrow.png"));
-    	keysPressed = new boolean[256];
     }
     
     public void setItemList(ArrayList<Item> list)
@@ -67,17 +65,11 @@ public class GuiItemList extends GuiElement
     public void update()
     {
     	if (listeningForInput) {
-    		if (Gdx.input.isKeyPressed(Keys.DOWN) && selectedIndex < itemList.size() - 1 && keysPressed[Keys.DOWN] != true) {
+    		if (Gdx.input.isKeyJustPressed(Keys.DOWN) && selectedIndex < itemList.size() - 1) {
     			selectedIndex++;
-    			keysPressed[Keys.DOWN] = true; 
     		} else {
-    			keysPressed[Keys.DOWN]= false;
-    			
-    			if (Gdx.input.isKeyPressed(Keys.UP) && selectedIndex > 0 && keysPressed[Keys.UP] != true) {
+    			if (Gdx.input.isKeyJustPressed(Keys.UP) && selectedIndex > 0) {
 	    			selectedIndex--;
-	    			keysPressed[Keys.UP] = true; 
-    			} else {
-    				keysPressed[Keys.UP]= false; 
     			}
     		}
     	}
