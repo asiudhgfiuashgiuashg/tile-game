@@ -54,6 +54,11 @@ public class ItemCollector
 		}
 		
 	}
+	
+	public void addItem(Item item)
+	{
+		itemList.add(item);
+	}
 
 	public boolean isEmpty()
 	{
@@ -63,13 +68,14 @@ public class ItemCollector
 		}
 		else
 		{
-		return false;
+			return false;
 		}
 	}
 	
-	public void moveItem(ItemCollector fromList)
+	public void moveItem(ItemCollector rootList, int index)
 	{
-		
+		addItem(rootList.getItem(index));
+		rootList.deleteItem(index);
 	}
 	
 	public ItemCollector createSubCollection(ArrayList<Integer> indexValues)
@@ -83,6 +89,11 @@ public class ItemCollector
 		ItemCollector childItemCollector = new ItemCollector(childItemList);
 		
 		return childItemCollector;
+	}
+	
+	public void deleteItem(int index)
+	{
+		itemList.remove(index);
 	}
 	public Item getItem(int index)
 	{
@@ -122,7 +133,7 @@ public class ItemCollector
 		return itemList.get(index).getHeight();
 	}
 	
-	public int getItemListSize()
+	public int getListSize()
 	{
 		return itemList.size();
 	}

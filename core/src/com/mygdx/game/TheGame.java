@@ -82,7 +82,7 @@ public class TheGame extends ApplicationAdapter
 				if (!itemListExists && !currentMap.getNearbyItemList().isEmpty()) {
 					ItemCollector items = currentMap.getNearbyItemList();
 					GuiItemList guiItemList = new GuiItemList(currentMap.player);
-					guiItemList.setItemList(items.itemList);
+					guiItemList.setItemList(items);
 					
 					currentManager.addElement(guiItemList);
 					currentManager.setFocused(guiItemList);
