@@ -89,10 +89,9 @@ public class TheGame extends ApplicationAdapter
 					itemListExists = true;
 					player.setCanMove(false);
 					currentManager.listen();
-					if (!guiItemList.deletedList.isEmpty())
-					{
-						currentMap.itemsOnField.deleteSet(guiItemList.getDeletedItemList());
-					}
+					
+					guiItemList.watchedList = currentMap.itemsOnField;
+				
 					
 					
 				} else {

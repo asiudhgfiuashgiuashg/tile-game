@@ -78,11 +78,17 @@ public class ItemCollector
 		rootList.deleteItem(index);
 	}
 	
-	public void deleteSet(ItemCollector deletedList)
+	public void deledteSet(ItemCollector deletedList)
 	{
 		for (int x = 0; x < deletedList.getListSize(); x++)
 		{
+			
 			itemList.remove(deletedList.getItem(x));
+			
+			for (int y = 0; y < itemList.size(); y++)
+			{
+				System.out.println(itemList.get(y).getName());
+			}
 		}
 	}
 	
@@ -103,6 +109,12 @@ public class ItemCollector
 	{
 		itemList.remove(index);
 	}
+	
+	public void deleteItem(Item x)
+	{
+		itemList.remove(x);
+	}
+	
 	public Item getItem(int index)
 	{
 		return itemList.get(index);

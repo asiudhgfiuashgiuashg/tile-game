@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 
 
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
@@ -29,7 +30,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class GuiItemList extends GuiElement
 {
     ItemCollector itemList;
-    ItemCollector deletedList;
+    ItemCollector watchedList;
     private int numberOfItems = 9;
     private BitmapFont font;
     Player player;
@@ -55,7 +56,6 @@ public class GuiItemList extends GuiElement
     	font = new BitmapFont();
     	arrowFileURI = "itemlist_arrow.png";
     	arrowTexture = new Texture(Gdx.files.internal("itemlist_arrow.png"));
-    	deletedList = new ItemCollector();
     }
     
     public void setItemList(ItemCollector list)
@@ -80,8 +80,10 @@ public class GuiItemList extends GuiElement
     		if(Gdx.input.isKeyJustPressed(Keys.Z) && !itemList.isEmpty())
     		{
     			System.out.println("\ndeleted: " + itemList.getItem(selectedIndex) + "\n");
-    			deletedList.addItem(itemList.getItem(selectedIndex));
+    			watchedList.deleteItem(itemList.getItem(selectedIndex));
     			player.inv.moveItem(itemList,selectedIndex);
+    			
+    			
     		}
     		if(Gdx.input.isKeyJustPressed(Keys.F))
     		{
@@ -95,12 +97,7 @@ public class GuiItemList extends GuiElement
     			
     	}
     }
-    
-    public ItemCollector getDeletedItemList()
-    {
-    	return deletedList;
-    }
-    
+       
     public void displayItems(SpriteBatch batch)
     {
         String tempItemList = "";
