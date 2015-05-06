@@ -12,7 +12,7 @@ package com.mygdx.game;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-
+import java.util.List;
 /**
  * (Insert a comment that briefly describes the purpose of this class definition.)
  *
@@ -23,14 +23,14 @@ import java.util.ArrayList;
  */
 public class ItemCollector
 {
-	ArrayList<Item> itemList = new ArrayList<Item>();
+	List<Item> itemList = new ArrayList<Item>();
 	
 	ItemCollector()
 	{
 		
 	}
 	
-	ItemCollector(ArrayList<Item> items)
+	ItemCollector(List<Item> items)
 	{
 		itemList = items;
 	}
@@ -92,9 +92,9 @@ public class ItemCollector
 		}
 	}
 	
-	public ItemCollector createSubCollection(ArrayList<Integer> indexValues)
+	public ItemCollector createSubCollection(List<Integer> indexValues)
 	{	
-		ArrayList<Item> childItemList = new ArrayList<Item>();
+		List<Item> childItemList = new ArrayList<Item>();
 		
 		for (int x = 0; x < indexValues.size(); x++)
 		{
@@ -157,5 +157,12 @@ public class ItemCollector
 	{
 		return itemList.size();
 	}
-	
+	@Override
+	public String toString() {
+		String toReturn = "";
+		for(Item item: itemList) {
+			toReturn += item.toString() + '\n';
+		}
+		return toReturn;
+	}
 }
