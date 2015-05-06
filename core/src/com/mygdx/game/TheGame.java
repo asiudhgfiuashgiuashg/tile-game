@@ -89,11 +89,18 @@ public class TheGame extends ApplicationAdapter
 					itemListExists = true;
 					player.setCanMove(false);
 					currentManager.listen();
+					
+					guiItemList.watchedList = currentMap.itemsOnField;
+				
+					
+					
 				} else {
+					
 					currentManager.clearElements();
 					itemListExists = false;
 					player.setCanMove(true);
 				}
+				
 			}
 		}
 /*		} else if (currentManager.equals(mainMenuGuiManager) {
