@@ -103,6 +103,10 @@ public class TheGame extends ApplicationAdapter
 				
 			}
 		}
+		if (Gdx.input.isKeyJustPressed(Keys.L))
+				{
+					player.setCanMove(false);
+				}
 /*		} else if (currentManager.equals(mainMenuGuiManager) {
 			some other behavior
 		} else if (currentManager.equals(someOtherGuiManager) {

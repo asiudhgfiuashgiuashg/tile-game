@@ -54,6 +54,7 @@ public class Map
     private int winX = 400;
     private int winY = 240;
     Player player;
+    Camera cam;
     
     Texture mapImage;
     TextureRegion fov;
@@ -164,6 +165,7 @@ public class Map
         updatePosY(0);
         updatePosX(0);
         
+        //cam.haunt(player);
             
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
     }
@@ -172,10 +174,9 @@ public class Map
     public void update(SpriteBatch batch)
     {
     	//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
-        fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY);
+        
         stateTime += Gdx.graphics.getDeltaTime();
         player.update(stateTime);
-
         for (int x = 0; x < itemsOnField.getListSize(); x++)
         {    		
         	if (itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
@@ -186,6 +187,9 @@ public class Map
         		}
         	}
         }
+        fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY);
+
+        
     }
     
     public void draw(SpriteBatch batch)
@@ -194,6 +198,7 @@ public class Map
         batch.draw(fov, 0, 0);
 
 		player.draw(batch);
+		
 		
         
     }
@@ -309,21 +314,21 @@ public class Map
     
     public void adjustCharPlacement()
     {
-    	if (player.posX < -15)
+    	if (player.posX < -player.getLeft())
     	{
-    		player.posX = -15;
+    		player.posX = -player.getLeft();
     	}
     	else if (player.posX > mapWidth - 50)
     	{
-    		player.posX = mapWidth - 50;
+    		player.posX = mapWidth - player.getRight();
     	}
     	if (player.posY < 5)
     	{
-    		player.posY = 5;
+    		player.posY = player.getBottom();
     	}
-    	else if (player.posY > mapHeight - 55)
+    	else if (player.posY > mapHeight - player.getTop())
     	{
-    		player.posY = mapHeight - 55;
+    		player.posY = mapHeight - player.getTop();
     	}
     	if (smallWidth)
     	{

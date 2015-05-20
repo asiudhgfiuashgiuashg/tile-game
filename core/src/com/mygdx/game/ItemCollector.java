@@ -13,6 +13,8 @@ package com.mygdx.game;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.badlogic.gdx.graphics.g2d.Batch;
 /**
  * (Insert a comment that briefly describes the purpose of this class definition.)
  *
@@ -33,6 +35,11 @@ public class ItemCollector
 	ItemCollector(List<Item> items)
 	{
 		itemList = items;
+	}
+	
+	public void drawItems(Batch batch)
+	{
+		
 	}
 	
 	public void addItem(String className, int id, int xPos, int yPos)
@@ -78,7 +85,7 @@ public class ItemCollector
 		rootList.deleteItem(index);
 	}
 	
-	public void deledteSet(ItemCollector deletedList)
+	public void deletedSet(ItemCollector deletedList)
 	{
 		for (int x = 0; x < deletedList.getListSize(); x++)
 		{

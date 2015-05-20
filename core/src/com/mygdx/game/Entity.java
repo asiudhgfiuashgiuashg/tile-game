@@ -15,7 +15,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public abstract class Entity
 {
-
+	
+	
     int FRAME_COLS = 13;
     int FRAME_ROWS = 21;
 
