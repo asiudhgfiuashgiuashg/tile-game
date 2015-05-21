@@ -22,6 +22,7 @@ public class Player extends Entity
     TextureRegion idleLeft;
     TextureRegion idleUp;
     TextureRegion idleDown;
+    private float moveSpeed;
     Map currentMap;
     int sightX = 400;
     int sightY = 240;
@@ -34,6 +35,7 @@ public class Player extends Entity
     public void create()
     {
     	canMove = true;
+    	moveSpeed = 200;
     	
         left = 15;
         right = 50;
@@ -162,4 +164,8 @@ public class Player extends Entity
     public boolean canMove() {
     	return canMove;
     }
+    public float getMoveDist() {
+    	return moveSpeed * Gdx.graphics.getDeltaTime();
+    }
+    
 }

@@ -172,10 +172,19 @@ public class Map
     public void update(SpriteBatch batch)
     {
     	//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
+    	//player.update() must come before fov.setRegion or item drawing will lag behind map and player drawing
+    	player.update(stateTime);
         fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY);
         stateTime += Gdx.graphics.getDeltaTime();
-        player.update(stateTime);
+        
 
+        
+    }
+    
+    public void draw(SpriteBatch batch)
+    {
+    	
+        batch.draw(fov, 0, 0);
         for (int x = 0; x < itemsOnField.getListSize(); x++)
         {    		
         	if (itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
@@ -186,13 +195,6 @@ public class Map
         		}
         	}
         }
-    }
-    
-    public void draw(SpriteBatch batch)
-    {
-    	
-        batch.draw(fov, 0, 0);
-
 		player.draw(batch);
 		
         
@@ -427,14 +429,14 @@ public class Map
     }
     
     
-    /////////////////////
-    // player movement //
-    /////////////////////
+    ///////////////////////////////////////////
+    // player movement (and camera movement) //
+    ///////////////////////////////////////////
     
     public boolean moveLeft() throws Exception
     {
     	boolean success = false;
-    	float deltaX = 200 * Gdx.graphics.getDeltaTime();
+    	float deltaX = player.getMoveDist();
 		if (!collides(Direction.LEFT, deltaX) && player.posX > - player.getLeft())
 		{
 			player.posX -= deltaX;
@@ -449,7 +451,7 @@ public class Map
     {
 
     	boolean success = false;
-    	float deltaX = 200 * Gdx.graphics.getDeltaTime();
+    	float deltaX = player.getMoveDist();
 		if (!collides(Direction.RIGHT, deltaX) && player.posX < mapWidth - player.getRight())
 		{
 			player.posX += deltaX;
@@ -461,7 +463,7 @@ public class Map
     public boolean moveUp() throws Exception
     {
     	boolean success = false;
-    	float deltaY = 200 * Gdx.graphics.getDeltaTime();
+    	float deltaY = player.getMoveDist();
 		if (!collides(Direction.UP, deltaY) && player.posY < mapHeight - player.getTop())
 		{
 			player.posY += deltaY;
@@ -473,7 +475,7 @@ public class Map
     public boolean moveDown() throws Exception
     {
     	boolean success = false; 
-    	float deltaY = 200 * Gdx.graphics.getDeltaTime();
+    	float deltaY = player.getMoveDist();
 		if (!collides(Direction.DOWN, deltaY) && player.posY > player.getBottom())
 		{
 			player.posY -= deltaY;
