@@ -46,5 +46,13 @@ public class Shape {
     public List<LineSeg> getLineSegs() {
         return this.lineSegs;
     }
+    
+    public String toString() {
+    	String lineSegPrint = "";
+    	for (LineSeg seg: getLineSegs()) {
+    		lineSegPrint += seg + "\n";
+    	}
+    	return "Shape:\n" + lineSegPrint;
+    }
 }
 

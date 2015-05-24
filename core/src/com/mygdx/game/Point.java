@@ -28,4 +28,9 @@ public class Point {
     public float cross(Point other) {
         return this.getX() * other.getY() - this.getY() * other.getX();
     }
+    
+    @Override
+    public String toString() {
+    	return "(" + Float.toString(x) + ", " + Float.toString(y) + ")";
+    }
 }

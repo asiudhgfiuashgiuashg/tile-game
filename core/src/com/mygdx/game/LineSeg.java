@@ -52,4 +52,9 @@ public class LineSeg {
     	p1.translate(xDist, yDist);
     	p2.translate(xDist, yDist);
     }
+    
+    @Override
+    public String toString() {
+    	return "LineSeg: " + p1.toString() + "-----" + p2.toString();
+    }
 }
