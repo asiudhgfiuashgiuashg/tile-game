@@ -35,8 +35,8 @@ public class Map
     private String title;
     private int numRows;
     private int numCols;
-    private static final int TILE_WIDTH = 80;
-    private static final int TILE_HEIGHT = 80;
+    private static final int TILE_WIDTH = Tile.getTileWidth();
+    private static final int TILE_HEIGHT = Tile.getTileHeight();
     private Tile[][] mapTiles;
     private int mapWidth;
     private int mapHeight;
@@ -100,7 +100,7 @@ public class Map
         		String name = currentAttributes[0];
         		boolean passable = Boolean.parseBoolean(currentAttributes[3]);
         		//need to also get hazard once class Item is implemented
-        		Tile newTile = new Tile(imageURI, name, passable);
+        		Tile newTile = new Tile(c * TILE_WIDTH, r * TILE_HEIGHT, imageURI, name, passable);
         		mapTiles[r][c] = newTile;
         		tileFileScanner = new Scanner(new File(tileFile));
         	}
