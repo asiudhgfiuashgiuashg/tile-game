@@ -75,8 +75,9 @@ public class Map
         mapTiles = new Tile[numRows][numCols];
         stateTime = 0f;
         
+        System.out.println("numrows: " + numRows);
         Scanner tileFileScanner = new Scanner(new File(tileFile));
-        for (int r = 0; r < numRows; r++) {
+        for (int r = numRows - 1; r >= 0; r--) {
             String currentRow = mapFileScanner.nextLine();
             String[] individualIds = currentRow.split("\\s+");
         	for (int c = 0; c < numCols; c++/*ha*/) {
@@ -143,7 +144,7 @@ public class Map
             for (int c = 0; c < numCols; c++)
             {
                 BufferedImage currTileImg;
-                currTileImg = ImageIO.read(new File("../core/assets/" + mapTiles[r][c].imageURI));
+                currTileImg = ImageIO.read(new File("../core/assets/" + mapTiles[numRows - 1 - r][c].imageURI));
                 g.drawImage(currTileImg, c * TILE_WIDTH, r * TILE_HEIGHT, null);
             }
         }
@@ -579,6 +580,7 @@ public class Map
         //tiles which the character *might* be in if they are allowed to continue to move in this direction
         Tile futureTile0 = mapTiles[row0][col0];
         Tile futureTile1 = mapTiles[row1][col1];
+        System.out.println(futureTile0.imageURI);
         if (!(futureTile0.isPassable() && futureTile1.isPassable())) {
         	//check for collision
         	Shape futureTile0Shape = futureTile0.getShape();
