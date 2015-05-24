@@ -26,47 +26,6 @@ public class TheGame extends ApplicationAdapter
 	@Override
 	public void create()
 	{	
-		System.out.println("SHAPE TESTING-------------------------------");
-        /*LineSeg line1 = new LineSeg(new Point(0, 0), new Point(5, 5));
-        LineSeg line2 = new LineSeg(new Point (6, 6), new Point(9, 9));
-        LineSeg line3 = new LineSeg(new Point(2, 0), new Point(0, 2));
-        LineSeg line4 = new LineSeg(new Point(10.4f, 1.02f), new Point(14.06f, 3.3f));
-        LineSeg line5 = new LineSeg(new Point(10.15f, 3.3f), new Point(14.22f, 1.2f));
-        LineSeg line6 = new LineSeg(new Point(0, 1), new Point(1, 0));
-        LineSeg line7 = new LineSeg(new Point(1, 1), new Point(0, 0));
-        LineSeg line8 = new LineSeg(new Point(6.05f, 9.4f), new Point(7.9f, 6.7f));
-        LineSeg line9 = new LineSeg(new Point(5.28f, 6.47f), new Point(8.36f, 9.03f));
-        System.out.println("line1, line2 intersection: " + line1.intersects(line2));
-        System.out.println("line1, line3 intersection: " + line1.intersects(line3));
-        System.out.println("line2, line3 intersection: " + line2.intersects(line3));
-        System.out.println("line3, line4 intersection: " + line3.intersects(line4));
-        System.out.println("line4, line5 intersection: " + line4.intersects(line5));
-        System.out.println("line6, line7 intersection: " + line6.intersects(line7));
-        System.out.println("line8, line9 intersection: " + line8.intersects(line9));
-        System.out.println("line8, line7 intersection: " + line8.intersects(line7));
-        System.out.println("line9, line8 intersection: " + line9.intersects(line8));*/
-
-        Shape box1 = new Shape(Arrays.asList(new LineSeg(new Point(0, 0), new Point(0, 1)), 
-        		new LineSeg(new Point(0, 1), new Point(1, 1)),
-        		new LineSeg(new Point(1, 1), new Point(1, 0)),
-        		new LineSeg(new Point(1, 0), new Point(0, 0))), new Point(0, 0));
-        
-        Shape box2 = new Shape(Arrays.asList(new LineSeg(new Point(0, 0), new Point(0, 1)), 
-        		new LineSeg(new Point(0, 1), new Point(1, 1)),
-        		new LineSeg(new Point(1, 1), new Point(1, 0)),
-        		new LineSeg(new Point(1, 0), new Point(0, 0))), new Point(1f, 1f));
-        
-        System.out.println("box1: ");
-        System.out.println(box1);
-        System.out.println("box2: ");
-        System.out.println(box2);
-        System.out.println("box1, box2 collision: " + box1.intersects(box2));
-		System.out.println("END SHAPE TESTING---------------------------");
-
-
-
-
-
 		Shape playerShape = new Shape(Arrays.asList(
 				new LineSeg(new Point(0, 0), new Point(0, 50)),
 				new LineSeg(new Point(0, 50), new Point(50, 65)),
