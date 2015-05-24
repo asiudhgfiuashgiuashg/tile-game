@@ -84,7 +84,7 @@ public class TheGame extends ApplicationAdapter
 		
 		Scanner sc = new Scanner(System.in);
         System.out.println("Which map would you like to test?");
-        String mapName = "Test";//sc.nextLine();
+        String mapName = "1Square";//sc.nextLine();
         
         sc.close();
         
@@ -109,7 +109,7 @@ public class TheGame extends ApplicationAdapter
 	@Override
 	public void render()
 	{
-		System.out.println(player.getShape());
+		//System.out.println(player.getShape());
 		/*
 		 * logic for switching between various GuiManagers could go here
 		 * if (character.health <= 0) {

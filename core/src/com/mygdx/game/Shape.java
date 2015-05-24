@@ -9,7 +9,7 @@ public class Shape {
     //list of lineSegments relative to pos
     private List<LineSeg> lineSegs;
 
-    //lineSegs should be specified relative to pos (pos is their origin)
+    //lineSegs should be specified relative to pos (pos is their origin, (0, 0))
     //pos should be specified relative to actual origin
     //lineSegs will then be converted to be relative to the actual origin, not pos
     public Shape(List<LineSeg> lineSegs, Point pos) {
@@ -19,9 +19,11 @@ public class Shape {
         //conceptually, the Shape is created with its position at 0, 0 and then translated to its intended position
         updateLineSegs(new Point(0, 0));
     }
+    public Shape() {
+    	
+    }
     //issue
     public void setPos(Point newPos) {
-    	
     	Point oldPos = pos;
         pos = newPos;
         
@@ -73,12 +75,28 @@ public class Shape {
     	setPos(pos.plus(dist));
     }
     
-    public Shape copy() {
+    public Shape deepCopy() {
     	List<LineSeg> copyOfLineSegs = new ArrayList<LineSeg>();
     	for (LineSeg seg: lineSegs) {
     		copyOfLineSegs.add(seg.deepCopy());
     	}
-    	return new Shape(copyOfLineSegs, pos.deepCopy());
+    	Shape copyOfShape = new Shape();
+    	copyOfShape.setLineSegs(copyOfLineSegs);
+    	copyOfShape.setPosNoUpdate(pos.deepCopy());
+    	
+    	return copyOfShape;
+    }
+    public Point getPos() {
+    	return pos;
+    }
+    
+    //used for deepCopy()
+    public void setLineSegs(List<LineSeg> lineSegs) {
+    	this.lineSegs = lineSegs;
+    }
+    //also used for deepCopy()
+    public void setPosNoUpdate(Point newPos) {
+    	this.pos = newPos;
     }
 }
 

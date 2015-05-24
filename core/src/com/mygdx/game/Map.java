@@ -507,7 +507,7 @@ public class Map
         int row0, col0, row1, col1;
         
         Shape playerShape = player.getShape();
-        Shape futurePlayerShape = playerShape.copy();
+        Shape futurePlayerShape = playerShape.deepCopy();
         Point moveDist;
         //calculate requested new position of character and the rows and cols of tiles to check for collision
         if (Direction.LEFT == direction)
@@ -574,13 +574,19 @@ public class Map
         } else {
         	throw new Exception("invalid Direction");
         }
-        	
         futurePlayerShape.translate(moveDist);
         //row, col
         //tiles which the character *might* be in if they are allowed to continue to move in this direction
         Tile futureTile0 = mapTiles[row0][col0];
         Tile futureTile1 = mapTiles[row1][col1];
-        System.out.println(futureTile0.imageURI);
+
+        if (futureTile1.imageURI.equals("whiteSquare.png")) {
+        	System.out.println("FUTURETILE1:");
+        	System.out.println(futureTile1.getShape());
+        	System.out.println("FUTUREPLAYERSHAPE:");
+        	System.out.println(futurePlayerShape);
+        	System.out.println("----------------");
+        }
         if (!(futureTile0.isPassable() && futureTile1.isPassable())) {
         	//check for collision
         	Shape futureTile0Shape = futureTile0.getShape();

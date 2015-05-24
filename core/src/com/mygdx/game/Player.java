@@ -109,6 +109,7 @@ public class Player extends Entity
 		            if (currentMap.moveUp())
 		            {
 		                currentFrame = moveUp.getKeyFrame(stateTime, true); 
+		                
 		            }
 		        }
 		        
