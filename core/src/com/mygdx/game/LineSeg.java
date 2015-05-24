@@ -1,5 +1,8 @@
 package com.mygdx.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
 * for use in shape class
 */
@@ -62,5 +65,12 @@ public class LineSeg {
     }
     public void setP2(Point newP2) {
     	p2 = newP2;
+    }
+    //deep copy
+    public LineSeg deepCopy() {
+    	Point newP1 = p1.deepCopy();
+    	Point newP2 = p2.deepCopy();
+    	
+    	return new LineSeg(newP1, newP2);
     }
 }

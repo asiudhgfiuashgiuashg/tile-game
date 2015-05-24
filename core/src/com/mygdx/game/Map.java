@@ -502,15 +502,12 @@ public class Map
     	double playerBottomSide = player.getPos().getY() + player.getBottom();
     	double playerTopSide = player.getPos().getY() + player.getTop();
 
-        double tilesLeftSide;
-        double tilesRightSide;
-        double tilesTopSide;
-        double tilesBottomSide;
 
         int row0, col0, row1, col1;
         
-        Rectangle futurePlayerRect;
-        Rectangle tilesRect;
+        Shape playerShape = player.getShape();
+        Shape futurePlayerShape = playerShape.copy();
+        Point moveDist;
         //calculate requested new position of character and the rows and cols of tiles to check for collision
         if (Direction.LEFT == direction)
         {
@@ -518,12 +515,10 @@ public class Map
             int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
             int topTileToLeftYIndex = (int) playerTopSide / TILE_HEIGHT;
             
-            tilesRightSide = tilesToLeftXIndex * TILE_WIDTH + TILE_WIDTH;
-            tilesLeftSide = tilesToLeftXIndex * TILE_WIDTH;
-            tilesTopSide = topTileToLeftYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
-            tilesBottomSide = bottomTileToLeftYIndex * TILE_HEIGHT;
-
-            futurePlayerRect = new Rectangle(playerLeftSide - speed, playerRightSide - speed, playerTopSide, playerBottomSide);
+            
+            //futurePlayerRect = new Rectangle(playerLeftSide - speed, playerRightSide - speed, playerTopSide, playerBottomSide);
+            moveDist = new Point(-speed, 0);
+            
             
             row0 = bottomTileToLeftYIndex;
             col0 = tilesToLeftXIndex;
@@ -537,12 +532,9 @@ public class Map
         	int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
             int topTileToLeftYIndex = (int) playerTopSide / TILE_HEIGHT;
             
-            tilesRightSide = tilesToRightXIndex * TILE_WIDTH + TILE_WIDTH;
-            tilesLeftSide = tilesToRightXIndex * TILE_WIDTH;
-            tilesTopSide = topTileToLeftYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
-            tilesBottomSide = bottomTileToLeftYIndex * TILE_HEIGHT;
             
-            futurePlayerRect = new Rectangle(playerLeftSide + speed, playerRightSide + speed, playerTopSide, playerBottomSide);
+            //futurePlayerRect = new Rectangle(playerLeftSide + speed, playerRightSide + speed, playerTopSide, playerBottomSide);
+            moveDist = new Point(speed, 0);
             
             row0 = bottomTileToLeftYIndex;
             col0 = tilesToRightXIndex;
@@ -555,12 +547,9 @@ public class Map
         	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
         	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT + 1);
         	
-        	tilesRightSide = tileToRightXIndex * TILE_WIDTH + TILE_WIDTH;
-            tilesLeftSide = tileToLeftXIndex * TILE_WIDTH;
-            tilesTopSide = tilesYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
-            tilesBottomSide = tilesYIndex * TILE_HEIGHT;
             
-            futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            //futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            moveDist = new Point(0, speed);
             
             row0 = tilesYIndex;
             col0 = tileToLeftXIndex;
@@ -573,12 +562,9 @@ public class Map
         	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
         	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT - 1);
         	
-        	tilesRightSide = tileToRightXIndex * TILE_WIDTH + TILE_WIDTH;
-            tilesLeftSide = tileToLeftXIndex * TILE_WIDTH;
-            tilesTopSide = tilesYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
-            tilesBottomSide = tilesYIndex * TILE_HEIGHT;
             
-            futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            //futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            moveDist = new Point(0, -speed);
             
             row0 = tilesYIndex;
             col0 = tileToLeftXIndex;
@@ -588,33 +574,18 @@ public class Map
         	throw new Exception("invalid Direction");
         }
         	
+        futurePlayerShape.translate(moveDist);
+        //row, col
+        //tiles which the character *might* be in if they are allowed to continue to move in this direction
+        Tile futureTile0 = mapTiles[row0][col0];
+        Tile futureTile1 = mapTiles[row1][col1];
+        if (!(futureTile0.isPassable() && futureTile1.isPassable())) {
+        	//check for collision
+        	Shape futureTile0Shape = futureTile0.getShape();
+        	Shape futureTile1Shape = futureTile1.getShape();
         	
-        	
-        	
-        tilesRect = new Rectangle(tilesLeftSide, tilesRightSide, tilesTopSide, tilesBottomSide);
-        //check for collision of tiles in Direction.x are not passable
-        //System.out.println("row 0: " + row0 + "col 0: " + col0 + "row 1: " + row1 + "col1: " + col1);
-        //first part of if statement avoids giving bothPassable args which would cause IndexOutOfBounds exception
-        if (!(row0 < 0 || col0 < 0 || row1 < 0 || col1 < 0 || row0 >= mapHeight/TILE_HEIGHT || row1 >= mapHeight/TILE_HEIGHT || col0 >= mapWidth/TILE_WIDTH || col1 >= mapWidth/TILE_WIDTH) && !bothPassable(row0, col0, row1, col1)) {
-        	return rectIntersect(futurePlayerRect, tilesRect);
+        	return futurePlayerShape.intersects(futureTile0Shape) || futurePlayerShape.intersects(futureTile1Shape);
         }
         return false;
-    }
-    
-    
-    
-    
-    private boolean bothPassable(int row0, int col0, int row1, int col1) {    	
-    	return mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row0)][col0].isPassable()
-        		&& mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row1)][col1].isPassable();
-    }
-    private int bottomLeftIndexedRowToTopLeftIndexedRow(int row) {
-    	return this.numRows - 1 - row;
-    }
-    private boolean rectIntersect(Rectangle a, Rectangle b) {
-    	return (a.left <= b.right &&
-    			b.left <= a.right &&
-    		    a.top >= b.bottom &&
-    		    b.top >= a.bottom);
     }
 }

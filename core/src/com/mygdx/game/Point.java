@@ -37,4 +37,8 @@ public class Point {
     public Point plus(Point other) {
     	return this.minus(new Point(-other.getX(), -other.getY()));
     }
+    //deep copy
+    public Point deepCopy() {
+    	return new Point(getX(), getY());
+    }
 }
