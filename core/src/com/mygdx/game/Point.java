@@ -33,4 +33,8 @@ public class Point {
     public String toString() {
     	return "(" + Float.toString(x) + ", " + Float.toString(y) + ")";
     }
+    
+    public Point plus(Point other) {
+    	return this.minus(new Point(-other.getX(), -other.getY()));
+    }
 }

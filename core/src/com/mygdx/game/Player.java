@@ -31,9 +31,9 @@ public class Player extends Entity
     
     public ItemCollector inv;
     
-    @Override
-    public void create()
+    public Player(Shape shape, boolean passable)
     {
+    	super(shape, passable);
     	canMove = true;
     	moveSpeed = 200;
     	
@@ -41,8 +41,7 @@ public class Player extends Entity
         right = 50;
         up = 50;
         down = 0;
-        posX = 0;
-        posY = 0;
+        pos = new Point(0, 0);
 
         
         spriteSheet = new Texture(Gdx.files.internal("index.png"));
@@ -167,5 +166,28 @@ public class Player extends Entity
     public float getMoveDist() {
     	return moveSpeed * Gdx.graphics.getDeltaTime();
     }
+    @Override
+    public Point getPos() {
+    	return pos;
+    }
+    @Override 
+    public void setPos(Point newPos) {
+    	pos = newPos;
+    	shape.setPos(newPos);
+    }
+    @Override
+    public void translate(Point dist) {
+    	pos.plus(dist);
+    	shape.translate(dist);
+    }
     
+    @Override
+    public void setX(float newX) {
+    	setPos(new Point(newX, pos.getY()));
+    }
+    
+    @Override
+    public void setY(float newY) {
+    	setPos(new Point(pos.getX(), newY));
+    }
 }

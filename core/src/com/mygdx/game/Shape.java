@@ -14,20 +14,31 @@ public class Shape {
     public Shape(List<LineSeg> lineSegs, Point pos) {
         this.lineSegs = lineSegs;
         this.pos = pos;
-
-        //convert line segments to be relative to overall screen origin
-        //(they were originally relative to pos)
-        for (LineSeg lineSeg: this.lineSegs){
-            //find out where pos lies relative to screen's origin
-        	float xDist = pos.getX();
-            float yDist = pos.getY();
-            //use that information to express the line segment's position relative to screen's origin
-            lineSeg.translate(xDist, yDist);
-        }
+        
+        //conceptually, the Shape is created with its position at 0, 0 and then translated to its intended position
+        updateLineSegs(new Point(0, 0));
     }
     //
     public void setPos(Point newPos) {
-        this.pos = newPos;
+    	Point oldPos = pos;
+        pos = newPos;
+        updateLineSegs(oldPos);
+    }
+    
+    private void updateLineSegs(Point oldPos) {
+    	float oldXDist = oldPos.getX(); //dist from screen origin
+        float oldYDist = oldPos.getY();
+        
+        float newXDist = pos.getX();
+        float newYDist = pos.getY();
+        
+        float xDistDiff = newXDist - oldXDist;
+        float yDistDiff = newYDist - oldYDist;
+        
+        //move line segments of shape the same amount that the pos Point of the shape moved
+        for (LineSeg seg: lineSegs) {
+        	seg.translate(xDistDiff, yDistDiff);
+        }
     }
 
     public boolean intersects(Shape other) {
@@ -53,6 +64,10 @@ public class Shape {
     		lineSegPrint += seg + "\n";
     	}
     	return "Shape:\n" + lineSegPrint;
+    }
+    
+    public void translate(Point dist) { //where dist is a vector from origin representing the translation
+    	setPos(pos.plus(dist));
     }
 }
 

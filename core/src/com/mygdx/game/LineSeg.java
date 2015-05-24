@@ -57,4 +57,10 @@ public class LineSeg {
     public String toString() {
     	return "LineSeg: " + p1.toString() + "-----" + p2.toString();
     }
+    public void setP1(Point newP1) {
+    	p1 = newP1;
+    }
+    public void setP2(Point newP2) {
+    	p2 = newP2;
+    }
 }

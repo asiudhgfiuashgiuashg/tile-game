@@ -213,30 +213,30 @@ public class Map
     {
     	float itemRefPosX;
     	float itemRefPosY;
-    	float charRefPosX = player.posX + player.getLeft();
-    	float charRefPosY = player.posY + player.getBottom();
+    	float charRefPosX = player.getPos().getX() + player.getLeft();
+    	float charRefPosY = player.getPos().getY() + player.getBottom();
     	ArrayList<Integer> indexValues = new ArrayList<Integer>(); 
     	
     	for (int x = 0; x < itemsOnField.getListSize(); x++)
     	{
-    		if (player.posX > itemsOnField.getXPos(x) + itemsOnField.getWidth(x))
+    		if (player.getPos().getX() > itemsOnField.getXPos(x) + itemsOnField.getWidth(x))
     		{
     			itemRefPosX = itemsOnField.getXPos(x) + itemsOnField.getWidth(x);
     		}
     		else 
     		{
     			itemRefPosX = itemsOnField.getXPos(x);
-    			charRefPosX = player.posX + player.getRight();
+    			charRefPosX = player.getPos().getX() + player.getRight();
 			}
     		
-    		if (player.posY > itemsOnField.getYPos(x) + itemsOnField.getHeight(x))
+    		if (player.getPos().getY() > itemsOnField.getYPos(x) + itemsOnField.getHeight(x))
     		{
     			itemRefPosY = itemsOnField.getYPos(x) + itemsOnField.getHeight(x);
     		}
     		else 
     		{
     			itemRefPosY = itemsOnField.getYPos(x);
-    			charRefPosY = player.posY + player.getTop();
+    			charRefPosY = player.getPos().getY() + player.getTop();
     		}
     		
     		if (Math.sqrt(Math.pow(itemRefPosX - charRefPosX, 2) + Math.pow(itemRefPosY - charRefPosY, 2)) <= 100)	
@@ -280,23 +280,23 @@ public class Map
     									//as this method just provides a fail safe in case the char is placed off the map
 
     	
-    	if (player.posX < winX && smallWidth == false)
+    	if (player.getPos().getX() < winX && smallWidth == false)
     	{
-    		player.drawPosX = player.posX;
+    		player.drawPosX = player.getPos().getX();
     	}
-    	else if (player.posX > mapWidth - winX && smallWidth == false)
+    	else if (player.getPos().getX() > mapWidth - winX && smallWidth == false)
     	{
-    		player.drawPosX = (player.posX - mapWidth + 2*winX);
+    		player.drawPosX = (player.getPos().getX() - mapWidth + 2*winX);
     	}
     	
     	
-    	if (player.posY < winY && smallHeight == false)
+    	if (player.getPos().getY() < winY && smallHeight == false)
     	{
-    		player.drawPosY = player.posY;
+    		player.drawPosY = player.getPos().getY();
     	}
-    	else if (player.posY > mapHeight - winY && smallHeight == false)
+    	else if (player.getPos().getY() > mapHeight - winY && smallHeight == false)
     	{
-    		player.drawPosY = (player.posY - (mapHeight - winY) + winY);
+    		player.drawPosY = (player.getPos().getY() - (mapHeight - winY) + winY);
     	}
     	if (smallWidth == true)
     	{
@@ -311,39 +311,40 @@ public class Map
     
     public void adjustCharPlacement()
     {
-    	if (player.posX < -15)
+    	Point playerPos = player.getPos();
+    	if (playerPos.getX() < -15)
     	{
-    		player.posX = -15;
+    		player.setX(-15);
     	}
-    	else if (player.posX > mapWidth - 50)
+    	else if (playerPos.getX() > mapWidth - 50)
     	{
-    		player.posX = mapWidth - 50;
+    		player.setX(mapWidth - 50);
     	}
-    	if (player.posY < 5)
+    	if (playerPos.getY() < 5)
     	{
-    		player.posY = 5;
+    		player.setY(5);
     	}
-    	else if (player.posY > mapHeight - 55)
+    	else if (playerPos.getY() > mapHeight - 55)
     	{
-    		player.posY = mapHeight - 55;
+    		player.setY(mapHeight - 55);
     	}
     	if (smallWidth)
     	{
-    		player.drawPosX = player.posX + (winX - mapWidth/2);
+    		player.drawPosX = playerPos.getX() + (winX - mapWidth/2);
     	}
     	if (smallHeight)
     	{
-    		player.drawPosY = player.posY + (winY - mapHeight/2);
+    		player.drawPosY = playerPos.getY() + (winY - mapHeight/2);
     	}
     	boolean enclosed = true; 
     	while (enclosed == true)
     	{
-    		int x = (int) (player.posX - 15)/TILE_WIDTH;
-        	int y = (int) (player.posY)/TILE_HEIGHT;
+    		int x = (int) (playerPos.getX() - 15) / TILE_WIDTH;
+        	int y = (int) (playerPos.getY()) / TILE_HEIGHT;
         	if (!mapTiles[y][x].isPassable())
         	{
-        		x +=TILE_WIDTH;
-        		y +=TILE_HEIGHT;
+        		x += TILE_WIDTH;
+        		y += TILE_HEIGHT;
         	}
         	else
         	{
@@ -356,16 +357,16 @@ public class Map
     {
     	if (smallWidth == false)
     	{
-    		if (player.posX < winX )
+    		if (player.getPos().getX() < winX )
     		{
     			mapPosX = 0;
     		}
-    		else if (player.posX > winX)
+    		else if (player.getPos().getX() > winX)
     		{
-    			mapPosX = (int)player.posX - winX;
+    			mapPosX = (int)player.getPos().getX() - winX;
     		}
     	
-    		if (player.posX + winX > mapWidth)
+    		if (player.getPos().getX() + winX > mapWidth)
     		{
     			mapPosX = mapWidth - 2*winX;
     		}
@@ -397,15 +398,15 @@ public class Map
     { 	
     	if (smallHeight == false) 
     	{
-    		if (player.posY < winY)
+    		if (player.getPos().getY() < winY)
     		{
     			mapPosY = 0;
     		}
-    		else if (player.posY > winY)
+    		else if (player.getPos().getY() > winY)
     		{
-    			mapPosY = (int)player.posY - winY;
+    			mapPosY = (int)player.getPos().getY() - winY;
     		}
-    		if (player.posY + winY > mapHeight )
+    		if (player.getPos().getY() + winY > mapHeight )
     		{
     		mapPosY = mapHeight - 2*winY;
     		}
@@ -437,9 +438,10 @@ public class Map
     {
     	boolean success = false;
     	float deltaX = player.getMoveDist();
-		if (!collides(Direction.LEFT, deltaX) && player.posX > - player.getLeft())
+		if (!collides(Direction.LEFT, deltaX) && player.getPos().getX() > - player.getLeft())
 		{
-			player.posX -= deltaX;
+			//player.getPos().getX() -= deltaX;
+			player.setX(player.getPos().getX() - deltaX);
 			success = true;
 			
 			updatePosX(-deltaX);	
@@ -452,9 +454,10 @@ public class Map
 
     	boolean success = false;
     	float deltaX = player.getMoveDist();
-		if (!collides(Direction.RIGHT, deltaX) && player.posX < mapWidth - player.getRight())
+		if (!collides(Direction.RIGHT, deltaX) && player.getPos().getX() < mapWidth - player.getRight())
 		{
-			player.posX += deltaX;
+			//player.getPos().getX() += deltaX;
+			player.setX(player.getPos().getX() + deltaX);
 			success = true;
 			updatePosX(deltaX);
 		}
@@ -464,9 +467,10 @@ public class Map
     {
     	boolean success = false;
     	float deltaY = player.getMoveDist();
-		if (!collides(Direction.UP, deltaY) && player.posY < mapHeight - player.getTop())
+		if (!collides(Direction.UP, deltaY) && player.getPos().getY() < mapHeight - player.getTop())
 		{
-			player.posY += deltaY;
+			//player.getPos().getY() += deltaY;
+			player.setY(player.getPos().getY() + deltaY);
 			success = true;
 			updatePosY(deltaY);
 		}    	    
@@ -476,9 +480,10 @@ public class Map
     {
     	boolean success = false; 
     	float deltaY = player.getMoveDist();
-		if (!collides(Direction.DOWN, deltaY) && player.posY > player.getBottom())
+		if (!collides(Direction.DOWN, deltaY) && player.getPos().getY() > player.getBottom())
 		{
-			player.posY -= deltaY;
+			//player.getPos().getY() -= deltaY;
+			player.setY(player.getPos().getY() - deltaY);
 			success = true;
 			updatePosY(-deltaY);
 		}	
@@ -492,10 +497,10 @@ public class Map
     	//MAP IS INDEXED WITH (0,0) IN TOP LEFT         //
     	//CHAR POS STARTS WITH (0,0) IN BOTTOM LEFT     //
     	//////////////////////////////////////////////////
-    	double playerLeftSide = player.posX + player.getLeft();
-    	double playerRightSide = player.posX + player.getRight();
-    	double playerBottomSide = player.posY + player.getBottom();
-    	double playerTopSide = player.posY + player.getTop();
+    	double playerLeftSide = player.getPos().getX() + player.getLeft();
+    	double playerRightSide = player.getPos().getX() + player.getRight();
+    	double playerBottomSide = player.getPos().getY() + player.getBottom();
+    	double playerTopSide = player.getPos().getY() + player.getTop();
 
         double tilesLeftSide;
         double tilesRightSide;
