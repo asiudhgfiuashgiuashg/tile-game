@@ -32,7 +32,7 @@ public class Tile extends GameObject
                 new LineSeg(new Point(0,0), new Point(0, TILE_HEIGHT)),
                 new LineSeg(new Point(0, TILE_HEIGHT), new Point(TILE_WIDTH, TILE_HEIGHT)),
                 new LineSeg(new Point(TILE_WIDTH, TILE_HEIGHT), new Point(TILE_WIDTH, 0)),
-                new LineSeg(new Point(TILE_WIDTH, 0), new Point(xPos, yPos))),
+                new LineSeg(new Point(TILE_WIDTH, 0), new Point(0, 0))),
 
                 new Point(xPos, yPos)); //a square (assuming TILE_WIDTH == TILE_HEIGHT
     	return tileShape;
