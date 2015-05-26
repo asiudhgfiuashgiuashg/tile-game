@@ -27,19 +27,18 @@ public class LineSeg {
 
                    
         float q1 = (otherP2.getX() - otherP1.getX()) * (thisP1.getY() - otherP2.getY())
-                    - (otherP2.getY() - otherP1.getY()) * (thisP1.getX() - otherP2.getX());///thisP1.minus(otherP1).cross(otherP2.minus(otherP1));
+                    - (otherP2.getY() - otherP1.getY()) * (thisP1.getX() - otherP2.getX());
 
         float q2 = (otherP2.getX() - otherP1.getX()) * (thisP2.getY() - otherP2.getY())
                     - (otherP2.getY() - otherP1.getY()) * (thisP2.getX() - otherP2.getX()); 
-//thisP2.minus(otherP1).cross(otherP2.minus(otherP1));
+
 
         float q3 = (thisP2.getX() - thisP1.getX()) * (otherP1.getY() - thisP2.getY())
                     - (thisP2.getY() - thisP1.getY()) * (otherP1.getX() - thisP2.getX()); 
-//otherP2.minus(thisP1).cross(thisP2.minus(thisP1));
 
         float q4 = (thisP2.getX() - thisP1.getX()) * (otherP2.getY() - thisP2.getY())
                     - (thisP2.getY() - thisP1.getY()) * (otherP2.getX() - thisP2.getX()); 
-//otherP1.minus(thisP1).cross(thisP2.minus(thisP1));
+
        return  ((q1 < 0 && q2 > 0) || (q1 > 0 && q2 < 0))
         && ((q3 < 0 && q4 > 0) || (q3 > 0 && q4 < 0));
     }
