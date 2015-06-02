@@ -24,7 +24,12 @@ import java.util.List;
  */
 public class ObjectCollector
 {
-	List<Object> objectList = new ArrayList<Object>();
+	List<Object> objectList;
+	
+	ObjectCollector()
+	{
+		objectList = new ArrayList<Object>();
+	}
 	
 	ObjectCollector(List<Object> objects)
 	{
@@ -33,6 +38,7 @@ public class ObjectCollector
 	
 	public void addObject(String className, int id, Point pos)
 	{
+		System.out.println("apart");
 		try
 		{
 			if(className == "Weapon")

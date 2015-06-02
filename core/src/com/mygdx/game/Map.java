@@ -133,21 +133,25 @@ public class Map
         }
         
         //Creates the ObjectCollector...object before giving it the information to create an array list of objects
+        
+        objectList = new ObjectCollector();
         int objectIndex = Integer.parseInt(mapFileScanner.nextLine());
         if (objectIndex > 0)
         {
         	for(int x = 0; x < objectIndex; x++)
         	{
-        	String currentLine = mapFileScanner.nextLine();
-			currentAttributes = currentLine.split(", ");
-			className = currentAttributes[0];
-			id = Integer.parseInt(currentAttributes[1]);
-			pos = new Point(Float.parseFloat(currentAttributes[2]),Float.parseFloat(currentAttributes[3])); 
-			objectList.addObject(className, id, pos);
+        		String currentLine = mapFileScanner.nextLine();
+        		currentAttributes = currentLine.split(", ");
+        		className = currentAttributes[0];
+        		id = Integer.parseInt(currentAttributes[1]);
+        		pos = new Point(Float.parseFloat(currentAttributes[2]),Float.parseFloat(currentAttributes[3]));
+        		System.out.println("torn");
+        		objectList.addObject(className, id, pos);
         	}
-			
+
         }
         
+        	
         mapFileScanner.close();
         ///////////////////////////////////////////////////////////
         // create and save png which is composite of tile images //
@@ -172,7 +176,7 @@ public class Map
         }
         catch(IOException e)
         {
-        	e.printstacktrace();
+        	System.out.println(e);
         }
         mapWidth = TILE_WIDTH * numCols;
         mapHeight = TILE_HEIGHT * numRows;

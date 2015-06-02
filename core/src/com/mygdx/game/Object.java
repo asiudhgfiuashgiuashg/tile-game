@@ -57,6 +57,7 @@ public class Object
 				found = true;
 			}
 		}
+		
 		objectFileScanner.close();
 		//now currentAttributes should correspond to the attributes of the object we want from the object file
 		setName(currentAttributes[0]);
@@ -68,14 +69,16 @@ public class Object
 		{
 			points.add(new Point(Float.parseFloat(currentAttributes[x]), Float.parseFloat(currentAttributes[x+1])));
 		}
-		for (int i = 0; i < points.size(); i++)
+		for (int i = 0; i < points.size() - 1; i++)
 		{
 			lines.add( new LineSeg(points.get(i), points.get(i+1)) );
 		}
 		lines.add( new LineSeg(points.get(points.size() - 1), points.get(0)) );
 		
 		hitbox = new Shape(lines, pos);
+		
     }
+	
 	
 	public int getId() {
         return id;    
