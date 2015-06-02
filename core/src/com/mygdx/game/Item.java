@@ -9,8 +9,7 @@ import com.badlogic.gdx.Gdx;
 public class Item {
     private String name;
     private int id;
-    private int xPos;
-    private int yPos;
+    private Point pos;
 
     public static final String classFileLocation = "../core/assets/Item.txt";
 
@@ -19,11 +18,10 @@ public class Item {
     
     private int width, height;
     
-    public Item(int id, int xPos, int yPos) throws FileNotFoundException
+    public Item(int id, Point pos) throws FileNotFoundException
     {
     	this.id = id;
-    	this.xPos = xPos;
-    	this.yPos = yPos;
+    	this.pos = pos;
     	
     	Scanner itemFileScanner = new Scanner(new File(classFileLocation));
 
@@ -49,8 +47,6 @@ public class Item {
 		setWidth(Integer.parseInt(currentAttributes[4]));
 		setHeight(Integer.parseInt(currentAttributes[5]));
 		
-		System.out.println(xPos + ", " + yPos);
-		
     }
     
     public int getId() {
@@ -73,13 +69,13 @@ public class Item {
     {
         return ("../core/assets/" + floorImageURI);
     }
-    public int getXPos()
+    public float getXPos()
     {
-    	return xPos;
+    	return pos.getX();
     }
-    public int getYPos()
+    public float getYPos()
     {
-    	return yPos;
+    	return pos.getY();
     }
     
     

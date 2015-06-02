@@ -35,7 +35,7 @@ public class ItemCollector
 		itemList = items;
 	}
 	
-	public void addItem(String className, int id, int xPos, int yPos)
+	public void addItem(String className, int id, Point pos)
 	{
 		try
 		{
@@ -45,7 +45,7 @@ public class ItemCollector
 			}
 			else
 			{
-				itemList.add( new Item(id, xPos, yPos));
+				itemList.add( new Item(id, pos));
 			}
 		}
 		catch(FileNotFoundException e)
@@ -78,7 +78,7 @@ public class ItemCollector
 		rootList.deleteItem(index);
 	}
 	
-	public void deledteSet(ItemCollector deletedList)
+	public void deleteSet(ItemCollector deletedList)
 	{
 		for (int x = 0; x < deletedList.getListSize(); x++)
 		{
@@ -125,12 +125,12 @@ public class ItemCollector
 		return itemList.get(index).getName();
 	}
 	
-	public int getXPos(int index)
+	public float getXPos(int index)
 	{
 		return itemList.get(index).getXPos();
 	}
 	
-	public int getYPos(int index)
+	public float getYPos(int index)
 	{
 		return itemList.get(index).getYPos();
 	}

@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.lang.Math;
 
@@ -58,6 +59,7 @@ public class Map
     Texture mapImage;
     TextureRegion fov;
     ItemCollector itemsOnField;
+    ObjectCollector objectList;
     
     
     public Map(String mapFile, String tileFile, Player player) throws IOException
@@ -115,8 +117,7 @@ public class Map
         String[] currentAttributes = null;
         String className;
         int id;
-        int xPos;
-        int yPos;
+        Point pos;
         if (itemIndex > 0)
         {
         	for(int x = 0; x < itemIndex; x++)
@@ -125,9 +126,24 @@ public class Map
 			currentAttributes = currentLine.split(", ");
 			className = currentAttributes[0];
 			id = Integer.parseInt(currentAttributes[1]);
-			xPos = Integer.parseInt(currentAttributes[2]);
-			yPos = Integer.parseInt(currentAttributes[3]);
-			itemsOnField.addItem(className, id, xPos, yPos);
+			pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
+			itemsOnField.addItem(className, id, pos);
+        	}
+			
+        }
+        
+        //Creates the ObjectCollector...object before giving it the information to create an array list of objects
+        int objectIndex = Integer.parseInt(mapFileScanner.nextLine());
+        if (objectIndex > 0)
+        {
+        	for(int x = 0; x < objectIndex; x++)
+        	{
+        	String currentLine = mapFileScanner.nextLine();
+			currentAttributes = currentLine.split(", ");
+			className = currentAttributes[0];
+			id = Integer.parseInt(currentAttributes[1]);
+			pos = new Point(Float.parseFloat(currentAttributes[2]),Float.parseFloat(currentAttributes[3])); 
+			objectList.addObject(className, id, pos);
         	}
 			
         }
@@ -156,7 +172,7 @@ public class Map
         }
         catch(IOException e)
         {
-        	System.out.println("Fucking sucks");
+        	e.printstacktrace();
         }
         mapWidth = TILE_WIDTH * numCols;
         mapHeight = TILE_HEIGHT * numRows;
@@ -193,6 +209,16 @@ public class Map
         		if(itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2*winX)
         		{
         			batch.draw(new Texture(itemsOnField.getFloorImage(x)), itemsOnField.getXPos(x) - mapPosX, itemsOnField.getYPos(x) - mapPosY);
+        		}
+        	}
+        }
+        for (int x = 0; x < objectList.getListSize(); x++)
+        {    		
+        	if (objectList.getXPos(x) + 150 > mapPosX && objectList.getXPos(x) < mapPosX + 2*winX)
+        	{
+        		if(objectList.getYPos(x) + 150 > mapPosY && objectList.getYPos(x) < mapPosY + 2*winX)
+        		{
+        			batch.draw(new Texture(objectList.getImage(x)), objectList.getXPos(x) - mapPosX, objectList.getYPos(x) - mapPosY);
         		}
         	}
         }
