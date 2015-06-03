@@ -125,12 +125,12 @@ public class ItemCollector
 		return itemList.get(index).getName();
 	}
 	
-	public float getXPos(int index)
+	public double getXPos(int index)
 	{
 		return itemList.get(index).getXPos();
 	}
 	
-	public float getYPos(int index)
+	public double getYPos(int index)
 	{
 		return itemList.get(index).getYPos();
 	}

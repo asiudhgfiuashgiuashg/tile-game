@@ -26,17 +26,17 @@ public class LineSeg {
         Point otherP2 = other.getP2();
 
                    
-        float q1 = (otherP2.getX() - otherP1.getX()) * (thisP1.getY() - otherP2.getY())
+        double q1 = (otherP2.getX() - otherP1.getX()) * (thisP1.getY() - otherP2.getY())
                     - (otherP2.getY() - otherP1.getY()) * (thisP1.getX() - otherP2.getX());
 
-        float q2 = (otherP2.getX() - otherP1.getX()) * (thisP2.getY() - otherP2.getY())
+        double q2 = (otherP2.getX() - otherP1.getX()) * (thisP2.getY() - otherP2.getY())
                     - (otherP2.getY() - otherP1.getY()) * (thisP2.getX() - otherP2.getX()); 
 
 
-        float q3 = (thisP2.getX() - thisP1.getX()) * (otherP1.getY() - thisP2.getY())
+        double q3 = (thisP2.getX() - thisP1.getX()) * (otherP1.getY() - thisP2.getY())
                     - (thisP2.getY() - thisP1.getY()) * (otherP1.getX() - thisP2.getX()); 
 
-        float q4 = (thisP2.getX() - thisP1.getX()) * (otherP2.getY() - thisP2.getY())
+        double q4 = (thisP2.getX() - thisP1.getX()) * (otherP2.getY() - thisP2.getY())
                     - (thisP2.getY() - thisP1.getY()) * (otherP2.getX() - thisP2.getX()); 
 
        return  ((q1 < 0 && q2 > 0) || (q1 > 0 && q2 < 0))
@@ -50,7 +50,7 @@ public class LineSeg {
     	return p2;
     }
     
-    public void translate(float xDist, float yDist) {
+    public void translate(double xDist, double yDist) {
     	p1.translate(xDist, yDist);
     	p2.translate(xDist, yDist);
     }

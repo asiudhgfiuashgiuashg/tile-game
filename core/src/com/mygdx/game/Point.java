@@ -1,20 +1,20 @@
 package com.mygdx.game;
 public class Point {
-    private float x;
-    private float y;
+    private double x;
+    private double y;
 
-    public Point(float x, float y) {
+    public Point(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
-    public float getX() {
+    public double getX() {
         return this.x;
     }
-    public float getY() {
+    public double getY() {
         return this.y;
     }
-    public void translate(float xDist, float yDist) {
+    public void translate(double xDist, double yDist) {
     	x += xDist;
     	y += yDist;
     }
@@ -25,13 +25,13 @@ public class Point {
     }
 
     //cross product of this point as a vector from origin crossed with other
-    public float cross(Point other) {
+    public double cross(Point other) {
         return this.getX() * other.getY() - this.getY() * other.getX();
     }
     
     @Override
     public String toString() {
-    	return "(" + Float.toString(x) + ", " + Float.toString(y) + ")";
+    	return "(" + Double.toString(x) + ", " + Double.toString(y) + ")";
     }
     
     public Point plus(Point other) {

@@ -39,8 +39,8 @@ public class Map
     private static final int TILE_WIDTH = Tile.getTileWidth();
     private static final int TILE_HEIGHT = Tile.getTileHeight();
     private Tile[][] mapTiles;
-    private int mapWidth;
-    private int mapHeight;
+    public int mapWidth;
+    public int mapHeight;
     private boolean mapMoveLeft;
     private boolean mapMoveRight;
     private boolean mapMoveUp;
@@ -145,7 +145,6 @@ public class Map
         		className = currentAttributes[0];
         		id = Integer.parseInt(currentAttributes[1]);
         		pos = new Point(Float.parseFloat(currentAttributes[2]),Float.parseFloat(currentAttributes[3]));
-        		System.out.println("torn");
         		objectList.addObject(className, id, pos);
         	}
 
@@ -212,7 +211,7 @@ public class Map
         	{
         		if(itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2*winX)
         		{
-        			batch.draw(new Texture(itemsOnField.getFloorImage(x)), itemsOnField.getXPos(x) - mapPosX, itemsOnField.getYPos(x) - mapPosY);
+        			batch.draw(new Texture(itemsOnField.getFloorImage(x)), (float)itemsOnField.getXPos(x) - mapPosX, (float)itemsOnField.getYPos(x) - mapPosY);
         		}
         	}
         }
@@ -222,7 +221,7 @@ public class Map
         	{
         		if(objectList.getYPos(x) + 150 > mapPosY && objectList.getYPos(x) < mapPosY + 2*winX)
         		{
-        			batch.draw(new Texture(objectList.getImage(x)), objectList.getXPos(x) - mapPosX, objectList.getYPos(x) - mapPosY);
+        			batch.draw(new Texture(objectList.getImage(x)), (float) objectList.getXPos(x) - mapPosX, (float) objectList.getYPos(x) - mapPosY);
         		}
         	}
         }
@@ -242,10 +241,10 @@ public class Map
     
     public ItemCollector getNearbyItemList()
     {
-    	float itemRefPosX;
-    	float itemRefPosY;
-    	float charRefPosX = player.getPos().getX() + player.getLeft();
-    	float charRefPosY = player.getPos().getY() + player.getBottom();
+    	double itemRefPosX;
+    	double itemRefPosY;
+    	double charRefPosX = player.getPos().getX() + player.getLeft();
+    	double charRefPosY = player.getPos().getY() + player.getBottom();
     	ArrayList<Integer> indexValues = new ArrayList<Integer>(); 
     	
     	for (int x = 0; x < itemsOnField.getListSize(); x++)
@@ -313,21 +312,21 @@ public class Map
     	
     	if (player.getPos().getX() < winX && smallWidth == false)
     	{
-    		player.drawPosX = player.getPos().getX();
+    		player.drawPosX = (float) player.getPos().getX();
     	}
     	else if (player.getPos().getX() > mapWidth - winX && smallWidth == false)
     	{
-    		player.drawPosX = (player.getPos().getX() - mapWidth + 2*winX);
+    		player.drawPosX = (float)(player.getPos().getX() - mapWidth + 2*winX);
     	}
     	
     	
     	if (player.getPos().getY() < winY && smallHeight == false)
     	{
-    		player.drawPosY = player.getPos().getY();
+    		player.drawPosY = (float)player.getPos().getY();
     	}
     	else if (player.getPos().getY() > mapHeight - winY && smallHeight == false)
     	{
-    		player.drawPosY = (player.getPos().getY() - (mapHeight - winY) + winY);
+    		player.drawPosY = (float)(player.getPos().getY() - (mapHeight - winY) + winY);
     	}
     	if (smallWidth == true)
     	{
@@ -361,11 +360,11 @@ public class Map
     	}
     	if (smallWidth)
     	{
-    		player.drawPosX = playerPos.getX() + (winX - mapWidth/2);
+    		player.drawPosX = (float)playerPos.getX() + (winX - mapWidth/2);
     	}
     	if (smallHeight)
     	{
-    		player.drawPosY = playerPos.getY() + (winY - mapHeight/2);
+    		player.drawPosY = (float)playerPos.getY() + (winY - mapHeight/2);
     	}
     	boolean enclosed = true; 
     	while (enclosed == true)
@@ -472,7 +471,7 @@ public class Map
 		if (!collides(Direction.LEFT, deltaX) && player.getPos().getX() > - player.getLeft())
 		{
 			//player.getPos().getX() -= deltaX;
-			player.setX(player.getPos().getX() - deltaX);
+			player.setX((double)(player.getPos().getX() - deltaX));
 			success = true;
 			
 			updatePosX(-deltaX);	
@@ -542,7 +541,7 @@ public class Map
         //calculate requested new position of character and the rows and cols of tiles to check for collision
         if (Direction.LEFT == direction)
         {
-            int tilesToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH) - 1;
+            int tilesToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
             int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
             int topTileToLeftYIndex = (int) playerTopSide / TILE_HEIGHT;
             
@@ -559,7 +558,7 @@ public class Map
             
             
         } else if(Direction.RIGHT == direction) {
-        	int tilesToRightXIndex = ((int) playerRightSide / TILE_WIDTH) + 1;
+        	int tilesToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
         	int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
             int topTileToLeftYIndex = (int) playerTopSide / TILE_HEIGHT;
             
@@ -576,7 +575,7 @@ public class Map
         } else if (Direction.UP == direction) {
         	int tileToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
         	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
-        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT + 1);
+        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT);
         	
             
             //futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
@@ -591,7 +590,7 @@ public class Map
         } else if (Direction.DOWN == direction) {
         	int tileToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
         	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
-        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT - 1);
+        	int tilesYIndex = ((int) playerBottomSide / TILE_HEIGHT);
         	
             
             //futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);

@@ -24,21 +24,20 @@ import java.util.List;
  */
 public class ObjectCollector
 {
-	List<Object> objectList;
+	List<GameObject> objectList;
 	
 	ObjectCollector()
 	{
-		objectList = new ArrayList<Object>();
+		objectList = new ArrayList<GameObject>();
 	}
 	
-	ObjectCollector(List<Object> objects)
+	ObjectCollector(List<GameObject> objects)
 	{
 		objectList = objects;
 	}
 	
 	public void addObject(String className, int id, Point pos)
 	{
-		System.out.println("apart");
 		try
 		{
 			if(className == "Weapon")
@@ -47,7 +46,7 @@ public class ObjectCollector
 			}
 			else
 			{
-				objectList.add( new Object(id, pos));
+				objectList.add( new GameObject(id, pos));
 			}
 		}
 		catch(FileNotFoundException e)
@@ -77,12 +76,12 @@ public class ObjectCollector
 		return objectList.get(index).getName();
 	}
 	
-	public float getXPos(int index)
+	public double getXPos(int index)
 	{
 		return objectList.get(index).getXPos();
 	}
 	
-	public float getYPos(int index)
+	public double getYPos(int index)
 	{
 		return objectList.get(index).getYPos();
 	}

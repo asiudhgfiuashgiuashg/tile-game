@@ -57,6 +57,6 @@ public abstract class Entity extends GameObject
     public void translate(Point dist) {
     	shape.translate(dist);
     }
-    abstract public void setX(float newX);
-    abstract public void setY(float newY);
+    abstract public void setX(double newX);
+    abstract public void setY(double newY);
 }

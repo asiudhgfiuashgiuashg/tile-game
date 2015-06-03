@@ -26,15 +26,15 @@ public class TheGame extends ApplicationAdapter
 	@Override
 	public void create()
 	{	
-		Shape playerShape = new Shape(Arrays.asList(
-				new LineSeg(new Point(0, 0), new Point(0, 50)),
-				new LineSeg(new Point(0, 50), new Point(50, 65)),
-				new LineSeg(new Point(50, 65), new Point(65, 0)),
-				new LineSeg(new Point(65, 0), new Point(0, 0))
+		
+		Shape shape = new Shape(Arrays.asList(
+				new LineSeg(new Point(15, 0), new Point(15, 55)),
+				new LineSeg(new Point(15, 55), new Point(50, 55)),
+				new LineSeg(new Point(50, 55), new Point(50, 0)),
+				new LineSeg(new Point(50, 0), new Point(15, 0))
 				),
 				new Point(0,0));
-		
-		player = new Player(playerShape, false);
+		player = new Player(shape, false);
 		
 		batch = new SpriteBatch();
 		

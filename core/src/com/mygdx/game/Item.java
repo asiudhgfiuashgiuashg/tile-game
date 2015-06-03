@@ -69,11 +69,11 @@ public class Item {
     {
         return ("../core/assets/" + floorImageURI);
     }
-    public float getXPos()
+    public double getXPos()
     {
     	return pos.getX();
     }
-    public float getYPos()
+    public double getYPos()
     {
     	return pos.getY();
     }

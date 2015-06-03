@@ -32,14 +32,14 @@ public class Shape {
     
     private void updateLineSegs(Point oldPos) {
     	
-    	float oldXDist = oldPos.getX(); //dist from map origin
-        float oldYDist = oldPos.getY();
+    	double oldXDist = oldPos.getX(); //dist from map origin
+    	double oldYDist = oldPos.getY();
         
-        float newXDist = pos.getX();
-        float newYDist = pos.getY();
+    	double newXDist = pos.getX();
+    	double newYDist = pos.getY();
         
-        float xDistDiff = newXDist - oldXDist;
-        float yDistDiff = newYDist - oldYDist;
+    	double xDistDiff = newXDist - oldXDist;
+    	double yDistDiff = newYDist - oldYDist;
         //move line segments of shape the same amount that the pos Point of the shape moved
         for (LineSeg seg: lineSegs) {
         	seg.translate(xDistDiff, yDistDiff); 	

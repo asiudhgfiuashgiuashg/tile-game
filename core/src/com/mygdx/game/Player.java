@@ -8,6 +8,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.mygdx.game;
 
+import java.util.Arrays;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
@@ -34,13 +36,16 @@ public class Player extends Entity
     public Player(Shape shape, boolean passable)
     {
     	super(shape, passable);
+    	left = 15;
+        right = 50;
+        up = 55;
+        down = 1;
+    	
+    	
     	canMove = true;
     	moveSpeed = 200;
     	
-        left = 15;
-        right = 50;
-        up = 50;
-        down = 0;
+        
         pos = new Point(0, 0);
 
         
@@ -88,9 +93,10 @@ public class Player extends Entity
 	    	boolean down = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
 	    	
 	    	try {
+	    		//Each direction has preset limits for the character pos to help prevent outofbounds errors and to smoothen movement along the edges. Once collision is perfected, these should'nt be necessary
 		        if (left && !right)
 		        {
-		            if (currentMap.moveLeft())
+		            if (pos.getX() > 0 - this.left && currentMap.moveLeft())
 		            {
 		                currentFrame = moveLeft.getKeyFrame(stateTime, true);
 		            }
@@ -98,7 +104,7 @@ public class Player extends Entity
 		        
 		        else if (right && !left ) 
 		        {            
-		            if (currentMap.moveRight())
+		            if (pos.getX() < currentMap.mapWidth - this.right && currentMap.moveRight())
 		            {
 		                currentFrame = moveRight.getKeyFrame(stateTime, true);
 		            }
@@ -106,7 +112,7 @@ public class Player extends Entity
 		        
 		        else if (up && !down)
 		        {
-		            if (currentMap.moveUp())
+		            if (pos.getY() < currentMap.mapHeight - this.up && currentMap.moveUp())
 		            {
 		                currentFrame = moveUp.getKeyFrame(stateTime, true); 
 		                
@@ -115,7 +121,7 @@ public class Player extends Entity
 		        
 		        else if (down && !up)
 		        { 
-		            if (currentMap.moveDown())
+		            if (pos.getY() > this.down && currentMap.moveDown())
 		            {
 		                currentFrame = moveDown.getKeyFrame(stateTime, true);
 		            }
@@ -129,8 +135,8 @@ public class Player extends Entity
     @Override
     public void draw(SpriteBatch batch) {
         batch.draw(currentFrame, drawPosX, drawPosY);
-        batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
-        batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
+        //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
+        //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
     }
     
     
@@ -183,12 +189,12 @@ public class Player extends Entity
     }
     
     @Override
-    public void setX(float newX) {
+    public void setX(double newX) {
     	setPos(new Point(newX, pos.getY()));
     }
     
     @Override
-    public void setY(float newY) {
+    public void setY(double newY) {
     	setPos(new Point(pos.getX(), newY));
     }
 }
