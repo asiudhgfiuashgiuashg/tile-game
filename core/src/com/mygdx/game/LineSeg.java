@@ -12,8 +12,10 @@ public class LineSeg {
     Point p2;
 
     public LineSeg(Point p1, Point p2) {
-        this.p1 = p1;
-        this.p2 = p2;
+    	// we deepcopy because otherwise LineSegs sharing points which are translated will be all fucked up (one point could be translated more
+    	//  than once if looping through a list of lineSegs in a shape in which some lineSegs share Points.
+        this.p1 = p1.deepCopy();
+        this.p2 = p2.deepCopy();
     }
     
     //http://stackoverflow.com/questions/25830932/how-to-find-if-two-line-segments-intersect-or-not-in-java

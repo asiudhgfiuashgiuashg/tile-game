@@ -66,7 +66,7 @@ public class GameObject {
 			lines.add( new LineSeg(points.get(i), points.get(i+1)) );
 		}
 		lines.add( new LineSeg(points.get(points.size() - 1), points.get(0)) );
-		
+		System.out.println("pos: " + pos);
 		shape = new Shape(lines, pos);
 		
     }

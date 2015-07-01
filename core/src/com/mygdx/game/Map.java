@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.lang.Math;
 
 import javax.imageio.ImageIO;
 
@@ -60,8 +59,7 @@ public class Map
     TextureRegion fov;
     ItemCollector itemsOnField;
     ObjectCollector objectList;
-    
-    
+        
     public Map(String mapFile, String tileFile, Player player) throws IOException
     {	
     	this.player = player;
@@ -122,19 +120,19 @@ public class Map
         {
         	for(int x = 0; x < itemIndex; x++)
         	{
-        	String currentLine = mapFileScanner.nextLine();
-			currentAttributes = currentLine.split(", ");
-			className = currentAttributes[0];
-			id = Integer.parseInt(currentAttributes[1]);
-			pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
-			itemsOnField.addItem(className, id, pos);
+	        	String currentLine = mapFileScanner.nextLine();
+				currentAttributes = currentLine.split(", ");
+				className = currentAttributes[0];
+				id = Integer.parseInt(currentAttributes[1]);
+				pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
+				itemsOnField.addItem(className, id, pos);
         	}
 			
         }
         
-        //Creates the ObjectCollector...object before giving it the information to create an array list of objects
+        //Creates the ObjectCollector...object (kek) before giving it the information to create an array list of objects
         
-        objectList = new ObjectCollector();
+        objectList = new ObjectCollector(TILE_WIDTH, TILE_HEIGHT, numCols, numRows, mapTiles);
         int objectIndex = Integer.parseInt(mapFileScanner.nextLine());
         if (objectIndex > 0)
         {
@@ -186,6 +184,7 @@ public class Map
         
             
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
+        
     }
     
     //updating and drawing the visible part of the map
@@ -609,11 +608,32 @@ public class Map
         Tile futureTile0 = mapTiles[row0][col0];
         Tile futureTile1 = mapTiles[row1][col1];
 
-
+        // check for object intersection with future player shape
+        List<GameObject> futureTile0Objects = (List<GameObject>) objectList.objectGrid[row0][col0];
+    	List<GameObject> futureTile1Objects = (List<GameObject>) objectList.objectGrid[row1][col1];
+    	
+        for (GameObject object: futureTile0Objects) {
+    		if (object.getShape().intersects(futurePlayerShape)) {
+    			return true;
+    		}
+    	}
+        
+        
+        for (GameObject object: futureTile1Objects) {
+    		if (object.getShape().intersects(futurePlayerShape)) {
+    			return true;
+    		}
+    	}
+    	
+        
         if (!(futureTile0.isPassable() && futureTile1.isPassable())) {
         	//check for collision
         	Shape futureTile0Shape = futureTile0.getShape();
         	Shape futureTile1Shape = futureTile1.getShape();
+        	
+        	
+        	
+        	
         	
         	return futurePlayerShape.intersects(futureTile0Shape) || futurePlayerShape.intersects(futureTile1Shape);
         }
