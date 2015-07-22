@@ -19,6 +19,7 @@ public class TheGame extends ApplicationAdapter
 	
 	Map currentMap;
 	GuiManager mapGuiManager; //holds all gui elements which are displayed when map is visible
+	GuiManager mainMenuGuiManager;
 	//GuiManager mainMenuGuiManager
 	//etc
 	boolean itemListExists;
@@ -60,6 +61,7 @@ public class TheGame extends ApplicationAdapter
 		
 		//initialize various GuiManagers, giving them appropriate GuiElements
 		mapGuiManager = new GuiManager();
+		mainMenuGuiManager = new GuiManager();
 		GuiManager.setCurrentManager(mapGuiManager);
 		itemListExists = false;
 	}
@@ -77,12 +79,15 @@ public class TheGame extends ApplicationAdapter
 		 */
 		keyListening();
 		
-		Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
-
-		currentMap.draw(batch);
-        currentMap.update(batch);
+		
+		if(GuiManager.currentManager.equals(mapGuiManager))
+		{
+			currentMap.draw(batch);
+			currentMap.update(batch);
+		}
 		GuiManager.currentManager.draw(batch);
 		GuiManager.currentManager.update();
 		
@@ -90,19 +95,20 @@ public class TheGame extends ApplicationAdapter
 	}
 	
 	public void keyListening() {
-		GuiManager currentManager = GuiManager.getCurrentManager();
-		if (currentManager.equals(mapGuiManager)) {
+		
+		if (GuiManager.currentManager.equals(mapGuiManager)) 
+		{
 			if (Gdx.input.isKeyJustPressed(Keys.G)) {
 				if (!itemListExists && !currentMap.getNearbyItemList().isEmpty()) {
 					ItemCollector items = currentMap.getNearbyItemList();
-					GuiItemList guiItemList = new GuiItemList(currentMap.player);
+					GuiItemList guiItemList = new GuiItemList(currentMap.player, 0);
 					guiItemList.setItemList(items);
 					
-					currentManager.addElement(guiItemList);
-					currentManager.setFocused(guiItemList);
+					GuiManager.currentManager.addElement(guiItemList);
+					GuiManager.currentManager.setFocused(guiItemList);
 					itemListExists = true;
 					player.setCanMove(false);
-					currentManager.listen();
+					GuiManager.currentManager.listen();
 					
 					guiItemList.watchedList = currentMap.itemsOnField;
 				
@@ -110,13 +116,25 @@ public class TheGame extends ApplicationAdapter
 					
 				} else {
 					
-					currentManager.clearElements();
+					GuiManager.currentManager.clearElements();
 					itemListExists = false;
 					player.setCanMove(true);
 				}
 				
 			}
+			if (Gdx.input.isKeyJustPressed(Keys.C))
+			{	
+				GuiManager.currentManager = mainMenuGuiManager;
+			}
 		}
+		else if (GuiManager.currentManager.equals(mainMenuGuiManager))
+			{
+				if (Gdx.input.isKeyJustPressed(Keys.C))
+				{	
+					GuiManager.currentManager = mapGuiManager;
+				}
+				
+			}
 /*		} else if (currentManager.equals(mainMenuGuiManager) {
 			some other behavior
 		} else if (currentManager.equals(someOtherGuiManager) {
