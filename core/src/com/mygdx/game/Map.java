@@ -53,14 +53,17 @@ public class Map
 
     private int winX = 400;
     private int winY = 240;
-    Player player;
+    LocalPlayer player;
+    RemotePlayer player2;
+    
+    boolean multiplayerEnabled = false;
     
     Texture mapImage;
     TextureRegion fov;
     ItemCollector itemsOnField;
     ObjectCollector objectList;
         
-    public Map(String mapFile, String tileFile, Player player) throws IOException
+    public Map(String mapFile, String tileFile, LocalPlayer player) throws IOException
     {	
     	this.player = player;
     	player.setCurrentMap(this);
@@ -225,7 +228,9 @@ public class Map
         	}
         }
 		player.draw(batch);
-		
+		if (multiplayerEnabled == true) {
+			player2.draw(batch);
+		}
         
     }
     

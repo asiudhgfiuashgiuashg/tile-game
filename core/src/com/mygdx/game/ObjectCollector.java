@@ -67,6 +67,7 @@ public class ObjectCollector
 	
 	public void addObject(String className, int id, Point pos)
 	{
+		//
 		System.out.println("adding object" + className + String.valueOf(id) + pos.toString());
 		try
 		{

@@ -17,7 +17,7 @@ import org.json.simple.JSONObject;
 
 public class TheGame extends ApplicationAdapter 
 {
-	Player player;
+	LocalPlayer player;
 	SpriteBatch batch;
 	
 	Map currentMap;
@@ -40,7 +40,7 @@ public class TheGame extends ApplicationAdapter
 				new LineSeg(new Point(50, 0), new Point(15, 0))
 				),
 				new Point(0,0));
-		player = new Player(shape, false);
+		player = new LocalPlayer(shape, false);
 		
 		batch = new SpriteBatch();
 		
