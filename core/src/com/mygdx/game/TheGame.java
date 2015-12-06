@@ -100,9 +100,11 @@ public class TheGame extends ApplicationAdapter
             		String inputLine = in.readLine();
             		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
             		System.out.println("received from client 0: " + received.toString());
-            		//secondplayerX = ((Number) received.get("charX")).floatValue();
-            		//secondPlayerY = ((Number) received.get("charY")).floatValue();
-            		
+            		double secondPlayerX = ((Number) received.get("charX")).floatValue();
+            		double secondPlayerY = ((Number) received.get("charY")).floatValue();
+            		if (currentMap.player2 != null) {
+            			currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
+            		}
             	}
 			}
 		} catch (IOException e) {
