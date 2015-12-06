@@ -111,8 +111,8 @@ public class TheGame extends ApplicationAdapter
 		}
 		//sending
     	JSONObject obj = new JSONObject();
-    	float charX = 0;
-    	float charY = 0;
+    	float charX = (float) player.getPos().getX();
+    	float charY = (float) player.getPos().getY();
         obj.put("charX", charX);
         obj.put("charY", charY);
         out.println(obj.toString());
