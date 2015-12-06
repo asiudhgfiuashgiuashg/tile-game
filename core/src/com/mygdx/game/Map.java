@@ -56,7 +56,7 @@ public class Map
     LocalPlayer player;
     RemotePlayer player2;
     
-    boolean multiplayerEnabled = false;
+    boolean multiplayerEnabled = true;
     
     Texture mapImage;
     TextureRegion fov;
