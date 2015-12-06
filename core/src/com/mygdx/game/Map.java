@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -67,6 +68,15 @@ public class Map
     {	
     	this.player = player;
     	player.setCurrentMap(this);
+    	
+    	Shape shape = new Shape(Arrays.asList(
+				new LineSeg(new Point(15, 0), new Point(15, 55)),
+				new LineSeg(new Point(15, 55), new Point(50, 55)),
+				new LineSeg(new Point(50, 55), new Point(50, 0)),
+				new LineSeg(new Point(50, 0), new Point(15, 0))
+				),
+				new Point(0,0));
+		player2 = new RemotePlayer(shape, true);
     	
         ///////////////////////////////////
         // convert mapFile into Tile[][] //

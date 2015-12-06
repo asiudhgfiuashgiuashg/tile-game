@@ -102,9 +102,8 @@ public class TheGame extends ApplicationAdapter
             		System.out.println("received from client 0: " + received.toString());
             		double secondPlayerX = ((Number) received.get("charX")).floatValue();
             		double secondPlayerY = ((Number) received.get("charY")).floatValue();
-            		if (currentMap.player2 != null) {
-            			currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
-            		}
+            		
+            		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
             	}
 			}
 		} catch (IOException e) {
