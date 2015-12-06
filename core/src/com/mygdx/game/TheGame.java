@@ -3,6 +3,8 @@ package com.mygdx.game;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.io.*;
+import java.net.*;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -24,6 +26,8 @@ public class TheGame extends ApplicationAdapter
 	//GuiManager mainMenuGuiManager
 	//etc
 	boolean itemListExists;
+	PrintWriter out;
+    BufferedReader in;
 
 	@Override
 	public void create()
@@ -65,12 +69,55 @@ public class TheGame extends ApplicationAdapter
 		mainMenuGuiManager = new GuiManager();
 		GuiManager.setCurrentManager(mapGuiManager);
 		itemListExists = false;
+		
+		Socket socket;
+		
+		try {
+			socket = new Socket("128.61.104.60", 8080);
+			out = new PrintWriter(socket.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(-1);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
 
 	@Override
 	public void render()
 	{
+		//*******Networking*****
+		
+		//receiving
+		try {
+			if (in.ready()) {
+				if (in.ready()) {
+            		String inputLine = in.readLine();
+            		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
+            		System.out.println("received from client 0: " + received.toString());
+            		//secondplayerX = ((Number) received.get("charX")).floatValue();
+            		//secondPlayerY = ((Number) received.get("charY")).floatValue();
+            		
+            	}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//sending
+    	JSONObject obj = new JSONObject();
+    	float charX = 0;
+    	float charY = 0;
+        obj.put("charX", charX);
+        obj.put("charY", charY);
+        out.println(obj.toString());
+        
+		//**end networking******
 		//System.out.println(player.getShape());
 		/*
 		 * logic for switching between various GuiManagers could go here
