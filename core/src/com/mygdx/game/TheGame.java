@@ -10,7 +10,8 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import java.util.ArrayList;
+import org.json.simple.JSONValue;
+import org.json.simple.JSONObject;
 
 public class TheGame extends ApplicationAdapter 
 {

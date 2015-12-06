@@ -3,6 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+    
     }
 }
 
@@ -46,6 +47,7 @@ project(":core") {
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        compile 'com.googlecode.json-simple:json-simple:1.1'
     }
 }
 
