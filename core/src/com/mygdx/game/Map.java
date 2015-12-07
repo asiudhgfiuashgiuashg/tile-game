@@ -213,6 +213,7 @@ public class Map
     	//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
     	//player.update() must come before fov.setRegion or item drawing will lag behind map and player drawing
     	player.update(stateTime);
+    	player2.update(stateTime);
         fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY);
         stateTime += Gdx.graphics.getDeltaTime();
         

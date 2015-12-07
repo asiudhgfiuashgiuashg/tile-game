@@ -29,8 +29,9 @@ public class TheGame extends ApplicationAdapter
 	PrintWriter out;
     BufferedReader in;
     long time;
-    final int SEND_SPACING = 20;
+    final int SEND_SPACING = 50;
     boolean gameStart;
+    Direction playerOldDirection;
 
 	@Override
 	public void create()
@@ -110,11 +111,17 @@ public class TheGame extends ApplicationAdapter
 				} else { //handle messages that come during game play, after the game has started
 	        		String inputLine = in.readLine();
 	        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
-	        		if (received.get("type").equals("position")) {
+	        		String messageType = (String) received.get("type");
+	        		//position updates
+	        		if (messageType.equals("position")) {
 		        		double secondPlayerX = ((Number) received.get("charX")).floatValue();
 		        		double secondPlayerY = ((Number) received.get("charY")).floatValue();
 		        		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
+	        		} else if (messageType.equals("animation")) { //animation updates
+	        			currentMap.player2.setAnimation((String) received.get("animationName"));
+	        			System.out.println("received animation message: " + received);
 	        		}
+	                
 				}
 			}
 		} catch (IOException e) {
@@ -136,15 +143,17 @@ public class TheGame extends ApplicationAdapter
         	out.println(obj.toString());
         	
         	//sending direction
-        	obj.clear();
-        	obj.put("type", "direction");
-        	obj.put("isMovingLeft", currentMap.player.isMovingLeft);
-        	obj.put("isMovingRight", currentMap.player.isMovingRight);
-        	obj.put("isMovingDown", currentMap.player.isMovingDown);
-        	obj.put("isMovingUp", currentMap.player.isMovingUp);
-        	out.println(obj.toString());
-        	
-        	
+        	//note -- if not moving, all of these bools will be false
+        	if (currentMap.player.direction != playerOldDirection) {
+	        	obj.clear();
+	        	obj.put("type", "direction");
+	        	obj.put("isMovingLeft", currentMap.player.isMovingLeft);
+	        	obj.put("isMovingRight", currentMap.player.isMovingRight);
+	        	obj.put("isMovingDown", currentMap.player.isMovingDown);
+	        	obj.put("isMovingUp", currentMap.player.isMovingUp);
+	        	out.println(obj.toString());
+        	}
+        	playerOldDirection = currentMap.player.direction;
         	
         	//update time
         	time = System.currentTimeMillis();

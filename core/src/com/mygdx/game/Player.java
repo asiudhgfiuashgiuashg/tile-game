@@ -19,7 +19,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Player extends Entity
 {
-    
     TextureRegion idleRight;
     TextureRegion idleLeft;
     TextureRegion idleUp;
