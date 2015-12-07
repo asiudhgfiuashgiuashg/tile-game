@@ -237,11 +237,10 @@ public class Map
         		}
         	}
         }
-		player.draw(batch);
-		if (multiplayerEnabled == true) {
-			player2.draw(batch);
+        if (multiplayerEnabled) {
+			player2.drawAtPos(batch, (float) player2.getPos().getX() - mapPosX, (float) player2.getPos().getY() - mapPosY);
 		}
-        
+		player.draw(batch);
     }
     
     //////////////////////////

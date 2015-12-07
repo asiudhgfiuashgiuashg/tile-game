@@ -77,11 +77,18 @@ public class Player extends Entity
     	
     }
     
-    @Override
-    public void draw(SpriteBatch batch) {
+
+    public void drawAtPos(SpriteBatch batch, float drawPosX, float drawPosY) {
         batch.draw(currentFrame, drawPosX, drawPosY);
         //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
         //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
+    }
+    
+    @Override
+    public void draw(SpriteBatch batch) {
+	    batch.draw(currentFrame, drawPosX, drawPosY);
+	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
+	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
     }
     
     
