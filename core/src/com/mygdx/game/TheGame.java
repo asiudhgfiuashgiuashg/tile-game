@@ -29,12 +29,13 @@ public class TheGame extends ApplicationAdapter
 	PrintWriter out;
     BufferedReader in;
     long time;
-    final int SEND_RATE = 40;
+    final int SEND_SPACING = 20;
+    boolean gameStart;
 
 	@Override
 	public void create()
 	{	
-		
+		gameStart = false; //dont start game until both clients are ready
 		Shape shape = new Shape(Arrays.asList(
 				new LineSeg(new Point(15, 0), new Point(15, 55)),
 				new LineSeg(new Point(15, 55), new Point(50, 55)),
@@ -95,20 +96,30 @@ public class TheGame extends ApplicationAdapter
 	public void render()
 	{
 		//*******Networking*****
-		
-		//receiving
+		//receiving during gameplay, after the game has started
 		try {
 			if (in.ready()) {
-				if (in.ready()) {
-            		String inputLine = in.readLine();
-            		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
-            		//System.out.println("received from server: " + received.toString());
-            		double secondPlayerX = ((Number) received.get("charX")).floatValue();
-            		double secondPlayerY = ((Number) received.get("charY")).floatValue();
-            		
-            		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
-            		//System.out.println("updated player2 pos to be: " + currentMap.player2.getPos());
-            	}
+				//spin until receive message from server to start game (signaling that other client has connected, etc)
+				while (!gameStart) {
+					if (!gameStart) {
+						JSONObject received = (JSONObject) JSONValue.parse(in.readLine());
+						if (received.get("type").equals("gameStartSignal")) {
+							gameStart = true; //start the game once the gameStartSignal is received from the server (signalling that the other client has connected, etc)
+						}
+					}
+				}
+				
+				//handle messages that come during game play, after the game has started
+        		String inputLine = in.readLine();
+        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
+        		//System.out.println("received from server: " + received.toString());
+        		if (received.get("type").equals("position")) {
+	        		double secondPlayerX = ((Number) received.get("charX")).floatValue();
+	        		double secondPlayerY = ((Number) received.get("charY")).floatValue();
+	        		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
+        		
+        		//System.out.println("updated player2 pos to be: " + currentMap.player2.getPos());
+				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -118,9 +129,10 @@ public class TheGame extends ApplicationAdapter
     	JSONObject obj = new JSONObject();
     	float charX = (float) player.getPos().getX();
     	float charY = (float) player.getPos().getY();
+    	obj.put("type", "position"); //let server know that this message specifies a position update
         obj.put("charX", charX);
         obj.put("charY", charY);
-        if (System.currentTimeMillis() - time >= SEND_RATE) {
+        if (System.currentTimeMillis() - time >= SEND_SPACING) {
         	out.println(obj.toString());
         	time = System.currentTimeMillis();
         }

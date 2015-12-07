@@ -11,8 +11,10 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -63,9 +65,14 @@ public class Map
     TextureRegion fov;
     ItemCollector itemsOnField;
     ObjectCollector objectList;
-        
+    
+    //map for keeping track of textures to dispose of
+    // thing = GameObject or Item
+    AbstractMap<Object, Texture> thingToTextureMap;
     public Map(String mapFile, String tileFile, LocalPlayer player) throws IOException
     {	
+    	thingToTextureMap = new HashMap<Object, Texture>();
+    	
     	this.player = player;
     	player.setCurrentMap(this);
     	
@@ -218,23 +225,45 @@ public class Map
     	
         batch.draw(fov, 0, 0);
         for (int x = 0; x < itemsOnField.getListSize(); x++)
-        {    		
-        	if (itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
+        {
+        	Item item = itemsOnField.getItem(x);
+			Texture textureToUse = thingToTextureMap.get(item);
+			
+			//see if item should be drawn
+        	if ((itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
+        			&& (itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2*winX))
         	{
-        		if(itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2*winX)
-        		{
-        			batch.draw(new Texture(itemsOnField.getFloorImage(x)), (float)itemsOnField.getXPos(x) - mapPosX, (float)itemsOnField.getYPos(x) - mapPosY);
-        		}
+    			if (textureToUse == null) { //Item doesnt map to any texture, so make it one
+    				textureToUse = new Texture(itemsOnField.getFloorImage(x));
+    				thingToTextureMap.put(item, textureToUse); // save texture to use later
+    			}
+    			batch.draw(textureToUse, (float)itemsOnField.getXPos(x) - mapPosX, (float)itemsOnField.getYPos(x) - mapPosY);
+        	} else { //item should not be drawn, so free up its texture
+        		 if (textureToUse != null) {
+        			 textureToUse.dispose();
+        			 thingToTextureMap.remove(item);
+        		 }
         	}
         }
+        
+        
         for (int x = 0; x < objectList.getListSize(); x++)
         {    		
-        	if (objectList.getXPos(x) + 150 > mapPosX && objectList.getXPos(x) < mapPosX + 2*winX)
-        	{
-        		if(objectList.getYPos(x) + 150 > mapPosY && objectList.getYPos(x) < mapPosY + 2*winX)
-        		{
-        			batch.draw(new Texture(objectList.getImage(x)), (float) objectList.getXPos(x) - mapPosX, (float) objectList.getYPos(x) - mapPosY);
-        		}
+        	GameObject object = objectList.getObject(x);
+        	Texture textureToUse = thingToTextureMap.get(object);
+        	if ((objectList.getXPos(x) + 150 > mapPosX && objectList.getXPos(x) < mapPosX + 2*winX)
+        		&& (objectList.getYPos(x) + 150 > mapPosY && objectList.getYPos(x) < mapPosY + 2*winX))
+        	{   
+        		if (textureToUse == null) { //Item doesnt map to any texture, so make it one
+    				textureToUse = new Texture(objectList.getImage(x));
+    				thingToTextureMap.put(object, textureToUse); // save texture to use later
+    			}
+        		batch.draw(textureToUse, (float) objectList.getXPos(x) - mapPosX, (float) objectList.getYPos(x) - mapPosY);
+        	} else {
+        		if (textureToUse != null) {
+       			 textureToUse.dispose();
+       			 thingToTextureMap.remove(object);
+       		 }
         	}
         }
         if (multiplayerEnabled) {

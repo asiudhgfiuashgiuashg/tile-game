@@ -123,7 +123,7 @@ public class ObjectCollector
 		objectList.remove(x);
 	}
 	
-	public Object getObject(int index)
+	public GameObject getObject(int index)
 	{
 		return objectList.get(index);
 	}
