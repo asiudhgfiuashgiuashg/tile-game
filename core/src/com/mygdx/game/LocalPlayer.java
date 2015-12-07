@@ -6,6 +6,11 @@ import com.badlogic.gdx.Input.Keys;
 
 public class LocalPlayer extends Player
 {
+	boolean isMovingLeft;
+	boolean isMovingRight;
+	boolean isMovingUp;
+	boolean isMovingDown;
+	
 	private float moveSpeed;
 	int sightX = 400;
     int sightY = 240;
@@ -28,14 +33,14 @@ public class LocalPlayer extends Player
 	@Override
     public void update(float stateTime) {
     	if (canMove()) {
-	    	boolean left = (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) ? true : false;
-	    	boolean right = (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D)) ? true : false;
-	    	boolean up = (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W)) ? true : false;
-	    	boolean down = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
+	    	isMovingLeft = (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) ? true : false;
+	    	isMovingRight = (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D)) ? true : false;
+	    	isMovingUp = (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W)) ? true : false;
+	    	isMovingDown = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
 	    	
 	    	try {
 	    		//Each direction has preset limits for the character pos to help prevent outofbounds errors and to smoothen movement along the edges. Once collision is perfected, these should'nt be necessary
-		        if (left && !right)
+		        if (isMovingLeft && !isMovingRight)
 		        {
 		            if (pos.getX() > 0 - this.left && currentMap.moveLeft())
 		            {
@@ -43,7 +48,7 @@ public class LocalPlayer extends Player
 		            }
 		        }
 		        
-		        else if (right && !left ) 
+		        else if (isMovingRight && !isMovingLeft ) 
 		        {            
 		            if (pos.getX() < currentMap.mapWidth - this.right && currentMap.moveRight())
 		            {
@@ -51,7 +56,7 @@ public class LocalPlayer extends Player
 		            }
 		        }
 		        
-		        else if (up && !down)
+		        else if (isMovingUp && !isMovingDown)
 		        {
 		            if (pos.getY() < currentMap.mapHeight - this.up && currentMap.moveUp())
 		            {
@@ -60,7 +65,7 @@ public class LocalPlayer extends Player
 		            }
 		        }
 		        
-		        else if (down && !up)
+		        else if (isMovingDown && !isMovingUp)
 		        { 
 		            if (pos.getY() > this.down && currentMap.moveDown())
 		            {

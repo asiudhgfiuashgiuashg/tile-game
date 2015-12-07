@@ -100,40 +100,53 @@ public class TheGame extends ApplicationAdapter
 		try {
 			if (in.ready()) {
 				//spin until receive message from server to start game (signaling that other client has connected, etc)
-				while (!gameStart) {
-					if (!gameStart) {
-						JSONObject received = (JSONObject) JSONValue.parse(in.readLine());
-						if (received.get("type").equals("gameStartSignal")) {
-							gameStart = true; //start the game once the gameStartSignal is received from the server (signalling that the other client has connected, etc)
-						}
+				if (!gameStart) {
+					JSONObject received = (JSONObject) JSONValue.parse(in.readLine());
+					if (received.get("type").equals("gameStartSignal")) {
+						gameStart = true; //start the game once the gameStartSignal is received from the server (signalling that the other client has connected, etc)
 					}
-				}
-				
-				//handle messages that come during game play, after the game has started
-        		String inputLine = in.readLine();
-        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
-        		//System.out.println("received from server: " + received.toString());
-        		if (received.get("type").equals("position")) {
-	        		double secondPlayerX = ((Number) received.get("charX")).floatValue();
-	        		double secondPlayerY = ((Number) received.get("charY")).floatValue();
-	        		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
-        		
-        		//System.out.println("updated player2 pos to be: " + currentMap.player2.getPos());
+					
+					
+				} else { //handle messages that come during game play, after the game has started
+	        		String inputLine = in.readLine();
+	        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
+	        		if (received.get("type").equals("position")) {
+		        		double secondPlayerX = ((Number) received.get("charX")).floatValue();
+		        		double secondPlayerY = ((Number) received.get("charY")).floatValue();
+		        		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
+	        		}
 				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//sending
+		//sending messagse to server
+		//TODO maybe need a more advanced queue so we arent sending every message type at the same time
+		// maybe not, maybe tcp already handles queues of messages pretty well
     	JSONObject obj = new JSONObject();
-    	float charX = (float) player.getPos().getX();
-    	float charY = (float) player.getPos().getY();
-    	obj.put("type", "position"); //let server know that this message specifies a position update
-        obj.put("charX", charX);
-        obj.put("charY", charY);
         if (System.currentTimeMillis() - time >= SEND_SPACING) {
+        	//sending position
+        	obj.clear();
+        	float charX = (float) player.getPos().getX();
+        	float charY = (float) player.getPos().getY();
+        	obj.put("type", "position"); //let server know that this message specifies a position update
+            obj.put("charX", charX);
+            obj.put("charY", charY);
         	out.println(obj.toString());
+        	
+        	//sending direction
+        	obj.clear();
+        	obj.put("type", "direction");
+        	obj.put("isMovingLeft", currentMap.player.isMovingLeft);
+        	obj.put("isMovingRight", currentMap.player.isMovingRight);
+        	obj.put("isMovingDown", currentMap.player.isMovingDown);
+        	obj.put("isMovingUp", currentMap.player.isMovingUp);
+        	out.println(obj.toString());
+        	
+        	
+        	
+        	//update time
         	time = System.currentTimeMillis();
         }
         
