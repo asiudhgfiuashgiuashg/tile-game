@@ -8,6 +8,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.mygdx.game;
 
+import java.util.Arrays;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
@@ -17,32 +19,25 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Player extends Entity
 {
-    
     TextureRegion idleRight;
     TextureRegion idleLeft;
     TextureRegion idleUp;
     TextureRegion idleDown;
-    private float moveSpeed;
+
     Map currentMap;
-    int sightX = 400;
-    int sightY = 240;
     
-    private boolean canMove;
     
     public ItemCollector inv;
     
-    @Override
-    public void create()
+    public Player(Shape shape, boolean passable)
     {
-    	canMove = true;
-    	moveSpeed = 200;
-    	
-        left = 15;
+    	super(shape, passable);
+    	left = 15;
         right = 50;
-        up = 50;
-        down = 0;
-        posX = 0;
-        posY = 0;
+        up = 55;
+        down = 1;
+    	
+        pos = new Point(0, 0);
 
         
         spriteSheet = new Texture(Gdx.files.internal("index.png"));
@@ -62,10 +57,6 @@ public class Player extends Entity
 
     }
     
-    public void setCurrentMap(Map currentMap)
-    {
-    	this.currentMap = currentMap;
-    }
     
     protected Animation animate(int row, int length)
     {
@@ -82,55 +73,21 @@ public class Player extends Entity
     
     @Override
     public void update(float stateTime) {
-    	if (canMove()) {
-	    	boolean left = (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) ? true : false;
-	    	boolean right = (Gdx.input.isKeyPressed(Keys.RIGHT)|| Gdx.input.isKeyPressed(Keys.D)) ? true : false;
-	    	boolean up = (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W)) ? true : false;
-	    	boolean down = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
-	    	
-	    	try {
-		        if (left && !right)
-		        {
-		            if (currentMap.moveLeft())
-		            {
-		                currentFrame = moveLeft.getKeyFrame(stateTime, true);
-		            }
-		        }
-		        
-		        else if (right && !left ) 
-		        {            
-		            if (currentMap.moveRight())
-		            {
-		                currentFrame = moveRight.getKeyFrame(stateTime, true);
-		            }
-		        }
-		        
-		        else if (up && !down)
-		        {
-		            if (currentMap.moveUp())
-		            {
-		                currentFrame = moveUp.getKeyFrame(stateTime, true); 
-		            }
-		        }
-		        
-		        else if (down && !up)
-		        { 
-		            if (currentMap.moveDown())
-		            {
-		                currentFrame = moveDown.getKeyFrame(stateTime, true);
-		            }
-		        }
-	    	} catch(Exception e) {
-	    		System.out.println(e.getMessage());
-	    	}
-    	}
+    	
+    }
+    
+
+    public void drawAtPos(SpriteBatch batch, float drawPosX, float drawPosY) {
+        batch.draw(currentFrame, drawPosX, drawPosY);
+        //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
+        //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
     }
     
     @Override
     public void draw(SpriteBatch batch) {
-        batch.draw(currentFrame, drawPosX, drawPosY);
-        batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
-        batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
+	    batch.draw(currentFrame, drawPosX, drawPosY);
+	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
+	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
     }
     
     
@@ -153,19 +110,29 @@ public class Player extends Entity
     public float getBottom() {
     	return down;
     }
-    public void setFOV(int x, int y)
-    {
-        sightX = x;
-        sightY = y;
+    
+    @Override
+    public Point getPos() {
+    	return pos;
     }
-    public void setCanMove(boolean canMove) {
-    	this.canMove = canMove;
+    @Override 
+    public void setPos(Point newPos) {
+    	pos = newPos;
+    	shape.setPos(newPos);
     }
-    public boolean canMove() {
-    	return canMove;
-    }
-    public float getMoveDist() {
-    	return moveSpeed * Gdx.graphics.getDeltaTime();
+    @Override
+    public void translate(Point dist) {
+    	pos.plus(dist);
+    	shape.translate(dist);
     }
     
+    @Override
+    public void setX(double newX) {
+    	setPos(new Point(newX, pos.getY()));
+    }
+    
+    @Override
+    public void setY(double newY) {
+    	setPos(new Point(pos.getX(), newY));
+    }
 }

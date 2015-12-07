@@ -11,9 +11,12 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
-import java.lang.Math;
 
 import javax.imageio.ImageIO;
 
@@ -35,11 +38,11 @@ public class Map
     private String title;
     private int numRows;
     private int numCols;
-    private static final int TILE_WIDTH = 80;
-    private static final int TILE_HEIGHT = 80;
+    private static final int TILE_WIDTH = Tile.getTileWidth();
+    private static final int TILE_HEIGHT = Tile.getTileHeight();
     private Tile[][] mapTiles;
-    private int mapWidth;
-    private int mapHeight;
+    public int mapWidth;
+    public int mapHeight;
     private boolean mapMoveLeft;
     private boolean mapMoveRight;
     private boolean mapMoveUp;
@@ -53,17 +56,34 @@ public class Map
 
     private int winX = 400;
     private int winY = 240;
-    Player player;
+    LocalPlayer player;
+    RemotePlayer player2;
+    
+    boolean multiplayerEnabled = true;
     
     Texture mapImage;
     TextureRegion fov;
     ItemCollector itemsOnField;
+    ObjectCollector objectList;
     
-    
-    public Map(String mapFile, String tileFile, Player player) throws IOException
+    //map for keeping track of textures to dispose of
+    // thing = GameObject or Item
+    AbstractMap<Object, Texture> thingToTextureMap;
+    public Map(String mapFile, String tileFile, LocalPlayer player) throws IOException
     {	
+    	thingToTextureMap = new HashMap<Object, Texture>();
+    	
     	this.player = player;
     	player.setCurrentMap(this);
+    	
+    	Shape shape = new Shape(Arrays.asList(
+				new LineSeg(new Point(15, 0), new Point(15, 55)),
+				new LineSeg(new Point(15, 55), new Point(50, 55)),
+				new LineSeg(new Point(50, 55), new Point(50, 0)),
+				new LineSeg(new Point(50, 0), new Point(15, 0))
+				),
+				new Point(0,0));
+		player2 = new RemotePlayer(shape, true);
     	
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
@@ -75,8 +95,9 @@ public class Map
         mapTiles = new Tile[numRows][numCols];
         stateTime = 0f;
         
+        System.out.println("numrows: " + numRows);
         Scanner tileFileScanner = new Scanner(new File(tileFile));
-        for (int r = 0; r < numRows; r++) {
+        for (int r = numRows - 1; r >= 0; r--) {
             String currentRow = mapFileScanner.nextLine();
             String[] individualIds = currentRow.split("\\s+");
         	for (int c = 0; c < numCols; c++/*ha*/) {
@@ -100,7 +121,7 @@ public class Map
         		String name = currentAttributes[0];
         		boolean passable = Boolean.parseBoolean(currentAttributes[3]);
         		//need to also get hazard once class Item is implemented
-        		Tile newTile = new Tile(imageURI, name, passable);
+        		Tile newTile = new Tile(c * TILE_WIDTH, r * TILE_HEIGHT, imageURI, name, passable);
         		mapTiles[r][c] = newTile;
         		tileFileScanner = new Scanner(new File(tileFile));
         	}
@@ -114,23 +135,40 @@ public class Map
         String[] currentAttributes = null;
         String className;
         int id;
-        int xPos;
-        int yPos;
+        Point pos;
         if (itemIndex > 0)
         {
         	for(int x = 0; x < itemIndex; x++)
         	{
-        	String currentLine = mapFileScanner.nextLine();
-			currentAttributes = currentLine.split(", ");
-			className = currentAttributes[0];
-			id = Integer.parseInt(currentAttributes[1]);
-			xPos = Integer.parseInt(currentAttributes[2]);
-			yPos = Integer.parseInt(currentAttributes[3]);
-			itemsOnField.addItem(className, id, xPos, yPos);
+	        	String currentLine = mapFileScanner.nextLine();
+				currentAttributes = currentLine.split(", ");
+				className = currentAttributes[0];
+				id = Integer.parseInt(currentAttributes[1]);
+				pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
+				itemsOnField.addItem(className, id, pos);
         	}
 			
         }
         
+        //Creates the ObjectCollector...object (kek) before giving it the information to create an array list of objects
+        
+        objectList = new ObjectCollector(TILE_WIDTH, TILE_HEIGHT, numCols, numRows, mapTiles);
+        int objectIndex = Integer.parseInt(mapFileScanner.nextLine());
+        if (objectIndex > 0)
+        {
+        	for(int x = 0; x < objectIndex; x++)
+        	{
+        		String currentLine = mapFileScanner.nextLine();
+        		currentAttributes = currentLine.split(", ");
+        		className = currentAttributes[0];
+        		id = Integer.parseInt(currentAttributes[1]);
+        		pos = new Point(Float.parseFloat(currentAttributes[2]),Float.parseFloat(currentAttributes[3]));
+        		objectList.addObject(className, id, pos);
+        	}
+
+        }
+        
+        	
         mapFileScanner.close();
         ///////////////////////////////////////////////////////////
         // create and save png which is composite of tile images //
@@ -143,7 +181,7 @@ public class Map
             for (int c = 0; c < numCols; c++)
             {
                 BufferedImage currTileImg;
-                currTileImg = ImageIO.read(new File("../core/assets/" + mapTiles[r][c].imageURI));
+                currTileImg = ImageIO.read(new File("../core/assets/" + mapTiles[numRows - 1 - r][c].imageURI));
                 g.drawImage(currTileImg, c * TILE_WIDTH, r * TILE_HEIGHT, null);
             }
         }
@@ -155,7 +193,7 @@ public class Map
         }
         catch(IOException e)
         {
-        	System.out.println("Fucking sucks");
+        	System.out.println(e);
         }
         mapWidth = TILE_WIDTH * numCols;
         mapHeight = TILE_HEIGHT * numRows;
@@ -166,6 +204,7 @@ public class Map
         
             
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
+        
     }
     
     //updating and drawing the visible part of the map
@@ -174,6 +213,7 @@ public class Map
     	//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
     	//player.update() must come before fov.setRegion or item drawing will lag behind map and player drawing
     	player.update(stateTime);
+    	player2.update(stateTime);
         fov.setRegion(mapPosX, mapHeight - (mapPosY + 2*winY), 2*winX, 2*winY);
         stateTime += Gdx.graphics.getDeltaTime();
         
@@ -186,18 +226,51 @@ public class Map
     	
         batch.draw(fov, 0, 0);
         for (int x = 0; x < itemsOnField.getListSize(); x++)
-        {    		
-        	if (itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
+        {
+        	Item item = itemsOnField.getItem(x);
+			Texture textureToUse = thingToTextureMap.get(item);
+			
+			//see if item should be drawn
+        	if ((itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2*winX)
+        			&& (itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2*winX))
         	{
-        		if(itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2*winX)
-        		{
-        			batch.draw(new Texture(itemsOnField.getFloorImage(x)), itemsOnField.getXPos(x) - mapPosX, itemsOnField.getYPos(x) - mapPosY);
-        		}
+    			if (textureToUse == null) { //Item doesnt map to any texture, so make it one
+    				textureToUse = new Texture(itemsOnField.getFloorImage(x));
+    				thingToTextureMap.put(item, textureToUse); // save texture to use later
+    			}
+    			batch.draw(textureToUse, (float)itemsOnField.getXPos(x) - mapPosX, (float)itemsOnField.getYPos(x) - mapPosY);
+        	} else { //item should not be drawn, so free up its texture
+        		 if (textureToUse != null) {
+        			 textureToUse.dispose();
+        			 thingToTextureMap.remove(item);
+        		 }
         	}
         }
-		player.draw(batch);
-		
         
+        
+        for (int x = 0; x < objectList.getListSize(); x++)
+        {    		
+        	GameObject object = objectList.getObject(x);
+        	Texture textureToUse = thingToTextureMap.get(object);
+        	if ((objectList.getXPos(x) + 150 > mapPosX && objectList.getXPos(x) < mapPosX + 2*winX)
+        		&& (objectList.getYPos(x) + 150 > mapPosY && objectList.getYPos(x) < mapPosY + 2*winX))
+        	{   
+        		if (textureToUse == null) { //Item doesnt map to any texture, so make it one
+    				textureToUse = new Texture(objectList.getImage(x));
+    				thingToTextureMap.put(object, textureToUse); // save texture to use later
+    			}
+        		batch.draw(textureToUse, (float) objectList.getXPos(x) - mapPosX, (float) objectList.getYPos(x) - mapPosY);
+        	} else {
+        		if (textureToUse != null) {
+       			 textureToUse.dispose();
+       			 thingToTextureMap.remove(object);
+       		 }
+        	}
+        }
+        if (multiplayerEnabled) {
+			player2.drawAtPos(batch, (float) player2.getPos().getX() - mapPosX, (float) player2.getPos().getY() - mapPosY);
+		}
+		player.draw(batch);
     }
     
     //////////////////////////
@@ -211,32 +284,32 @@ public class Map
     
     public ItemCollector getNearbyItemList()
     {
-    	float itemRefPosX;
-    	float itemRefPosY;
-    	float charRefPosX = player.posX + player.getLeft();
-    	float charRefPosY = player.posY + player.getBottom();
+    	double itemRefPosX;
+    	double itemRefPosY;
+    	double charRefPosX = player.getPos().getX() + player.getLeft();
+    	double charRefPosY = player.getPos().getY() + player.getBottom();
     	ArrayList<Integer> indexValues = new ArrayList<Integer>(); 
     	
     	for (int x = 0; x < itemsOnField.getListSize(); x++)
     	{
-    		if (player.posX > itemsOnField.getXPos(x) + itemsOnField.getWidth(x))
+    		if (player.getPos().getX() > itemsOnField.getXPos(x) + itemsOnField.getWidth(x))
     		{
     			itemRefPosX = itemsOnField.getXPos(x) + itemsOnField.getWidth(x);
     		}
     		else 
     		{
     			itemRefPosX = itemsOnField.getXPos(x);
-    			charRefPosX = player.posX + player.getRight();
+    			charRefPosX = player.getPos().getX() + player.getRight();
 			}
     		
-    		if (player.posY > itemsOnField.getYPos(x) + itemsOnField.getHeight(x))
+    		if (player.getPos().getY() > itemsOnField.getYPos(x) + itemsOnField.getHeight(x))
     		{
     			itemRefPosY = itemsOnField.getYPos(x) + itemsOnField.getHeight(x);
     		}
     		else 
     		{
     			itemRefPosY = itemsOnField.getYPos(x);
-    			charRefPosY = player.posY + player.getTop();
+    			charRefPosY = player.getPos().getY() + player.getTop();
     		}
     		
     		if (Math.sqrt(Math.pow(itemRefPosX - charRefPosX, 2) + Math.pow(itemRefPosY - charRefPosY, 2)) <= 100)	
@@ -280,23 +353,23 @@ public class Map
     									//as this method just provides a fail safe in case the char is placed off the map
 
     	
-    	if (player.posX < winX && smallWidth == false)
+    	if (player.getPos().getX() < winX && smallWidth == false)
     	{
-    		player.drawPosX = player.posX;
+    		player.drawPosX = (float) player.getPos().getX();
     	}
-    	else if (player.posX > mapWidth - winX && smallWidth == false)
+    	else if (player.getPos().getX() > mapWidth - winX && smallWidth == false)
     	{
-    		player.drawPosX = (player.posX - mapWidth + 2*winX);
+    		player.drawPosX = (float)(player.getPos().getX() - mapWidth + 2*winX);
     	}
     	
     	
-    	if (player.posY < winY && smallHeight == false)
+    	if (player.getPos().getY() < winY && smallHeight == false)
     	{
-    		player.drawPosY = player.posY;
+    		player.drawPosY = (float)player.getPos().getY();
     	}
-    	else if (player.posY > mapHeight - winY && smallHeight == false)
+    	else if (player.getPos().getY() > mapHeight - winY && smallHeight == false)
     	{
-    		player.drawPosY = (player.posY - (mapHeight - winY) + winY);
+    		player.drawPosY = (float)(player.getPos().getY() - (mapHeight - winY) + winY);
     	}
     	if (smallWidth == true)
     	{
@@ -311,39 +384,40 @@ public class Map
     
     public void adjustCharPlacement()
     {
-    	if (player.posX < -15)
+    	Point playerPos = player.getPos();
+    	if (playerPos.getX() < -15)
     	{
-    		player.posX = -15;
+    		player.setX(-15);
     	}
-    	else if (player.posX > mapWidth - 50)
+    	else if (playerPos.getX() > mapWidth - 50)
     	{
-    		player.posX = mapWidth - 50;
+    		player.setX(mapWidth - 50);
     	}
-    	if (player.posY < 5)
+    	if (playerPos.getY() < 5)
     	{
-    		player.posY = 5;
+    		player.setY(5);
     	}
-    	else if (player.posY > mapHeight - 55)
+    	else if (playerPos.getY() > mapHeight - 55)
     	{
-    		player.posY = mapHeight - 55;
+    		player.setY(mapHeight - 55);
     	}
     	if (smallWidth)
     	{
-    		player.drawPosX = player.posX + (winX - mapWidth/2);
+    		player.drawPosX = (float)playerPos.getX() + (winX - mapWidth/2);
     	}
     	if (smallHeight)
     	{
-    		player.drawPosY = player.posY + (winY - mapHeight/2);
+    		player.drawPosY = (float)playerPos.getY() + (winY - mapHeight/2);
     	}
     	boolean enclosed = true; 
     	while (enclosed == true)
     	{
-    		int x = (int) (player.posX - 15)/TILE_WIDTH;
-        	int y = (int) (player.posY)/TILE_HEIGHT;
+    		int x = (int) (playerPos.getX() - 15) / TILE_WIDTH;
+        	int y = (int) (playerPos.getY()) / TILE_HEIGHT;
         	if (!mapTiles[y][x].isPassable())
         	{
-        		x +=TILE_WIDTH;
-        		y +=TILE_HEIGHT;
+        		x += TILE_WIDTH;
+        		y += TILE_HEIGHT;
         	}
         	else
         	{
@@ -356,16 +430,16 @@ public class Map
     {
     	if (smallWidth == false)
     	{
-    		if (player.posX < winX )
+    		if (player.getPos().getX() < winX )
     		{
     			mapPosX = 0;
     		}
-    		else if (player.posX > winX)
+    		else if (player.getPos().getX() > winX)
     		{
-    			mapPosX = (int)player.posX - winX;
+    			mapPosX = (int)player.getPos().getX() - winX;
     		}
     	
-    		if (player.posX + winX > mapWidth)
+    		if (player.getPos().getX() + winX > mapWidth)
     		{
     			mapPosX = mapWidth - 2*winX;
     		}
@@ -397,15 +471,15 @@ public class Map
     { 	
     	if (smallHeight == false) 
     	{
-    		if (player.posY < winY)
+    		if (player.getPos().getY() < winY)
     		{
     			mapPosY = 0;
     		}
-    		else if (player.posY > winY)
+    		else if (player.getPos().getY() > winY)
     		{
-    			mapPosY = (int)player.posY - winY;
+    			mapPosY = (int)player.getPos().getY() - winY;
     		}
-    		if (player.posY + winY > mapHeight )
+    		if (player.getPos().getY() + winY > mapHeight )
     		{
     		mapPosY = mapHeight - 2*winY;
     		}
@@ -437,9 +511,10 @@ public class Map
     {
     	boolean success = false;
     	float deltaX = player.getMoveDist();
-		if (!collides(Direction.LEFT, deltaX) && player.posX > - player.getLeft())
+		if (!collides(Direction.LEFT, deltaX) && player.getPos().getX() > - player.getLeft())
 		{
-			player.posX -= deltaX;
+			//player.getPos().getX() -= deltaX;
+			player.setX((double)(player.getPos().getX() - deltaX));
 			success = true;
 			
 			updatePosX(-deltaX);	
@@ -452,9 +527,10 @@ public class Map
 
     	boolean success = false;
     	float deltaX = player.getMoveDist();
-		if (!collides(Direction.RIGHT, deltaX) && player.posX < mapWidth - player.getRight())
+		if (!collides(Direction.RIGHT, deltaX) && player.getPos().getX() < mapWidth - player.getRight())
 		{
-			player.posX += deltaX;
+			//player.getPos().getX() += deltaX;
+			player.setX(player.getPos().getX() + deltaX);
 			success = true;
 			updatePosX(deltaX);
 		}
@@ -464,9 +540,10 @@ public class Map
     {
     	boolean success = false;
     	float deltaY = player.getMoveDist();
-		if (!collides(Direction.UP, deltaY) && player.posY < mapHeight - player.getTop())
+		if (!collides(Direction.UP, deltaY) && player.getPos().getY() < mapHeight - player.getTop())
 		{
-			player.posY += deltaY;
+			//player.getPos().getY() += deltaY;
+			player.setY(player.getPos().getY() + deltaY);
 			success = true;
 			updatePosY(deltaY);
 		}    	    
@@ -476,9 +553,10 @@ public class Map
     {
     	boolean success = false; 
     	float deltaY = player.getMoveDist();
-		if (!collides(Direction.DOWN, deltaY) && player.posY > player.getBottom())
+		if (!collides(Direction.DOWN, deltaY) && player.getPos().getY() > player.getBottom())
 		{
-			player.posY -= deltaY;
+			//player.getPos().getY() -= deltaY;
+			player.setY(player.getPos().getY() - deltaY);
 			success = true;
 			updatePosY(-deltaY);
 		}	
@@ -492,33 +570,28 @@ public class Map
     	//MAP IS INDEXED WITH (0,0) IN TOP LEFT         //
     	//CHAR POS STARTS WITH (0,0) IN BOTTOM LEFT     //
     	//////////////////////////////////////////////////
-    	double playerLeftSide = player.posX + player.getLeft();
-    	double playerRightSide = player.posX + player.getRight();
-    	double playerBottomSide = player.posY + player.getBottom();
-    	double playerTopSide = player.posY + player.getTop();
+    	double playerLeftSide = player.getPos().getX() + player.getLeft();
+    	double playerRightSide = player.getPos().getX() + player.getRight();
+    	double playerBottomSide = player.getPos().getY() + player.getBottom();
+    	double playerTopSide = player.getPos().getY() + player.getTop();
 
-        double tilesLeftSide;
-        double tilesRightSide;
-        double tilesTopSide;
-        double tilesBottomSide;
 
         int row0, col0, row1, col1;
         
-        Rectangle futurePlayerRect;
-        Rectangle tilesRect;
+        Shape playerShape = player.getShape();
+        Shape futurePlayerShape = playerShape.deepCopy();
+        Point moveDist;
         //calculate requested new position of character and the rows and cols of tiles to check for collision
         if (Direction.LEFT == direction)
         {
-            int tilesToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH) - 1;
+            int tilesToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
             int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
             int topTileToLeftYIndex = (int) playerTopSide / TILE_HEIGHT;
             
-            tilesRightSide = tilesToLeftXIndex * TILE_WIDTH + TILE_WIDTH;
-            tilesLeftSide = tilesToLeftXIndex * TILE_WIDTH;
-            tilesTopSide = topTileToLeftYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
-            tilesBottomSide = bottomTileToLeftYIndex * TILE_HEIGHT;
-
-            futurePlayerRect = new Rectangle(playerLeftSide - speed, playerRightSide - speed, playerTopSide, playerBottomSide);
+            
+            //futurePlayerRect = new Rectangle(playerLeftSide - speed, playerRightSide - speed, playerTopSide, playerBottomSide);
+            moveDist = new Point(-speed, 0);
+            
             
             row0 = bottomTileToLeftYIndex;
             col0 = tilesToLeftXIndex;
@@ -528,16 +601,13 @@ public class Map
             
             
         } else if(Direction.RIGHT == direction) {
-        	int tilesToRightXIndex = ((int) playerRightSide / TILE_WIDTH) + 1;
+        	int tilesToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
         	int bottomTileToLeftYIndex = (int) playerBottomSide / TILE_HEIGHT;
             int topTileToLeftYIndex = (int) playerTopSide / TILE_HEIGHT;
             
-            tilesRightSide = tilesToRightXIndex * TILE_WIDTH + TILE_WIDTH;
-            tilesLeftSide = tilesToRightXIndex * TILE_WIDTH;
-            tilesTopSide = topTileToLeftYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
-            tilesBottomSide = bottomTileToLeftYIndex * TILE_HEIGHT;
             
-            futurePlayerRect = new Rectangle(playerLeftSide + speed, playerRightSide + speed, playerTopSide, playerBottomSide);
+            //futurePlayerRect = new Rectangle(playerLeftSide + speed, playerRightSide + speed, playerTopSide, playerBottomSide);
+            moveDist = new Point(speed, 0);
             
             row0 = bottomTileToLeftYIndex;
             col0 = tilesToRightXIndex;
@@ -548,14 +618,11 @@ public class Map
         } else if (Direction.UP == direction) {
         	int tileToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
         	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
-        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT + 1);
+        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT);
         	
-        	tilesRightSide = tileToRightXIndex * TILE_WIDTH + TILE_WIDTH;
-            tilesLeftSide = tileToLeftXIndex * TILE_WIDTH;
-            tilesTopSide = tilesYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
-            tilesBottomSide = tilesYIndex * TILE_HEIGHT;
             
-            futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            //futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            moveDist = new Point(0, speed);
             
             row0 = tilesYIndex;
             col0 = tileToLeftXIndex;
@@ -566,14 +633,11 @@ public class Map
         } else if (Direction.DOWN == direction) {
         	int tileToLeftXIndex = ((int) playerLeftSide / TILE_WIDTH);
         	int tileToRightXIndex = ((int) playerRightSide / TILE_WIDTH);
-        	int tilesYIndex = ((int) playerTopSide / TILE_HEIGHT - 1);
+        	int tilesYIndex = ((int) playerBottomSide / TILE_HEIGHT);
         	
-        	tilesRightSide = tileToRightXIndex * TILE_WIDTH + TILE_WIDTH;
-            tilesLeftSide = tileToLeftXIndex * TILE_WIDTH;
-            tilesTopSide = tilesYIndex * TILE_HEIGHT + TILE_HEIGHT - 1;
-            tilesBottomSide = tilesYIndex * TILE_HEIGHT;
             
-            futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            //futurePlayerRect = new Rectangle(playerLeftSide, playerRightSide, playerTopSide + speed, playerBottomSide + speed);
+            moveDist = new Point(0, -speed);
             
             row0 = tilesYIndex;
             col0 = tileToLeftXIndex;
@@ -582,34 +646,41 @@ public class Map
         } else {
         	throw new Exception("invalid Direction");
         }
+        futurePlayerShape.translate(moveDist);
+        //row, col
+        //tiles which the character *might* be in if they are allowed to continue to move in this direction
+        Tile futureTile0 = mapTiles[row0][col0];
+        Tile futureTile1 = mapTiles[row1][col1];
+
+        // check for object intersection with future player shape
+        List<GameObject> futureTile0Objects = (List<GameObject>) objectList.objectGrid[row0][col0];
+    	List<GameObject> futureTile1Objects = (List<GameObject>) objectList.objectGrid[row1][col1];
+    	
+        for (GameObject object: futureTile0Objects) {
+    		if (object.getShape().intersects(futurePlayerShape)) {
+    			return true;
+    		}
+    	}
+        
+        
+        for (GameObject object: futureTile1Objects) {
+    		if (object.getShape().intersects(futurePlayerShape)) {
+    			return true;
+    		}
+    	}
+    	
+        
+        if (!(futureTile0.isPassable() && futureTile1.isPassable())) {
+        	//check for collision
+        	Shape futureTile0Shape = futureTile0.getShape();
+        	Shape futureTile1Shape = futureTile1.getShape();
         	
         	
         	
         	
-        tilesRect = new Rectangle(tilesLeftSide, tilesRightSide, tilesTopSide, tilesBottomSide);
-        //check for collision of tiles in Direction.x are not passable
-        //System.out.println("row 0: " + row0 + "col 0: " + col0 + "row 1: " + row1 + "col1: " + col1);
-        //first part of if statement avoids giving bothPassable args which would cause IndexOutOfBounds exception
-        if (!(row0 < 0 || col0 < 0 || row1 < 0 || col1 < 0 || row0 >= mapHeight/TILE_HEIGHT || row1 >= mapHeight/TILE_HEIGHT || col0 >= mapWidth/TILE_WIDTH || col1 >= mapWidth/TILE_WIDTH) && !bothPassable(row0, col0, row1, col1)) {
-        	return rectIntersect(futurePlayerRect, tilesRect);
+        	
+        	return futurePlayerShape.intersects(futureTile0Shape) || futurePlayerShape.intersects(futureTile1Shape);
         }
         return false;
-    }
-    
-    
-    
-    
-    private boolean bothPassable(int row0, int col0, int row1, int col1) {    	
-    	return mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row0)][col0].isPassable()
-        		&& mapTiles[bottomLeftIndexedRowToTopLeftIndexedRow(row1)][col1].isPassable();
-    }
-    private int bottomLeftIndexedRowToTopLeftIndexedRow(int row) {
-    	return this.numRows - 1 - row;
-    }
-    private boolean rectIntersect(Rectangle a, Rectangle b) {
-    	return (a.left <= b.right &&
-    			b.left <= a.right &&
-    		    a.top >= b.bottom &&
-    		    b.top >= a.bottom);
     }
 }

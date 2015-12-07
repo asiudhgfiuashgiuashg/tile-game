@@ -39,23 +39,26 @@ public class GuiItemList extends GuiElement
     String arrowFileURI;
     Texture arrowTexture;
     
-    public GuiItemList(Player player)
+    public GuiItemList(Player player, int i)
     {
     	this.player = player;
-    	posX = player.drawPosX;
-    	
-    	if (player.drawPosY < 500)
-    	{	
-    		posY = player.drawPosY + player.up + 50;
-    	}
-    	else
+    	if (i == 0)
     	{
-    		posY = player.drawPosY - 100;
+    		posX = player.drawPosX;
+
+    		if (player.drawPosY < 500)
+    		{	
+    			posY = player.drawPosY + player.up + 50;
+    		}
+    		else
+    		{
+    			posY = player.drawPosY - 100;
+    		}
     	}
-    	
     	font = new BitmapFont();
     	arrowFileURI = "itemlist_arrow.png";
     	arrowTexture = new Texture(Gdx.files.internal("itemlist_arrow.png"));
+    	
     }
     
     public void setItemList(ItemCollector list)
