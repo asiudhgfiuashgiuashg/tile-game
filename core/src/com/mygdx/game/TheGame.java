@@ -28,6 +28,8 @@ public class TheGame extends ApplicationAdapter
 	boolean itemListExists;
 	PrintWriter out;
     BufferedReader in;
+    long time;
+    final int SEND_RATE = 40;
 
 	@Override
 	public void create()
@@ -85,6 +87,7 @@ public class TheGame extends ApplicationAdapter
 			e.printStackTrace();
 			System.exit(-1);
 		}
+		time = System.currentTimeMillis();
 	}
 
 
@@ -99,12 +102,12 @@ public class TheGame extends ApplicationAdapter
 				if (in.ready()) {
             		String inputLine = in.readLine();
             		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
-            		System.out.println("received from server: " + received.toString());
+            		//System.out.println("received from server: " + received.toString());
             		double secondPlayerX = ((Number) received.get("charX")).floatValue();
             		double secondPlayerY = ((Number) received.get("charY")).floatValue();
             		
             		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
-            		System.out.println("updated player2 pos to be: " + currentMap.player2.getPos());
+            		//System.out.println("updated player2 pos to be: " + currentMap.player2.getPos());
             	}
 			}
 		} catch (IOException e) {
@@ -117,7 +120,10 @@ public class TheGame extends ApplicationAdapter
     	float charY = (float) player.getPos().getY();
         obj.put("charX", charX);
         obj.put("charY", charY);
-        out.println(obj.toString());
+        if (System.currentTimeMillis() - time >= SEND_RATE) {
+        	out.println(obj.toString());
+        	time = System.currentTimeMillis();
+        }
         
 		//**end networking******
 		//System.out.println(player.getShape());
