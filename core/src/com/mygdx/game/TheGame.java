@@ -131,34 +131,35 @@ public class TheGame extends ApplicationAdapter
 		//sending messagse to server
 		//TODO maybe need a more advanced queue so we arent sending every message type at the same time
 		// maybe not, maybe tcp already handles queues of messages pretty well
-    	JSONObject obj = new JSONObject();
-        if (System.currentTimeMillis() - time >= SEND_SPACING) {
-        	//sending position
-        	obj.clear();
-        	float charX = (float) player.getPos().getX();
-        	float charY = (float) player.getPos().getY();
-        	obj.put("type", "position"); //let server know that this message specifies a position update
-            obj.put("charX", charX);
-            obj.put("charY", charY);
-        	out.println(obj.toString());
-        	
-        	//sending direction
-        	//note -- if not moving, all of these bools will be false
-        	if (currentMap.player.direction != playerOldDirection) {
+		if (gameStart) {
+	    	JSONObject obj = new JSONObject();
+	        if (System.currentTimeMillis() - time >= SEND_SPACING) {
+	        	//sending position
 	        	obj.clear();
-	        	obj.put("type", "direction");
-	        	obj.put("isMovingLeft", currentMap.player.isMovingLeft);
-	        	obj.put("isMovingRight", currentMap.player.isMovingRight);
-	        	obj.put("isMovingDown", currentMap.player.isMovingDown);
-	        	obj.put("isMovingUp", currentMap.player.isMovingUp);
+	        	float charX = (float) player.getPos().getX();
+	        	float charY = (float) player.getPos().getY();
+	        	obj.put("type", "position"); //let server know that this message specifies a position update
+	            obj.put("charX", charX);
+	            obj.put("charY", charY);
 	        	out.println(obj.toString());
-        	}
-        	playerOldDirection = currentMap.player.direction;
-        	
-        	//update time
-        	time = System.currentTimeMillis();
-        }
-        
+	        	
+	        	//sending direction
+	        	//note -- if not moving, all of these bools will be false
+	        	if (currentMap.player.direction != playerOldDirection) {
+		        	obj.clear();
+		        	obj.put("type", "direction");
+		        	obj.put("isMovingLeft", currentMap.player.isMovingLeft);
+		        	obj.put("isMovingRight", currentMap.player.isMovingRight);
+		        	obj.put("isMovingDown", currentMap.player.isMovingDown);
+		        	obj.put("isMovingUp", currentMap.player.isMovingUp);
+		        	out.println(obj.toString());
+	        	}
+	        	playerOldDirection = currentMap.player.direction;
+	        	
+	        	//update time
+	        	time = System.currentTimeMillis();
+	        }
+		}
 		//**end networking******
 		//System.out.println(player.getShape());
 		/*
@@ -204,8 +205,11 @@ public class TheGame extends ApplicationAdapter
 				
 					
 					
+				} else if (Gdx.input.isKeyJustPressed(Keys.ENTER)) {
+					player.setCanMove(false);
+					ChatInputProcessor chatInputProcessor = new ChatInputProcessor();
+					Gdx.input.setInputProcessor(chatInputProcessor);
 				} else {
-					
 					GuiManager.currentManager.clearElements();
 					itemListExists = false;
 					player.setCanMove(true);
