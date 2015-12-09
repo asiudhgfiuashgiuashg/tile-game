@@ -39,8 +39,13 @@ public class Player extends Entity
     	
         pos = new Point(0, 0);
 
-        
-        spriteSheet = new Texture(Gdx.files.internal("index.png"));
+        inv = new ItemCollector();
+
+    }
+    
+    protected void changeAppearance(String sprites)
+    {
+    	spriteSheet = new Texture(Gdx.files.internal(sprites));
         tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
         
         moveLeft = animate(9, 9);
@@ -52,11 +57,7 @@ public class Player extends Entity
         moveDown = animate(10, 9);
         idleDown = tmp[10][0];
         currentFrame = idleUp;
-
-        inv = new ItemCollector();
-
     }
-    
     
     protected Animation animate(int row, int length)
     {

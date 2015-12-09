@@ -13,18 +13,7 @@ public class RemotePlayer extends Player
 	
 	public RemotePlayer(Shape shape, boolean passable) {
 		super(shape, passable);
-		spriteSheet = new Texture(Gdx.files.internal("index2.png"));
-		tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
-		idle = true;
-		moveLeft = animate(9, 9);
-        idleLeft = tmp[9][0];
-        moveRight = animate(11, 9);
-        idleRight = tmp[11][0];
-        moveUp = animate(8, 9);
-        idleUp = tmp[8][0];
-        moveDown = animate(10, 9);
-        idleDown = tmp[10][0];
-        currentFrame = idleUp;
+		changeAppearance("index2.png");
 		currentAnimation = moveLeft;
 	}
 	

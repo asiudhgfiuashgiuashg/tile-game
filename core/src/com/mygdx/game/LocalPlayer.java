@@ -2,6 +2,8 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 
 public class LocalPlayer extends Player {
@@ -19,6 +21,7 @@ public class LocalPlayer extends Player {
 
 	public LocalPlayer(Shape shape, boolean passable) {
 		super(shape, passable);
+		changeAppearance("index.png");
 		moveSpeed = 200;
 		canMove = true;
 
