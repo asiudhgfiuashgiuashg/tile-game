@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 
 
@@ -7,8 +9,10 @@ public class RemotePlayer extends Player
 {
 	private Animation currentAnimation;
 	boolean idle;
+	
 	public RemotePlayer(Shape shape, boolean passable) {
 		super(shape, passable);
+		spriteSheet = new Texture(Gdx.files.internal("index2.png"));
 		idle = true;
 		currentAnimation = moveLeft;
 	}
