@@ -25,14 +25,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-/**
- * (Insert a comment that briefly describes the purpose of this class definition.)
- *
- * <p/> Bugs: (List any known issues or unimplemented features here)
- * 
- * @author (Bhavishya Shah)
- *
- */
+
 public class Map
 {
     private String title;
