@@ -54,7 +54,9 @@ public class TheGame extends ApplicationAdapter
     Direction playerOldDirection;
     Skin skin;
     Stage stage;
-    String serverIp;
+    Socket socket;
+    VerticalGroup mainMenuVerticalGroup;
+    TextField errorTextField;
     
     private static enum GameState {
         MAIN_MENU,
@@ -64,9 +66,7 @@ public class TheGame extends ApplicationAdapter
     
 	@Override
 	public void create()
-	{
-		serverIp = "";
-		
+	{	
 		gameStart = false; //dont start game until both clients are ready
 		
 		batch = new SpriteBatch();
@@ -96,42 +96,31 @@ public class TheGame extends ApplicationAdapter
 		skin.add("default", textButtonStyle);
 		
 		TextFieldStyle textFieldStyle = new TextFieldStyle();
+		textFieldStyle.background = skin.newDrawable("white", Color.OLIVE);
 		textFieldStyle.font = skin.getFont("default");
 		textFieldStyle.fontColor = Color.WHITE;
 		skin.add("default", textFieldStyle);
 		
+		
 
-		TextField textField = new TextField("", skin);
-		textField.setWidth(200);
-		textField.setHeight(30);
-		textField.setAlignment(Align.center);
-		textField.setTextFieldListener(new TextField.TextFieldListener() {
-
-			@Override
-			public void keyTyped(TextField textField, char c) {
-				if (Character.isDigit(c) || '.' == c || Character.isAlphabetic(c)) {
-					serverIp += c;
-				} else if ('\b' == c) { //backspace
-					serverIp = serverIp.substring(0, serverIp.length() - 1);
-				}
-				textField.setText(serverIp);
-			}
-			
-		});
+		final TextField serverTextField = new TextField("", skin);
+		serverTextField.setWidth(200);
+		serverTextField.setHeight(30);
+		serverTextField.setAlignment(Align.center);
 
 		// Create a table that fills the screen. Everything else will go inside this table.
-		VerticalGroup vGroup = new VerticalGroup();
-		vGroup.setFillParent(true);
-		vGroup.align(Align.center);
-		vGroup.debugAll();
-		stage.addActor(vGroup);
+		mainMenuVerticalGroup = new VerticalGroup();
+		mainMenuVerticalGroup.setFillParent(true);
+		mainMenuVerticalGroup.align(Align.center);
+		mainMenuVerticalGroup.debugAll();
+		stage.addActor(mainMenuVerticalGroup);
 
 		// Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
 		final TextButton button = new TextButton("Connect", skin);
-		vGroup.addActor(button);
-		vGroup.addActor(textField);
-		vGroup.debugAll();
-		vGroup.padTop(100);
+		mainMenuVerticalGroup.addActor(button);
+		mainMenuVerticalGroup.addActor(serverTextField);
+		mainMenuVerticalGroup.debugAll();
+		mainMenuVerticalGroup.padTop(100);
 
 		// Add a listener to the button. ChangeListener is fired when the button's checked state changes, eg when clicked,
 		// Button#setChecked() is called, via a key press, etc. If the event.cancel() is called, the checked state will be reverted.
@@ -139,7 +128,12 @@ public class TheGame extends ApplicationAdapter
 		// revert the checked state.
 		button.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
-				setupForInGame();
+				if (null != errorTextField) {
+					errorTextField.remove();
+				}
+				if (connectToServer(serverTextField.getText())) {
+					setupForInGame();
+				}
 			}
 		});
 
@@ -147,8 +141,29 @@ public class TheGame extends ApplicationAdapter
 		//table.add(new Image(skin.newDrawable("white", Color.RED))).size(64);
 	}
 	
+	//attempts to connect to server, returns true for success
+	private boolean connectToServer(String serverAddress) {
+		try {
+			socket = new Socket(serverAddress, 8080);
+			out = new PrintWriter(socket.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			return true;
+		} catch (Exception e) {
+			errorTextField = new TextField("could not connect", skin);
+			errorTextField.setAlignment(Align.center);
+			displayConnectError(errorTextField);
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	private void displayConnectError(TextField error) {
+		mainMenuVerticalGroup.addActorAt(2, error);
+		error.debug();
+	}
+	
 	/**
-	 * create player and map and connect
+	 * create player and map
 	 */
 	private void setupForInGame() {
 		Shape shape = new Shape(Arrays.asList(
@@ -188,21 +203,7 @@ public class TheGame extends ApplicationAdapter
 		GuiManager.setCurrentManager(mapGuiManager);
 		itemListExists = false;
 		
-		Socket socket;
 		
-		try {
-			socket = new Socket(serverIp, 8080);
-			out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(-1);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(-1);
-		}
 		time = System.currentTimeMillis();
 		gameState = GameState.IN_GAME;
 	}
