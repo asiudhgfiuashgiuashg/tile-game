@@ -50,7 +50,6 @@ public class TheGame extends ApplicationAdapter
     BufferedReader in;
     long time;
     final int SEND_SPACING = 50;
-    boolean gameStart;
     Direction playerOldDirection;
     Skin skin;
     Stage stage;
@@ -60,15 +59,14 @@ public class TheGame extends ApplicationAdapter
     
     private static enum GameState {
         MAIN_MENU,
-        IN_GAME,
+        WAITING_FOR_START_SIGNAL,
+        GAME_STARTED,
     }
     GameState gameState = GameState.MAIN_MENU;
     
 	@Override
 	public void create()
 	{	
-		gameStart = false; //dont start game until both clients are ready
-		
 		batch = new SpriteBatch();
 		stage = new Stage();
 		Gdx.input.setInputProcessor(stage);
@@ -205,7 +203,7 @@ public class TheGame extends ApplicationAdapter
 		
 		
 		time = System.currentTimeMillis();
-		gameState = GameState.IN_GAME;
+		gameState = GameState.GAME_STARTED;
 	}
 
 	@Override
@@ -222,10 +220,10 @@ public class TheGame extends ApplicationAdapter
 			try {
 				if (in.ready()) {
 					//spin until receive message from server to start game (signaling that other client has connected, etc)
-					if (!gameStart) {
+					if (GameState.GAME_STARTED != gameState) {
 						JSONObject received = (JSONObject) JSONValue.parse(in.readLine());
 						if (received.get("type").equals("gameStartSignal")) {
-							gameStart = true; //start the game once the gameStartSignal is received from the server (signalling that the other client has connected, etc)
+							gameState = GameState.GAME_STARTED; //start the game once the gameStartSignal is received from the server (signalling that the other client has connected, etc)
 						}
 						
 						
@@ -252,7 +250,7 @@ public class TheGame extends ApplicationAdapter
 			//sending messagse to server
 			//TODO maybe need a more advanced queue so we arent sending every message type at the same time
 			// maybe not, maybe tcp already handles queues of messages pretty well
-			if (gameStart) {
+			if (GameState.GAME_STARTED == gameState) {
 		    	JSONObject obj = new JSONObject();
 		        if (System.currentTimeMillis() - time >= SEND_SPACING) {
 		        	//sending position
