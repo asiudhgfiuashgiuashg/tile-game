@@ -23,6 +23,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
@@ -74,6 +75,12 @@ public class TheGame extends ApplicationAdapter
 		stage = new Stage();
 		Gdx.input.setInputProcessor(stage);
 
+		setupMainMenu();
+	}
+	
+	
+	
+	private void setupMainMenu() {
 		// A skin can be loaded via JSON or defined programmatically, either is fine. Using a skin is optional but strongly
 		// recommended solely for the convenience of getting a texture, region, etc as a drawable, tinted drawable, etc.
 		skin = new Skin();
@@ -88,7 +95,7 @@ public class TheGame extends ApplicationAdapter
 		skin.add("default", new BitmapFont());
 
 		// Configure a TextButtonStyle and name it "default". Skin resources are stored by type, so this doesn't overwrite the font.
-		TextButtonStyle textButtonStyle = new TextButtonStyle();
+		final TextButtonStyle textButtonStyle = new TextButtonStyle();
 		textButtonStyle.up = skin.newDrawable("white", Color.DARK_GRAY);
 		textButtonStyle.down = skin.newDrawable("white", Color.DARK_GRAY);
 		textButtonStyle.checked = skin.newDrawable("white", Color.DARK_GRAY);
@@ -108,37 +115,62 @@ public class TheGame extends ApplicationAdapter
 		labelStyle.font = skin.getFont("default");
 		labelStyle.fontColor = Color.WHITE;
 		
-		Label serverAddressLabel = new Label("server address: ", labelStyle);
+		Label serverAddressLabel = new Label("Server Address: ", labelStyle);
 	  
-		final TextField serverAddressField = new TextField("", skin);
-		serverAddressField.setWidth(200);
-		serverAddressField.setHeight(30);
-		serverAddressField.setAlignment(Align.center);
-		
-		
-		Label serverPortLabel = new Label("port: ", labelStyle);
-		
+		// Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
+		final TextButton connectButton = new TextButton("Connect", skin);
+				
 		final TextField serverPortField = new TextField("", skin);
 		serverPortField.setWidth(70);
 		serverPortField.setAlignment(Align.center);
 		System.out.println(serverPortField.getWidth());
 		serverPortField.setHeight(30);
+		
+		final TextField serverAddressField = new TextField("", skin);
+		serverAddressField.setWidth(200);
+		serverAddressField.setHeight(30);
+		serverAddressField.setAlignment(Align.center);
+		serverAddressField.setTextFieldFilter(new TextFieldFilter() {
+
+			@Override
+			public boolean acceptChar(TextField textField, char c) {
+				if ('.' == c || Character.isDigit(c) || Character.isAlphabetic(c)) {
+					if (serverPortField.getText().length() > 0) { //highlight and enable connect button
+						setEnabledAndHighlight(connectButton, true);
+					}
+					return true;
+				}
+				if (textField.getText().length() == 0) {
+					setEnabledAndHighlight(connectButton, false);
+				}
+				return false;
+			}
+			
+		});
+		
+		;
+				
+		Label serverPortLabel = new Label("Port: ", labelStyle);
+		
+		
 		//only accept digits in port field
 		serverPortField.setTextFieldFilter(new TextFieldFilter() {
 
 			@Override
 			public boolean acceptChar(TextField textField, char c) {
 				if (Character.isDigit(c)) {
+					if (serverAddressField.getText().length() > 0) { //highlight and enable connect button
+						setEnabledAndHighlight(connectButton, true);
+					}
 					return true;
+				}
+				if (textField.getText().length() == 0) {
+					setEnabledAndHighlight(connectButton, false);
 				}
 				return false;
 			}
 		});
-		
 
-		// Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
-		final TextButton connectButton = new TextButton("Connect", skin);
-		
 		
 		//create a table that fills the screen
 		mainMenuTable = new Table();
@@ -166,7 +198,9 @@ public class TheGame extends ApplicationAdapter
 				if (null != errorTextField) {
 					errorTextField.remove();
 				}
-				if (connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()))) {
+				if (serverAddressField.getText().length() > 0
+						&& serverPortField.getText().length() > 0
+						&& connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()))) {
 					setupForInGame();
 				}
 			}
@@ -176,6 +210,21 @@ public class TheGame extends ApplicationAdapter
 		//table.add(new Image(skin.newDrawable("white", Color.RED))).size(64);
 	}
 	
+	private void setEnabledAndHighlight(Button button, boolean enabled) {
+		Button.ButtonStyle buttonStyle = button.getStyle();
+		if (enabled) { //highlight connect button
+			buttonStyle.up = skin.newDrawable("white", Color.LIGHT_GRAY);
+			buttonStyle.down = skin.newDrawable("white", Color.LIGHT_GRAY);
+			buttonStyle.checked = skin.newDrawable("white", Color.LIGHT_GRAY);
+			buttonStyle.over = skin.newDrawable("white", Color.LIGHT_GRAY);
+		} else {
+			buttonStyle.up = skin.newDrawable("white", Color.DARK_GRAY);
+			buttonStyle.down = skin.newDrawable("white", Color.DARK_GRAY);
+			buttonStyle.checked = skin.newDrawable("white", Color.DARK_GRAY);
+			buttonStyle.over = skin.newDrawable("white", Color.DARK_GRAY);
+		}
+		button.setDisabled(!enabled);
+	}
 	//attempts to connect to server, returns true for success
 	private boolean connectToServer(String serverAddress, int port) {
 		try {
@@ -193,6 +242,7 @@ public class TheGame extends ApplicationAdapter
 	}
 	
 	private void displayConnectError(TextField error) {
+		error.setDisabled(true); //so it can't be edited
 		mainMenuTable.addActorAt(2, error);
 		//error.debug();
 	}
