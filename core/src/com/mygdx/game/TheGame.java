@@ -24,12 +24,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
@@ -54,7 +57,7 @@ public class TheGame extends ApplicationAdapter
     Skin skin;
     Stage stage;
     Socket socket;
-    VerticalGroup mainMenuVerticalGroup;
+    Table mainMenuTable;
     TextField errorTextField;
     
     private static enum GameState {
@@ -88,8 +91,8 @@ public class TheGame extends ApplicationAdapter
 		TextButtonStyle textButtonStyle = new TextButtonStyle();
 		textButtonStyle.up = skin.newDrawable("white", Color.DARK_GRAY);
 		textButtonStyle.down = skin.newDrawable("white", Color.DARK_GRAY);
-		textButtonStyle.checked = skin.newDrawable("white", Color.BLUE);
-		textButtonStyle.over = skin.newDrawable("white", Color.LIGHT_GRAY);
+		textButtonStyle.checked = skin.newDrawable("white", Color.DARK_GRAY);
+		textButtonStyle.over = skin.newDrawable("white", Color.DARK_GRAY);
 		textButtonStyle.font = skin.getFont("default");
 		skin.add("default", textButtonStyle);
 		
@@ -97,39 +100,73 @@ public class TheGame extends ApplicationAdapter
 		textFieldStyle.background = skin.newDrawable("white", Color.OLIVE);
 		textFieldStyle.font = skin.getFont("default");
 		textFieldStyle.fontColor = Color.WHITE;
+		textFieldStyle.cursor = skin.newDrawable("white", Color.WHITE);
+		textFieldStyle.cursor.setMinWidth(2f);
 		skin.add("default", textFieldStyle);
 		
+		LabelStyle labelStyle = new LabelStyle();
+		labelStyle.font = skin.getFont("default");
+		labelStyle.fontColor = Color.WHITE;
+		
+		Label serverAddressLabel = new Label("server address: ", labelStyle);
+	  
+		final TextField serverAddressField = new TextField("", skin);
+		serverAddressField.setWidth(200);
+		serverAddressField.setHeight(30);
+		serverAddressField.setAlignment(Align.center);
+		
+		
+		Label serverPortLabel = new Label("port: ", labelStyle);
+		
+		final TextField serverPortField = new TextField("", skin);
+		serverPortField.setWidth(70);
+		serverPortField.setAlignment(Align.center);
+		System.out.println(serverPortField.getWidth());
+		serverPortField.setHeight(30);
+		//only accept digits in port field
+		serverPortField.setTextFieldFilter(new TextFieldFilter() {
+
+			@Override
+			public boolean acceptChar(TextField textField, char c) {
+				if (Character.isDigit(c)) {
+					return true;
+				}
+				return false;
+			}
+		});
 		
 
-		final TextField serverTextField = new TextField("", skin);
-		serverTextField.setWidth(200);
-		serverTextField.setHeight(30);
-		serverTextField.setAlignment(Align.center);
-
-		// Create a table that fills the screen. Everything else will go inside this table.
-		mainMenuVerticalGroup = new VerticalGroup();
-		mainMenuVerticalGroup.setFillParent(true);
-		mainMenuVerticalGroup.align(Align.center);
-		mainMenuVerticalGroup.debugAll();
-		stage.addActor(mainMenuVerticalGroup);
-
 		// Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
-		final TextButton button = new TextButton("Connect", skin);
-		mainMenuVerticalGroup.addActor(button);
-		mainMenuVerticalGroup.addActor(serverTextField);
-		mainMenuVerticalGroup.debugAll();
-		mainMenuVerticalGroup.padTop(100);
+		final TextButton connectButton = new TextButton("Connect", skin);
+		
+		
+		//create a table that fills the screen
+		mainMenuTable = new Table();
+		mainMenuTable.setFillParent(true);
+		mainMenuTable.setSize(200, 300);
+		mainMenuTable.center();
+		stage.addActor(mainMenuTable);
+		
+		//populate table
+		mainMenuTable.add(serverAddressLabel);
+		mainMenuTable.add(serverAddressField);
+		mainMenuTable.add(serverPortLabel).padLeft(20);
+		mainMenuTable.add(serverPortField).width(70);
+		mainMenuTable.row();  //new row
+		mainMenuTable.add(connectButton).colspan(4).center().padTop(40);
+		//mainMenuTable.debugAll();
+		
 
 		// Add a listener to the button. ChangeListener is fired when the button's checked state changes, eg when clicked,
 		// Button#setChecked() is called, via a key press, etc. If the event.cancel() is called, the checked state will be reverted.
 		// ClickListener could have been used, but would only fire when clicked. Also, canceling a ClickListener event won't
 		// revert the checked state.
-		button.addListener(new ChangeListener() {
+		connectButton.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
 				if (null != errorTextField) {
 					errorTextField.remove();
 				}
-				if (connectToServer(serverTextField.getText())) {
+				if (connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()))) {
 					setupForInGame();
 				}
 			}
@@ -140,9 +177,9 @@ public class TheGame extends ApplicationAdapter
 	}
 	
 	//attempts to connect to server, returns true for success
-	private boolean connectToServer(String serverAddress) {
+	private boolean connectToServer(String serverAddress, int port) {
 		try {
-			socket = new Socket(serverAddress, 8080);
+			socket = new Socket(serverAddress, port);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			return true;
@@ -156,8 +193,8 @@ public class TheGame extends ApplicationAdapter
 	}
 	
 	private void displayConnectError(TextField error) {
-		mainMenuVerticalGroup.addActorAt(2, error);
-		error.debug();
+		mainMenuTable.addActorAt(2, error);
+		//error.debug();
 	}
 	
 	/**
