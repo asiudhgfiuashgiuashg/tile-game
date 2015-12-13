@@ -6,10 +6,10 @@ import com.badlogic.gdx.InputProcessor;
  * @author elimonent
  * handles keypresses for chat
  */
-public class ChatInputProcessor implements InputProcessor {
+public class TextInputProcessor implements InputProcessor {
 	private String chatString;
 	
-	public ChatInputProcessor() {
+	public TextInputProcessor() {
 		chatString = "";
 	}
 	

@@ -15,6 +15,26 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.json.simple.JSONValue;
 import org.json.simple.JSONObject;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+
 public class TheGame extends ApplicationAdapter 
 {
 	LocalPlayer player;
@@ -32,11 +52,105 @@ public class TheGame extends ApplicationAdapter
     final int SEND_SPACING = 50;
     boolean gameStart;
     Direction playerOldDirection;
-
+    Skin skin;
+    Stage stage;
+    String serverIp;
+    
+    private static enum GameState {
+        MAIN_MENU,
+        IN_GAME,
+    }
+    GameState gameState = GameState.MAIN_MENU;
+    
 	@Override
 	public void create()
-	{	
+	{
+		serverIp = "";
+		
 		gameStart = false; //dont start game until both clients are ready
+		
+		batch = new SpriteBatch();
+		stage = new Stage();
+		Gdx.input.setInputProcessor(stage);
+
+		// A skin can be loaded via JSON or defined programmatically, either is fine. Using a skin is optional but strongly
+		// recommended solely for the convenience of getting a texture, region, etc as a drawable, tinted drawable, etc.
+		skin = new Skin();
+
+		// Generate a 1x1 white texture and store it in the skin named "white".
+		Pixmap pixmap = new Pixmap(1, 1, Format.RGBA8888);
+		pixmap.setColor(Color.WHITE);
+		pixmap.fill();
+		skin.add("white", new Texture(pixmap));
+
+		// Store the default libgdx font under the name "default".
+		skin.add("default", new BitmapFont());
+
+		// Configure a TextButtonStyle and name it "default". Skin resources are stored by type, so this doesn't overwrite the font.
+		TextButtonStyle textButtonStyle = new TextButtonStyle();
+		textButtonStyle.up = skin.newDrawable("white", Color.DARK_GRAY);
+		textButtonStyle.down = skin.newDrawable("white", Color.DARK_GRAY);
+		textButtonStyle.checked = skin.newDrawable("white", Color.BLUE);
+		textButtonStyle.over = skin.newDrawable("white", Color.LIGHT_GRAY);
+		textButtonStyle.font = skin.getFont("default");
+		skin.add("default", textButtonStyle);
+		
+		TextFieldStyle textFieldStyle = new TextFieldStyle();
+		textFieldStyle.font = skin.getFont("default");
+		textFieldStyle.fontColor = Color.WHITE;
+		skin.add("default", textFieldStyle);
+		
+
+		TextField textField = new TextField("", skin);
+		textField.setWidth(200);
+		textField.setHeight(30);
+		textField.setAlignment(Align.center);
+		textField.setTextFieldListener(new TextField.TextFieldListener() {
+
+			@Override
+			public void keyTyped(TextField textField, char c) {
+				if (Character.isDigit(c) || '.' == c || Character.isAlphabetic(c)) {
+					serverIp += c;
+				} else if ('\b' == c) { //backspace
+					serverIp = serverIp.substring(0, serverIp.length() - 1);
+				}
+				textField.setText(serverIp);
+			}
+			
+		});
+
+		// Create a table that fills the screen. Everything else will go inside this table.
+		VerticalGroup vGroup = new VerticalGroup();
+		vGroup.setFillParent(true);
+		vGroup.align(Align.center);
+		vGroup.debugAll();
+		stage.addActor(vGroup);
+
+		// Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
+		final TextButton button = new TextButton("Connect", skin);
+		vGroup.addActor(button);
+		vGroup.addActor(textField);
+		vGroup.debugAll();
+		vGroup.padTop(100);
+
+		// Add a listener to the button. ChangeListener is fired when the button's checked state changes, eg when clicked,
+		// Button#setChecked() is called, via a key press, etc. If the event.cancel() is called, the checked state will be reverted.
+		// ClickListener could have been used, but would only fire when clicked. Also, canceling a ClickListener event won't
+		// revert the checked state.
+		button.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) {
+				setupForInGame();
+			}
+		});
+
+		// Add an image actor. Have to set the size, else it would be the size of the drawable (which is the 1x1 texture).
+		//table.add(new Image(skin.newDrawable("white", Color.RED))).size(64);
+	}
+	
+	/**
+	 * create player and map and connect
+	 */
+	private void setupForInGame() {
 		Shape shape = new Shape(Arrays.asList(
 				new LineSeg(new Point(15, 0), new Point(15, 55)),
 				new LineSeg(new Point(15, 55), new Point(50, 55)),
@@ -77,7 +191,7 @@ public class TheGame extends ApplicationAdapter
 		Socket socket;
 		
 		try {
-			socket = new Socket("128.61.104.60", 8080);
+			socket = new Socket(serverIp, 8080);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		} catch (UnknownHostException e) {
@@ -90,99 +204,106 @@ public class TheGame extends ApplicationAdapter
 			System.exit(-1);
 		}
 		time = System.currentTimeMillis();
+		gameState = GameState.IN_GAME;
 	}
-
 
 	@Override
 	public void render()
 	{
-		//*******Networking*****
-		//receiving during gameplay, after the game has started
-		try {
-			if (in.ready()) {
-				//spin until receive message from server to start game (signaling that other client has connected, etc)
-				if (!gameStart) {
-					JSONObject received = (JSONObject) JSONValue.parse(in.readLine());
-					if (received.get("type").equals("gameStartSignal")) {
-						gameStart = true; //start the game once the gameStartSignal is received from the server (signalling that the other client has connected, etc)
+		if (GameState.MAIN_MENU == gameState) {
+			Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+			stage.draw();
+		} else {
+			//*******Networking*****
+			//receiving during gameplay, after the game has started
+			try {
+				if (in.ready()) {
+					//spin until receive message from server to start game (signaling that other client has connected, etc)
+					if (!gameStart) {
+						JSONObject received = (JSONObject) JSONValue.parse(in.readLine());
+						if (received.get("type").equals("gameStartSignal")) {
+							gameStart = true; //start the game once the gameStartSignal is received from the server (signalling that the other client has connected, etc)
+						}
+						
+						
+					} else { //handle messages that come during game play, after the game has started
+		        		String inputLine = in.readLine();
+		        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
+		        		String messageType = (String) received.get("type");
+		        		//position updates
+		        		if (messageType.equals("position")) {
+			        		double secondPlayerX = ((Number) received.get("charX")).floatValue();
+			        		double secondPlayerY = ((Number) received.get("charY")).floatValue();
+			        		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
+		        		} else if (messageType.equals("animation")) { //animation updates
+		        			currentMap.player2.setAnimation((String) received.get("animationName"));
+		        			System.out.println("received animation message: " + received);
+		        		}
+		                
 					}
-					
-					
-				} else { //handle messages that come during game play, after the game has started
-	        		String inputLine = in.readLine();
-	        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
-	        		String messageType = (String) received.get("type");
-	        		//position updates
-	        		if (messageType.equals("position")) {
-		        		double secondPlayerX = ((Number) received.get("charX")).floatValue();
-		        		double secondPlayerY = ((Number) received.get("charY")).floatValue();
-		        		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
-	        		} else if (messageType.equals("animation")) { //animation updates
-	        			currentMap.player2.setAnimation((String) received.get("animationName"));
-	        			System.out.println("received animation message: " + received);
-	        		}
-	                
 				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		//sending messagse to server
-		//TODO maybe need a more advanced queue so we arent sending every message type at the same time
-		// maybe not, maybe tcp already handles queues of messages pretty well
-		if (gameStart) {
-	    	JSONObject obj = new JSONObject();
-	        if (System.currentTimeMillis() - time >= SEND_SPACING) {
-	        	//sending position
-	        	obj.clear();
-	        	float charX = (float) player.getPos().getX();
-	        	float charY = (float) player.getPos().getY();
-	        	obj.put("type", "position"); //let server know that this message specifies a position update
-	            obj.put("charX", charX);
-	            obj.put("charY", charY);
-	        	out.println(obj.toString());
-	        	
-	        	//sending direction
-	        	//note -- if not moving, all of these bools will be false
-	        	if (currentMap.player.direction != playerOldDirection) {
+			//sending messagse to server
+			//TODO maybe need a more advanced queue so we arent sending every message type at the same time
+			// maybe not, maybe tcp already handles queues of messages pretty well
+			if (gameStart) {
+		    	JSONObject obj = new JSONObject();
+		        if (System.currentTimeMillis() - time >= SEND_SPACING) {
+		        	//sending position
 		        	obj.clear();
-		        	obj.put("type", "direction");
-		        	obj.put("isMovingLeft", currentMap.player.isMovingLeft);
-		        	obj.put("isMovingRight", currentMap.player.isMovingRight);
-		        	obj.put("isMovingDown", currentMap.player.isMovingDown);
-		        	obj.put("isMovingUp", currentMap.player.isMovingUp);
+		        	float charX = (float) player.getPos().getX();
+		        	float charY = (float) player.getPos().getY();
+		        	obj.put("type", "position"); //let server know that this message specifies a position update
+		            obj.put("charX", charX);
+		            obj.put("charY", charY);
 		        	out.println(obj.toString());
-	        	}
-	        	playerOldDirection = currentMap.player.direction;
-	        	
-	        	//update time
-	        	time = System.currentTimeMillis();
-	        }
+		        	
+		        	//sending direction
+		        	//note -- if not moving, all of these bools will be false
+		        	if (currentMap.player.direction != playerOldDirection) {
+			        	obj.clear();
+			        	obj.put("type", "direction");
+			        	obj.put("isMovingLeft", currentMap.player.isMovingLeft);
+			        	obj.put("isMovingRight", currentMap.player.isMovingRight);
+			        	obj.put("isMovingDown", currentMap.player.isMovingDown);
+			        	obj.put("isMovingUp", currentMap.player.isMovingUp);
+			        	out.println(obj.toString());
+		        	}
+		        	playerOldDirection = currentMap.player.direction;
+		        	
+		        	//update time
+		        	time = System.currentTimeMillis();
+		        }
+			}
+			//**end networking******
+			//System.out.println(player.getShape());
+			/*
+			 * logic for switching between various GuiManagers could go here
+			 * if (character.health <= 0) {
+			 * 		GuiManager.setCurrentGuiManager(mainMenuGuiManager);
+			 * } else if (...
+			 */
+			keyListening();
+			
+			Gdx.gl.glClearColor(0, 0, 0, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			batch.begin();
+			
+			if(GuiManager.currentManager.equals(mapGuiManager))
+			{
+				currentMap.draw(batch);
+				currentMap.update(batch);
+			}
+			GuiManager.currentManager.draw(batch);
+			GuiManager.currentManager.update();
+			
+			batch.end();
 		}
-		//**end networking******
-		//System.out.println(player.getShape());
-		/*
-		 * logic for switching between various GuiManagers could go here
-		 * if (character.health <= 0) {
-		 * 		GuiManager.setCurrentGuiManager(mainMenuGuiManager);
-		 * } else if (...
-		 */
-		keyListening();
-		
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.begin();
-		
-		if(GuiManager.currentManager.equals(mapGuiManager))
-		{
-			currentMap.draw(batch);
-			currentMap.update(batch);
-		}
-		GuiManager.currentManager.draw(batch);
-		GuiManager.currentManager.update();
-		
-		batch.end();
 	}
 	
 	public void keyListening() {
@@ -207,7 +328,7 @@ public class TheGame extends ApplicationAdapter
 					
 				} else if (Gdx.input.isKeyJustPressed(Keys.ENTER)) {
 					player.setCanMove(false);
-					ChatInputProcessor chatInputProcessor = new ChatInputProcessor();
+					TextInputProcessor chatInputProcessor = new TextInputProcessor();
 					Gdx.input.setInputProcessor(chatInputProcessor);
 				} else {
 					GuiManager.currentManager.clearElements();
