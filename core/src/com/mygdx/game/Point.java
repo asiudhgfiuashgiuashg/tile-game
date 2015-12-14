@@ -2,6 +2,7 @@ package com.mygdx.game;
 public class Point {
     private double x;
     private double y;
+    private final double EPSILON = .000001;
 
     public Point(double x, double y) {
         this.x = x;
@@ -40,5 +41,21 @@ public class Point {
     //deep copy
     public Point deepCopy() {
     	return new Point(getX(), getY());
+    }
+    //http://www.ideyatech.com/effective-java-equals-and-hashcode/
+    @Override
+    public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof Point)) {
+			return false;
+		}
+		final Point theOther = (Point) other;
+		return Math.abs(this.getX() - theOther.getX()) < EPSILON && Math.abs(this.getY() - theOther.getY()) < EPSILON;
+    }
+    @Override
+    public int hashCode() {
+    	return (int) (this.getY() * 13 + this.getX());
     }
 }

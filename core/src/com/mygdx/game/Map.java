@@ -182,7 +182,9 @@ public class Map
         try
         {
 	        ImageIO.write(bigImage, "PNG", new File(title + ".png"));
+	        System.out.println("))))))))))))))))))))))))");
 	        mapImage = new Texture(Gdx.files.internal(title + ".png"));
+	        System.out.println("((((((((((((((((((((((((");
         }
         catch(IOException e)
         {

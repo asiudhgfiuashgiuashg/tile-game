@@ -1,10 +1,13 @@
 package com.mygdx.game;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -60,24 +63,40 @@ public class TheGame extends ApplicationAdapter
     Socket socket;
     Table mainMenuTable;
     TextField errorTextField;
+    List<Player> players;
+    List<Player> playersDrawnInLobby;
+    LabelStyle labelStyle;
+    Table lobbyTable;
+    Shape playerShape;
+    Point oldPos;
     
     private static enum GameState {
         MAIN_MENU,
+        IN_LOBBY,
         WAITING_FOR_START_SIGNAL,
         GAME_STARTED,
     }
-    GameState gameState = GameState.MAIN_MENU;
+    GameState gameState;
     
 	@Override
-	public void create()
-	{	
+	public void create() {
+		oldPos = new Point(0, 0);
+		gameState = GameState.MAIN_MENU;
 		batch = new SpriteBatch();
 		stage = new Stage();
 		Gdx.input.setInputProcessor(stage);
+		playerShape = new Shape(Arrays.asList(
+				new LineSeg(new Point(15, 0), new Point(15, 55)),
+				new LineSeg(new Point(15, 55), new Point(50, 55)),
+				new LineSeg(new Point(50, 55), new Point(50, 0)),
+				new LineSeg(new Point(50, 0), new Point(15, 0))
+				),
+				new Point(0,0));
+		
+		
 
 		setupMainMenu();
 	}
-	
 	
 	
 	private void setupMainMenu() {
@@ -111,7 +130,7 @@ public class TheGame extends ApplicationAdapter
 		textFieldStyle.cursor.setMinWidth(2f);
 		skin.add("default", textFieldStyle);
 		
-		LabelStyle labelStyle = new LabelStyle();
+		labelStyle = new LabelStyle();
 		labelStyle.font = skin.getFont("default");
 		labelStyle.fontColor = Color.WHITE;
 		
@@ -201,7 +220,9 @@ public class TheGame extends ApplicationAdapter
 				if (serverAddressField.getText().length() > 0
 						&& serverPortField.getText().length() > 0
 						&& connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()))) {
-					setupForInGame();
+					
+					setupLobby();
+					//setupForInGame();
 				}
 			}
 		});
@@ -209,7 +230,18 @@ public class TheGame extends ApplicationAdapter
 		// Add an image actor. Have to set the size, else it would be the size of the drawable (which is the 1x1 texture).
 		//table.add(new Image(skin.newDrawable("white", Color.RED))).size(64);
 	}
-	
+	private void setupLobby() {
+		players = new ArrayList<Player>();
+		//create local player
+		
+		players.add(player);
+		playersDrawnInLobby = new ArrayList<Player>();
+		
+		gameState = GameState.IN_LOBBY;
+		stage.clear();
+		lobbyTable = new Table();
+		stage.addActor(lobbyTable);
+	}
 	private void setEnabledAndHighlight(Button button, boolean enabled) {
 		Button.ButtonStyle buttonStyle = button.getStyle();
 		if (enabled) { //highlight connect button
@@ -231,7 +263,17 @@ public class TheGame extends ApplicationAdapter
 			socket = new Socket(serverAddress, port);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			player = new LocalPlayer(playerShape, false);
+			player.username = "placeholder";
+			
+			setupForInGame();
+			//send server player info, such as username
+			JSONObject outObj = new JSONObject();
+			outObj.put("type", "playerInfo");
+			outObj.put("username", player.username);
+			out.println(outObj);
 			return true;
+			
 		} catch (Exception e) {
 			errorTextField = new TextField("could not connect", skin);
 			errorTextField.setAlignment(Align.center);
@@ -251,15 +293,6 @@ public class TheGame extends ApplicationAdapter
 	 * create player and map
 	 */
 	private void setupForInGame() {
-		Shape shape = new Shape(Arrays.asList(
-				new LineSeg(new Point(15, 0), new Point(15, 55)),
-				new LineSeg(new Point(15, 55), new Point(50, 55)),
-				new LineSeg(new Point(50, 55), new Point(50, 0)),
-				new LineSeg(new Point(50, 0), new Point(15, 0))
-				),
-				new Point(0,0));
-		player = new LocalPlayer(shape, false);
-		
 		batch = new SpriteBatch();
 		
 		//player.create(); responsibilities for create() moved to constructor
@@ -290,31 +323,76 @@ public class TheGame extends ApplicationAdapter
 		
 		
 		time = System.currentTimeMillis();
-		gameState = GameState.GAME_STARTED;
 	}
 
 	@Override
 	public void render()
 	{
-		if (GameState.MAIN_MENU == gameState) {
+		if (GameState.MAIN_MENU == gameState || GameState.IN_LOBBY == gameState) {
 			Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 			stage.draw();
+			
+			if (GameState.IN_LOBBY == gameState) {
+				for(Player player: players) {
+					if (!playersDrawnInLobby.contains(player)) {
+						addPlayerToLobbyStage(player);
+						playersDrawnInLobby.add(player);
+					}
+				}
+			}
+			
 		} else {
-			//*******Networking*****
-			//receiving during gameplay, after the game has started
+			//System.out.println(player.getShape());
+			/*
+			 * logic for switching between various GuiManagers could go here
+			 * if (character.health <= 0) {
+			 * 		GuiManager.setCurrentGuiManager(mainMenuGuiManager);
+			 * } else if (...
+			 */
+			keyListening();
+			
+			Gdx.gl.glClearColor(0, 0, 0, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			batch.begin();
+			
+			if(GuiManager.currentManager.equals(mapGuiManager))
+			{
+				currentMap.draw(batch);
+				currentMap.update(batch);
+			}
+			GuiManager.currentManager.draw(batch);
+			GuiManager.currentManager.update();
+			
+			batch.end();
+		}
+		
+		//*******Networking*****
+		//receiving during gameplay, after the game has started
+		if (GameState.MAIN_MENU != gameState) { 
 			try {
 				if (in.ready()) {
 					//spin until receive message from server to start game (signaling that other client has connected, etc)
-					if (GameState.GAME_STARTED != gameState) {
-						JSONObject received = (JSONObject) JSONValue.parse(in.readLine());
+					if (GameState.IN_LOBBY == gameState) {
+						System.out.println("ready");
+						
+						/*char[] charArr = new char[1000];
+						int numBytesRead = in.read(charArr, 0, charArr.length);*/
+						String receivedStr = in.readLine();//new String(charArr, 0, numBytesRead);
+						System.out.println("receivedStr: " + receivedStr);
+						JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
+						System.out.println("received: " + received);
+						
 						if (received.get("type").equals("gameStartSignal")) {
-							gameState = GameState.GAME_STARTED; //start the game once the gameStartSignal is received from the server (signalling that the other client has connected, etc)
+							gameState = GameState.GAME_STARTED;
+						} else if (received.get("type").equals("player")) {
+							String playerName = (String) received.get("playerName");
+							RemotePlayer remotePlayer = addRemotePlayerToList(playerName);
+							addPlayerToLobbyStage(remotePlayer);
 						}
 						
-						
-					} else { //handle messages that come during game play, after the game has started
+					} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
 		        		String inputLine = in.readLine();
 		        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
 		        		String messageType = (String) received.get("type");
@@ -342,13 +420,15 @@ public class TheGame extends ApplicationAdapter
 		        if (System.currentTimeMillis() - time >= SEND_SPACING) {
 		        	//sending position
 		        	obj.clear();
-		        	float charX = (float) player.getPos().getX();
-		        	float charY = (float) player.getPos().getY();
-		        	obj.put("type", "position"); //let server know that this message specifies a position update
-		            obj.put("charX", charX);
-		            obj.put("charY", charY);
-		        	out.println(obj.toString());
-		        	
+		        	if (!player.getPos().equals(oldPos)) { //don't send unnecessary updates
+			        	float charX = (float) player.getPos().getX();
+			        	float charY = (float) player.getPos().getY();
+			        	obj.put("type", "position"); //let server know that this message specifies a position update
+			            obj.put("charX", charX);
+			            obj.put("charY", charY);
+			        	out.println(obj.toString());
+			        	oldPos = player.getPos();
+		        	}
 		        	//sending direction
 		        	//note -- if not moving, all of these bools will be false
 		        	if (currentMap.player.direction != playerOldDirection) {
@@ -367,29 +447,18 @@ public class TheGame extends ApplicationAdapter
 		        }
 			}
 			//**end networking******
-			//System.out.println(player.getShape());
-			/*
-			 * logic for switching between various GuiManagers could go here
-			 * if (character.health <= 0) {
-			 * 		GuiManager.setCurrentGuiManager(mainMenuGuiManager);
-			 * } else if (...
-			 */
-			keyListening();
-			
-			Gdx.gl.glClearColor(0, 0, 0, 1);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-			batch.begin();
-			
-			if(GuiManager.currentManager.equals(mapGuiManager))
-			{
-				currentMap.draw(batch);
-				currentMap.update(batch);
-			}
-			GuiManager.currentManager.draw(batch);
-			GuiManager.currentManager.update();
-			
-			batch.end();
 		}
+	}
+	public RemotePlayer addRemotePlayerToList(String playerName) {
+		RemotePlayer remotePlayer = new RemotePlayer(playerShape, true);
+		remotePlayer.username = playerName;
+		return remotePlayer;
+	}
+	/** add player's info to lobby page**/
+	public void addPlayerToLobbyStage(Player player) {
+		Label playerNameLabel = new Label(player.username, labelStyle);
+		lobbyTable.add(playerNameLabel);
+		lobbyTable.row();
 	}
 	
 	public void keyListening() {
