@@ -235,12 +235,16 @@ public class TheGame extends ApplicationAdapter
 		//create local player
 		
 		players.add(player);
-		playersDrawnInLobby = new ArrayList<Player>();
 		
 		gameState = GameState.IN_LOBBY;
 		stage.clear();
 		lobbyTable = new Table();
+		lobbyTable.debugAll();
+		lobbyTable.setFillParent(true);
+		lobbyTable.setSize(200, 300);
+		lobbyTable.center();
 		stage.addActor(lobbyTable);
+		addPlayerToLobbyStage(player);
 	}
 	private void setEnabledAndHighlight(Button button, boolean enabled) {
 		Button.ButtonStyle buttonStyle = button.getStyle();
@@ -335,12 +339,12 @@ public class TheGame extends ApplicationAdapter
 			stage.draw();
 			
 			if (GameState.IN_LOBBY == gameState) {
-				for(Player player: players) {
+				/*for(Player player: players) {
 					if (!playersDrawnInLobby.contains(player)) {
 						addPlayerToLobbyStage(player);
 						playersDrawnInLobby.add(player);
 					}
-				}
+				}*/
 			}
 			
 		} else {
@@ -377,16 +381,14 @@ public class TheGame extends ApplicationAdapter
 					if (GameState.IN_LOBBY == gameState) {
 						System.out.println("ready");
 						
-						/*char[] charArr = new char[1000];
-						int numBytesRead = in.read(charArr, 0, charArr.length);*/
-						String receivedStr = in.readLine();//new String(charArr, 0, numBytesRead);
+						String receivedStr = in.readLine();
 						System.out.println("receivedStr: " + receivedStr);
 						JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
 						System.out.println("received: " + received);
 						
 						if (received.get("type").equals("gameStartSignal")) {
 							gameState = GameState.GAME_STARTED;
-						} else if (received.get("type").equals("player")) {
+						} else if (received.get("type").equals("playerInfo")) {
 							String playerName = (String) received.get("playerName");
 							RemotePlayer remotePlayer = addRemotePlayerToList(playerName);
 							addPlayerToLobbyStage(remotePlayer);
@@ -452,6 +454,7 @@ public class TheGame extends ApplicationAdapter
 	public RemotePlayer addRemotePlayerToList(String playerName) {
 		RemotePlayer remotePlayer = new RemotePlayer(playerShape, true);
 		remotePlayer.username = playerName;
+		players.add(remotePlayer);
 		return remotePlayer;
 	}
 	/** add player's info to lobby page**/
@@ -459,6 +462,7 @@ public class TheGame extends ApplicationAdapter
 		Label playerNameLabel = new Label(player.username, labelStyle);
 		lobbyTable.add(playerNameLabel);
 		lobbyTable.row();
+		System.out.println("added player to lobby stage: " + player.username);
 	}
 	
 	public void keyListening() {
