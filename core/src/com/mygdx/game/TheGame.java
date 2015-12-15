@@ -140,6 +140,7 @@ public class TheGame extends ApplicationAdapter
 		labelStyle = new LabelStyle();
 		labelStyle.font = skin.getFont("default");
 		labelStyle.fontColor = Color.WHITE;
+		skin.add("default", labelStyle);
 		
 		Label serverAddressLabel = new Label("Server Address: ", labelStyle);
 	  
@@ -275,11 +276,17 @@ public class TheGame extends ApplicationAdapter
 				readyMessage.put("type", "readyStatus");
 				readyMessage.put("readyStatus", readyCheckBox.isChecked());
 				out.println(readyMessage);
+				
+				//check the box by name as well
+				playerToCheckBoxMap.get(player).setChecked(readyCheckBox.isChecked());
 			}
 		});
+		final Label readyCheckBoxLabel = new Label("Ready?", skin);
+		readyCheckBoxLabel.setPosition(520,  70);
 		
 		stage.clear();
 		stage.addActor(readyCheckBox);
+		stage.addActor(readyCheckBoxLabel);
 		lobbyTable = new Table();
 		lobbyTable.debugAll();
 		lobbyTable.setFillParent(true);
