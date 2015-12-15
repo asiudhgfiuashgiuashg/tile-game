@@ -24,9 +24,12 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
@@ -41,6 +44,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 public class TheGame extends ApplicationAdapter 
 {
@@ -243,11 +247,34 @@ public class TheGame extends ApplicationAdapter
 	private void setupLobby() {
 		players = new ArrayList<Player>();
 		//create local player
-		
 		players.add(player);
 		
 		gameState = GameState.IN_LOBBY;
+		
+		final CheckBoxStyle checkBoxStyle = new CheckBoxStyle();
+		checkBoxStyle.checkboxOff = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("art/checkbox_unchecked.png"))));
+		checkBoxStyle.checkboxOn = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("art/checkbox_checked.png"))));
+		checkBoxStyle.font = skin.getFont("default");
+		skin.add("default", checkBoxStyle);
+		
+		final CheckBox readyCheckBox = new CheckBox("", checkBoxStyle);
+		readyCheckBox.setPosition(600, 70);
+		//readyCheckBox.setWidth(100);
+		//readyCheckBox.setHeight(30);
+		//readyCheckBox.debug();
+		//readyCheckBox.setSize(100, 50);
+		
+		readyCheckBox.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) { //notify server of readynes or unreadyness
+				JSONObject readyMessage = new JSONObject();
+				readyMessage.put("type", "readyStatus");
+				readyMessage.put("readyStatus", readyCheckBox.isChecked());
+				out.println(readyMessage);
+			}
+		});
+		
 		stage.clear();
+		stage.addActor(readyCheckBox);
 		lobbyTable = new Table();
 		lobbyTable.debugAll();
 		lobbyTable.setFillParent(true);
@@ -255,6 +282,7 @@ public class TheGame extends ApplicationAdapter
 		lobbyTable.center();
 		stage.addActor(lobbyTable);
 		addPlayerToLobbyStage(player);
+		lobbyTable.row();
 	}
 	private void setEnabledAndHighlight(Button button, boolean enabled) {
 		Button.ButtonStyle buttonStyle = button.getStyle();
@@ -400,10 +428,14 @@ public class TheGame extends ApplicationAdapter
 							gameState = GameState.GAME_STARTED;
 						} else if (received.get("type").equals("playerInfo")) {
 							String playerName = (String) received.get("username");
-							System.out.println("playername: " + playerName);
+							//System.out.println("playername: " + playerName);
 							RemotePlayer remotePlayer = addRemotePlayerToList(playerName);
 							//System.out.println("remotePlayer info received: " + remotePlayer == null);
 							addPlayerToLobbyStage(remotePlayer);
+							lobbyTable.row();
+						} else if (received.get("type").equals("readyStatus")) {
+							String username = (String) received.get("username");
+							boolean ready = (Boolean) received.get("readyStatus");
 						}
 						
 					} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
@@ -473,8 +505,7 @@ public class TheGame extends ApplicationAdapter
 	/** add player's info to lobby page**/
 	public void addPlayerToLobbyStage(Player player) {
 		Label playerNameLabel = new Label(player.username, labelStyle);
-		lobbyTable.add(playerNameLabel);
-		lobbyTable.row();
+		lobbyTable.add(playerNameLabel).padBottom(80);
 		System.out.println("added player to lobby stage: " + player.username);
 	}
 	
