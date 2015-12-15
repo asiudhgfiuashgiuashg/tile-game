@@ -26,6 +26,7 @@ public class Player extends Entity
 
     GameMap currentMap;
     String username;
+    int uid;
     
     public ItemCollector inv;
     

@@ -79,8 +79,8 @@ public class TheGame extends ApplicationAdapter
     
     private static enum GameState {
         MAIN_MENU,
+        CONNECTED_TO_SERVER,
         IN_LOBBY,
-        WAITING_FOR_START_SIGNAL,
         GAME_STARTED,
     }
     GameState gameState;
@@ -240,7 +240,6 @@ public class TheGame extends ApplicationAdapter
 						&& connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()), usernameField.getText())) {
 					
 					setupLobby();
-					//setupForInGame();
 				}
 			}
 		});
@@ -249,12 +248,11 @@ public class TheGame extends ApplicationAdapter
 		//table.add(new Image(skin.newDrawable("white", Color.RED))).size(64);
 	}
 	private void setupLobby() {
+		gameState = GameState.IN_LOBBY;
 		playerToCheckBoxMap = new HashMap<Player, CheckBox>();
 		players = new ArrayList<Player>();
 		//create local player
 		players.add(player);
-		
-		gameState = GameState.IN_LOBBY;
 		
 		final CheckBoxStyle checkBoxStyle = new CheckBoxStyle();
 		checkBoxStyle.checkboxOff = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("art/checkbox_unchecked.png"))));
@@ -388,15 +386,6 @@ public class TheGame extends ApplicationAdapter
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 			stage.draw();
 			
-			if (GameState.IN_LOBBY == gameState) {
-				/*for(Player player: players) {
-					if (!playersDrawnInLobby.contains(player)) {
-						addPlayerToLobbyStage(player);
-						playersDrawnInLobby.add(player);
-					}
-				}*/
-			}
-			
 		} else {
 			//System.out.println(player.getShape());
 			/*
@@ -442,19 +431,22 @@ public class TheGame extends ApplicationAdapter
 						} else if (received.get("type").equals("playerInfo")) {
 							String playerName = (String) received.get("username");
 							//System.out.println("playername: " + playerName);
-							RemotePlayer remotePlayer = addRemotePlayerToList(playerName);
+							RemotePlayer remotePlayer = addRemotePlayerToList(playerName, ((Number) received.get("uid")).intValue());
 							//System.out.println("remotePlayer info received: " + remotePlayer == null);
 							addPlayerToLobbyStage(remotePlayer);
 							lobbyTable.row();
 							
 						} else if (received.get("type").equals("readyStatus")) {
-							String username = (String) received.get("username");
+							int uid = ((Number) received.get("uid")).intValue();
 							boolean isReady = (Boolean) received.get("readyStatus");
 							for (Player player: playerToCheckBoxMap.keySet()) {
-								if (player.username.equals(username)) {
+								if (player.uid == uid) {
 									playerToCheckBoxMap.get(player).setChecked(isReady);
 								}
 							}
+							
+						} else if (received.get("type").equals("uidUpdate")) {
+							player.uid = ((Number) received.get("uid")).intValue();
 						}
 						
 					} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
@@ -514,8 +506,9 @@ public class TheGame extends ApplicationAdapter
 			//**end networking******
 		}
 	}
-	public RemotePlayer addRemotePlayerToList(String playerName) {
+	public RemotePlayer addRemotePlayerToList(String playerName, int uid) {
 		RemotePlayer remotePlayer = new RemotePlayer(playerShape, true);
+		remotePlayer.uid = uid;
 		remotePlayer.username = playerName;
 		players.add(remotePlayer);
 		
