@@ -189,6 +189,13 @@ public class TheGame extends ApplicationAdapter
 				return false;
 			}
 		});
+		
+		final TextField usernameField = new TextField("", skin);
+		usernameField.setWidth(200);
+		usernameField.setHeight(30);
+		usernameField.setAlignment(Align.center);
+		
+		Label usernameLabel = new Label("Username: ", labelStyle);	
 
 		
 		//create a table that fills the screen
@@ -204,8 +211,11 @@ public class TheGame extends ApplicationAdapter
 		mainMenuTable.add(serverPortLabel).padLeft(20);
 		mainMenuTable.add(serverPortField).width(70);
 		mainMenuTable.row();  //new row
+		mainMenuTable.add(usernameLabel).padTop(20);
+		mainMenuTable.add(usernameField).padTop(20);
+		mainMenuTable.row();
 		mainMenuTable.add(connectButton).colspan(4).center().padTop(40);
-		//mainMenuTable.debugAll();
+		//mainMenuTable.debugAll(); //show bounding boxes
 		
 
 		// Add a listener to the button. ChangeListener is fired when the button's checked state changes, eg when clicked,
@@ -219,7 +229,7 @@ public class TheGame extends ApplicationAdapter
 				}
 				if (serverAddressField.getText().length() > 0
 						&& serverPortField.getText().length() > 0
-						&& connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()))) {
+						&& connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()), usernameField.getText())) {
 					
 					setupLobby();
 					//setupForInGame();
@@ -262,13 +272,13 @@ public class TheGame extends ApplicationAdapter
 		button.setDisabled(!enabled);
 	}
 	//attempts to connect to server, returns true for success
-	private boolean connectToServer(String serverAddress, int port) {
+	private boolean connectToServer(String serverAddress, int port, String username) {
 		try {
 			socket = new Socket(serverAddress, port);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			player = new LocalPlayer(playerShape, false);
-			player.username = "placeholder";
+			player.username = username;
 			
 			setupForInGame();
 			//send server player info, such as username
@@ -389,8 +399,10 @@ public class TheGame extends ApplicationAdapter
 						if (received.get("type").equals("gameStartSignal")) {
 							gameState = GameState.GAME_STARTED;
 						} else if (received.get("type").equals("playerInfo")) {
-							String playerName = (String) received.get("playerName");
+							String playerName = (String) received.get("username");
+							System.out.println("playername: " + playerName);
 							RemotePlayer remotePlayer = addRemotePlayerToList(playerName);
+							//System.out.println("remotePlayer info received: " + remotePlayer == null);
 							addPlayerToLobbyStage(remotePlayer);
 						}
 						
@@ -455,6 +467,7 @@ public class TheGame extends ApplicationAdapter
 		RemotePlayer remotePlayer = new RemotePlayer(playerShape, true);
 		remotePlayer.username = playerName;
 		players.add(remotePlayer);
+		
 		return remotePlayer;
 	}
 	/** add player's info to lobby page**/

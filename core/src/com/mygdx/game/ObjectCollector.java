@@ -68,7 +68,7 @@ public class ObjectCollector
 	public void addObject(String className, int id, Point pos)
 	{
 		//
-		System.out.println("adding object" + className + String.valueOf(id) + pos.toString());
+		//System.out.println("adding object" + className + String.valueOf(id) + pos.toString());
 		try
 		{
 			if(className == "Weapon")
@@ -96,10 +96,10 @@ public class ObjectCollector
 			for (int c = 0; c < tileMap[r].length; c++) {
 				Tile tile = tileMap[r][c];
 				if (object.intersects(tile)) {
-					System.out.println(">>>> " + String.valueOf(r) + ", " + String.valueOf(c));
+					/*System.out.println(">>>> " + String.valueOf(r) + ", " + String.valueOf(c));
 					System.out.println(tile.getShape());
 					System.out.println("------------------------");
-					System.out.println(object.getShape());
+					System.out.println(object.getShape());*/
 					((List<GameObject>) objectGrid[r][c]).add(object);
 				}
 			}

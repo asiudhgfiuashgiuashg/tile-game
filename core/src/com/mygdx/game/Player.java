@@ -32,6 +32,7 @@ public class Player extends Entity
     public Player(Shape shape, boolean passable)
     {
     	super(shape, passable);
+    	username = "default username";
     	left = 15;
         right = 50;
         up = 55;
@@ -135,5 +136,10 @@ public class Player extends Entity
     @Override
     public void setY(double newY) {
     	setPos(new Point(pos.getX(), newY));
+    }
+    
+    @Override
+    public String toString() {
+    	return username;
     }
 }
