@@ -26,7 +26,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 
-public class Map
+public class GameMap
 {
     private String title;
     private int numRows;
@@ -62,7 +62,7 @@ public class Map
     //map for keeping track of textures to dispose of
     // thing = GameObject or Item
     AbstractMap<Object, Texture> thingToTextureMap;
-    public Map(String mapFile, String tileFile, LocalPlayer player) throws IOException
+    public GameMap(String mapFile, String tileFile, LocalPlayer player) throws IOException
     {	
     	thingToTextureMap = new HashMap<Object, Texture>();
     	

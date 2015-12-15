@@ -3,7 +3,9 @@ package com.mygdx.game;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.io.*;
 import java.net.*;
@@ -51,7 +53,7 @@ public class TheGame extends ApplicationAdapter
 	LocalPlayer player;
 	SpriteBatch batch;
 	
-	Map currentMap;
+	GameMap currentMap;
 	GuiManager mapGuiManager; //holds all gui elements which are displayed when map is visible
 	GuiManager mainMenuGuiManager;
 	//GuiManager mainMenuGuiManager
@@ -73,6 +75,7 @@ public class TheGame extends ApplicationAdapter
     Table lobbyTable;
     Shape playerShape;
     Point oldPos;
+    Map<Player, CheckBox> playerToCheckBoxMap;
     
     private static enum GameState {
         MAIN_MENU,
@@ -245,6 +248,7 @@ public class TheGame extends ApplicationAdapter
 		//table.add(new Image(skin.newDrawable("white", Color.RED))).size(64);
 	}
 	private void setupLobby() {
+		playerToCheckBoxMap = new HashMap<Player, CheckBox>();
 		players = new ArrayList<Player>();
 		//create local player
 		players.add(player);
@@ -258,6 +262,7 @@ public class TheGame extends ApplicationAdapter
 		skin.add("default", checkBoxStyle);
 		
 		final CheckBox readyCheckBox = new CheckBox("", checkBoxStyle);
+		playerToCheckBoxMap.put(player, readyCheckBox);
 		readyCheckBox.setPosition(600, 70);
 		//readyCheckBox.setWidth(100);
 		//readyCheckBox.setHeight(30);
@@ -349,7 +354,7 @@ public class TheGame extends ApplicationAdapter
 		try
         {
             System.out.println("Working Directory = " + System.getProperty("user.dir"));
-            currentMap = new Map("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", player);
+            currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", player);
         }
         catch(IOException e)
         {
@@ -426,6 +431,7 @@ public class TheGame extends ApplicationAdapter
 						
 						if (received.get("type").equals("gameStartSignal")) {
 							gameState = GameState.GAME_STARTED;
+							
 						} else if (received.get("type").equals("playerInfo")) {
 							String playerName = (String) received.get("username");
 							//System.out.println("playername: " + playerName);
@@ -433,9 +439,15 @@ public class TheGame extends ApplicationAdapter
 							//System.out.println("remotePlayer info received: " + remotePlayer == null);
 							addPlayerToLobbyStage(remotePlayer);
 							lobbyTable.row();
+							
 						} else if (received.get("type").equals("readyStatus")) {
 							String username = (String) received.get("username");
-							boolean ready = (Boolean) received.get("readyStatus");
+							boolean isReady = (Boolean) received.get("readyStatus");
+							for (Player player: playerToCheckBoxMap.keySet()) {
+								if (player.username.equals(username)) {
+									playerToCheckBoxMap.get(player).setChecked(isReady);
+								}
+							}
 						}
 						
 					} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
@@ -505,7 +517,11 @@ public class TheGame extends ApplicationAdapter
 	/** add player's info to lobby page**/
 	public void addPlayerToLobbyStage(Player player) {
 		Label playerNameLabel = new Label(player.username, labelStyle);
-		lobbyTable.add(playerNameLabel).padBottom(80);
+		final CheckBox readyCheckBox = new CheckBox("", skin);
+		readyCheckBox.setDisabled(true);
+		playerToCheckBoxMap.put(player, readyCheckBox);
+		lobbyTable.add(playerNameLabel).padTop(15).padRight(20);
+		lobbyTable.add(readyCheckBox);
 		System.out.println("added player to lobby stage: " + player.username);
 	}
 	

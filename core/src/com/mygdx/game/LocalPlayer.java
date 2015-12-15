@@ -28,7 +28,7 @@ public class LocalPlayer extends Player {
 		// TODO Auto-generated constructor stub
 	}
 
-	public void setCurrentMap(Map currentMap) {
+	public void setCurrentMap(GameMap currentMap) {
 		this.currentMap = currentMap;
 	}@Override
 	public void update(float stateTime) {

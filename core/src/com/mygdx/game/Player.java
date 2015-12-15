@@ -24,7 +24,7 @@ public class Player extends Entity
     TextureRegion idleUp;
     TextureRegion idleDown;
 
-    Map currentMap;
+    GameMap currentMap;
     String username;
     
     public ItemCollector inv;
