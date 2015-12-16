@@ -81,9 +81,10 @@ public class TheGame extends ApplicationAdapter
     private Shape playerShape;
     private Point oldPos;
     private Map<Player, CheckBox> playerToCheckBoxMap;
-    private VerticalGroup lobbyMessagesVGroup;
+    private VerticalGroup chatMessagesVGroup;
     private static final int CHAT_BOX_HEIGHT = 150;
     private int numChatLines; //for in-lobby chat
+    private TextField messageTextField ;
     
     private static enum GameState {
         MAIN_MENU,
@@ -303,28 +304,32 @@ public class TheGame extends ApplicationAdapter
 		addPlayerToLobbyStage(player);
 		lobbyTable.row();
 		
-		lobbyMessagesVGroup = new VerticalGroup();
-		lobbyMessagesVGroup.debugAll();
-		lobbyMessagesVGroup.setPosition(5, 35);
-		lobbyMessagesVGroup.setSize(400, CHAT_BOX_HEIGHT);
-		lobbyMessagesVGroup.left();
-		lobbyMessagesVGroup.reverse();
-		stage.addActor(lobbyMessagesVGroup);
+		addChatboxToStage();
+	}
+	
+	private void addChatboxToStage() {
+		chatMessagesVGroup = new VerticalGroup();
+		chatMessagesVGroup.debugAll();
+		chatMessagesVGroup.setPosition(5, 35);
+		chatMessagesVGroup.setSize(400, CHAT_BOX_HEIGHT);
+		chatMessagesVGroup.left();
+		chatMessagesVGroup.reverse();
+		stage.addActor(chatMessagesVGroup);
 		
 		
-		final TextField messageTextField = new TextField("", skin);
+		messageTextField = new TextField("", skin);
 		messageTextField.setSize(400, 30);
 		
 		messageTextField.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				System.out.println(event.getCharacter());
 				if (keycode == Input.Keys.ENTER) {
 					JSONObject message = new JSONObject();
 					message.put("type", "chatMessage");
 					message.put("message", messageTextField.getText());
 					out.println(message);
-					addMessageToLobby(messageTextField.getText());
+					System.out.println("howdy pardner: " + player.username + ": " + messageTextField.getText());
+					addMessageToChatbox(player.username + ": " + messageTextField.getText());
 					messageTextField.setText("");
 					return false; //dont pass along the event
 				}
@@ -336,17 +341,21 @@ public class TheGame extends ApplicationAdapter
 		stage.addActor(messageTextField);
 	}
 	
-	private void addMessageToLobby(String message) {
+	private void addMessageToChatbox(String message) {
 		Label messageLabel = new Label(message, skin);
-		lobbyMessagesVGroup.addActorAt(0, messageLabel);
+		while (messageLabel.getPrefWidth() > chatMessagesVGroup.getWidth()) {
+			message = message.substring(0, message.length() - 1);
+			messageLabel.setText(message);
+		}
+		chatMessagesVGroup.addActorAt(0, messageLabel);
+		System.out.println("added: " + messageLabel);
 		numChatLines++;
 		BitmapFont font = messageLabel.getStyle().font;
 		int maxNumChatLines = (int) (CHAT_BOX_HEIGHT / (font.getCapHeight() + font.getAscent() + -font.getDescent()));
 		if (maxNumChatLines == numChatLines) {
 			numChatLines -= 1;
-			lobbyMessagesVGroup.getChildren().get(lobbyMessagesVGroup.getChildren().size - 1).remove(); //get rid of top chat line
+			chatMessagesVGroup.getChildren().get(chatMessagesVGroup.getChildren().size - 1).remove(); //get rid of top chat line
 		}
-		
 	}
 	
 	private void setEnabledAndHighlight(Button button, boolean enabled) {
@@ -437,13 +446,9 @@ public class TheGame extends ApplicationAdapter
 	@Override
 	public void render()
 	{
-		if (GameState.MAIN_MENU == gameState || GameState.IN_LOBBY == gameState) {
-			Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-			stage.draw();
-			
-		} else {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		if (GameState.GAME_STARTED == gameState) {
 			//System.out.println(player.getShape());
 			/*
 			 * logic for switching between various GuiManagers could go here
@@ -453,8 +458,7 @@ public class TheGame extends ApplicationAdapter
 			 */
 			keyListening();
 			
-			Gdx.gl.glClearColor(0, 0, 0, 1);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			
 			batch.begin();
 			
 			if(GuiManager.currentManager.equals(mapGuiManager))
@@ -468,6 +472,9 @@ public class TheGame extends ApplicationAdapter
 			batch.end();
 		}
 		
+		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+		stage.draw();
+		
 		//*******Networking*****
 		//receiving during gameplay, after the game has started
 		if (GameState.MAIN_MENU != gameState) { 
@@ -478,12 +485,14 @@ public class TheGame extends ApplicationAdapter
 						System.out.println("ready");
 						
 						String receivedStr = in.readLine();
-						System.out.println("receivedStr: " + receivedStr);
+						//System.out.println("receivedStr: " + receivedStr);
 						JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
-						System.out.println("received: " + received);
+						//System.out.println("received: " + received);
 						
 						if (received.get("type").equals("gameStartSignal")) {
 							gameState = GameState.GAME_STARTED;
+							stage.clear();
+							addInGameActors();
 							
 						} else if (received.get("type").equals("playerInfo")) {
 							String playerName = (String) received.get("username");
@@ -507,7 +516,7 @@ public class TheGame extends ApplicationAdapter
 							
 						} else if (received.get("type").equals("chatMessage")) {
 							String message = (String) received.get("message");
-							addMessageToLobby(message);
+							addMessageToChatbox(message);
 						}
 						
 					} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
@@ -567,7 +576,12 @@ public class TheGame extends ApplicationAdapter
 			//**end networking******
 		}
 	}
-	public RemotePlayer addRemotePlayerToList(String playerName, int uid) {
+	
+	public void addInGameActors() {
+		addChatboxToStage();
+	}
+	
+	private RemotePlayer addRemotePlayerToList(String playerName, int uid) {
 		RemotePlayer remotePlayer = new RemotePlayer(playerShape, true);
 		remotePlayer.uid = uid;
 		remotePlayer.username = playerName;
@@ -576,7 +590,7 @@ public class TheGame extends ApplicationAdapter
 		return remotePlayer;
 	}
 	/** add player's info to lobby page**/
-	public void addPlayerToLobbyStage(Player player) {
+	private void addPlayerToLobbyStage(Player player) {
 		Label playerNameLabel = new Label(player.username, labelStyle);
 		final CheckBox readyCheckBox = new CheckBox("", skin);
 		readyCheckBox.setDisabled(true);
@@ -615,7 +629,6 @@ public class TheGame extends ApplicationAdapter
 					itemListExists = false;
 					player.setCanMove(true);
 				}
-				
 			}
 			if (Gdx.input.isKeyJustPressed(Keys.C))
 			{	
