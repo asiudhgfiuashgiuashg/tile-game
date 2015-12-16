@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -28,6 +29,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
@@ -47,6 +50,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class TheGame extends ApplicationAdapter 
 {
@@ -58,24 +63,27 @@ public class TheGame extends ApplicationAdapter
 	GuiManager mainMenuGuiManager;
 	//GuiManager mainMenuGuiManager
 	//etc
-	boolean itemListExists;
-	PrintWriter out;
-    BufferedReader in;
-    long time;
-    final int SEND_SPACING = 50;
-    Direction playerOldDirection;
-    Skin skin;
-    Stage stage;
-    Socket socket;
-    Table mainMenuTable;
-    TextField errorTextField;
-    List<Player> players;
-    List<Player> playersDrawnInLobby;
-    LabelStyle labelStyle;
-    Table lobbyTable;
-    Shape playerShape;
-    Point oldPos;
-    Map<Player, CheckBox> playerToCheckBoxMap;
+	private boolean itemListExists;
+	private PrintWriter out;
+    private BufferedReader in;
+    private long time;
+    private final int SEND_SPACING = 50;
+    private Direction playerOldDirection;
+    private Skin skin;
+    private Stage stage;
+    private Socket socket;
+    private Table mainMenuTable;
+    private TextField errorTextField;
+    private List<Player> players;
+    private List<Player> playersDrawnInLobby;
+    private LabelStyle labelStyle;
+    private Table lobbyTable;
+    private Shape playerShape;
+    private Point oldPos;
+    private Map<Player, CheckBox> playerToCheckBoxMap;
+    private VerticalGroup lobbyMessagesVGroup;
+    private static final int CHAT_BOX_HEIGHT = 150;
+    private int numChatLines; //for in-lobby chat
     
     private static enum GameState {
         MAIN_MENU,
@@ -87,6 +95,7 @@ public class TheGame extends ApplicationAdapter
     
 	@Override
 	public void create() {
+		numChatLines = 0;
 		oldPos = new Point(0, 0);
 		gameState = GameState.MAIN_MENU;
 		batch = new SpriteBatch();
@@ -293,7 +302,53 @@ public class TheGame extends ApplicationAdapter
 		stage.addActor(lobbyTable);
 		addPlayerToLobbyStage(player);
 		lobbyTable.row();
+		
+		lobbyMessagesVGroup = new VerticalGroup();
+		lobbyMessagesVGroup.debugAll();
+		lobbyMessagesVGroup.setPosition(5, 35);
+		lobbyMessagesVGroup.setSize(400, CHAT_BOX_HEIGHT);
+		lobbyMessagesVGroup.left();
+		lobbyMessagesVGroup.reverse();
+		stage.addActor(lobbyMessagesVGroup);
+		
+		
+		final TextField messageTextField = new TextField("", skin);
+		messageTextField.setSize(400, 30);
+		
+		messageTextField.addListener(new InputListener() {
+			@Override
+			public boolean keyDown(InputEvent event, int keycode) {
+				System.out.println(event.getCharacter());
+				if (keycode == Input.Keys.ENTER) {
+					JSONObject message = new JSONObject();
+					message.put("type", "chatMessage");
+					message.put("message", messageTextField.getText());
+					out.println(message);
+					addMessageToLobby(messageTextField.getText());
+					messageTextField.setText("");
+					return false; //dont pass along the event
+				}
+				return true; //pass along the event
+			}
+		});
+		
+		messageTextField.setPosition(5, 5);
+		stage.addActor(messageTextField);
 	}
+	
+	private void addMessageToLobby(String message) {
+		Label messageLabel = new Label(message, skin);
+		lobbyMessagesVGroup.addActorAt(0, messageLabel);
+		numChatLines++;
+		BitmapFont font = messageLabel.getStyle().font;
+		int maxNumChatLines = (int) (CHAT_BOX_HEIGHT / (font.getCapHeight() + font.getAscent() + -font.getDescent()));
+		if (maxNumChatLines == numChatLines) {
+			numChatLines -= 1;
+			lobbyMessagesVGroup.getChildren().get(lobbyMessagesVGroup.getChildren().size - 1).remove(); //get rid of top chat line
+		}
+		
+	}
+	
 	private void setEnabledAndHighlight(Button button, boolean enabled) {
 		Button.ButtonStyle buttonStyle = button.getStyle();
 		if (enabled) { //highlight connect button
@@ -309,6 +364,8 @@ public class TheGame extends ApplicationAdapter
 		}
 		button.setDisabled(!enabled);
 	}
+	
+	
 	//attempts to connect to server, returns true for success
 	private boolean connectToServer(String serverAddress, int port, String username) {
 		try {
@@ -447,6 +504,10 @@ public class TheGame extends ApplicationAdapter
 							
 						} else if (received.get("type").equals("uidUpdate")) {
 							player.uid = ((Number) received.get("uid")).intValue();
+							
+						} else if (received.get("type").equals("chatMessage")) {
+							String message = (String) received.get("message");
+							addMessageToLobby(message);
 						}
 						
 					} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
