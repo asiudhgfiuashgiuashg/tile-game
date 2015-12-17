@@ -316,38 +316,27 @@ public class TheGame extends ApplicationAdapter
 
 			
 		//applies costume change for localplayer. Might need to move this to another location.
-		costumeCheckBox1.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) {
-				if(!costumeCheckBox1.isChecked()){
-					player.sprite = "Costume1.png";
-				}
-				player.changeAppearance();	
+		class costumeChange extends ChangeListener{
+			String sprite;
+			CheckBox checkBox;
+			costumeChange(CheckBox checkBox, String sprite){
+				this.checkBox = checkBox;
+				this.sprite = sprite;
 			}
-		});
-		costumeCheckBox2.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) {
-				if(!costumeCheckBox1.isChecked()){
-					player.sprite = "Costume2.png";
+			public void changed(ChangeEvent event, Actor actor){
+				if(!checkBox.isChecked()){
+					player.sprite = sprite;
+					player.changeAppearance();
 				}
-				player.changeAppearance();	
 			}
-		});
-		costumeCheckBox3.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) {
-				if(!costumeCheckBox1.isChecked()){
-					player.sprite = "Costume3.png";
-				}
-				player.changeAppearance();	
-			}
-		});
-		costumeCheckBox4.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) {
-				if(!costumeCheckBox1.isChecked()){
-					player.sprite = "Costume4.png";
-				}
-				player.changeAppearance();	
-			}
-		});
+			
+		}
+		
+		costumeCheckBox1.addListener(new costumeChange(costumeCheckBox1, "Costume1.png"));
+		costumeCheckBox2.addListener(new costumeChange(costumeCheckBox1, "Costume2.png"));
+		costumeCheckBox3.addListener(new costumeChange(costumeCheckBox1, "Costume3.png"));
+		costumeCheckBox4.addListener(new costumeChange(costumeCheckBox1, "Costume4.png"));
+		
 		
 		stage.clear();
 		stage.addActor(readyCheckBox);
