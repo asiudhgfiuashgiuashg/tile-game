@@ -84,7 +84,9 @@ public class TheGame extends ApplicationAdapter
     private VerticalGroup chatMessagesVGroup;
     private static final int CHAT_BOX_HEIGHT = 150;
     private int numChatLines; //for in-lobby chat
-    private TextField messageTextField ;
+    private TextField messageTextField;
+    private InputListener inLobbyMessageTextFieldListener;
+    private InputListener inGameMessageTextFieldListener;
     
     private static enum GameState {
         MAIN_MENU,
@@ -101,7 +103,7 @@ public class TheGame extends ApplicationAdapter
 		gameState = GameState.MAIN_MENU;
 		batch = new SpriteBatch();
 		stage = new Stage();
-		Gdx.input.setInputProcessor(stage);
+		Gdx.input.setInputProcessor(stage); //the stage which contains the gui/hud gets to handle inputs first, and then pass the ones it doesn't handle down to the game
 		playerShape = new Shape(Arrays.asList(
 				new LineSeg(new Point(15, 0), new Point(15, 55)),
 				new LineSeg(new Point(15, 55), new Point(50, 55)),
@@ -305,6 +307,24 @@ public class TheGame extends ApplicationAdapter
 		lobbyTable.row();
 		
 		addChatboxToStage();
+		
+		inLobbyMessageTextFieldListener  = new InputListener() {
+			@Override
+			public boolean keyDown(InputEvent event, int keycode) {
+				if (keycode == Input.Keys.ENTER) {
+					JSONObject message = new JSONObject();
+					message.put("type", "chatMessage");
+					message.put("message", messageTextField.getText());
+					out.println(message);
+					addMessageToChatbox(player.username + ": " + messageTextField.getText());
+					messageTextField.setText("");
+					return true; //dont pass along the event
+				}
+				return false; //pass along the event
+			}
+		};
+		
+		messageTextField.addListener(inLobbyMessageTextFieldListener);
 	}
 	
 	private void addChatboxToStage() {
@@ -319,23 +339,7 @@ public class TheGame extends ApplicationAdapter
 		
 		messageTextField = new TextField("", skin);
 		messageTextField.setSize(400, 30);
-		
-		messageTextField.addListener(new InputListener() {
-			@Override
-			public boolean keyDown(InputEvent event, int keycode) {
-				if (keycode == Input.Keys.ENTER) {
-					JSONObject message = new JSONObject();
-					message.put("type", "chatMessage");
-					message.put("message", messageTextField.getText());
-					out.println(message);
-					System.out.println("howdy pardner: " + player.username + ": " + messageTextField.getText());
-					addMessageToChatbox(player.username + ": " + messageTextField.getText());
-					messageTextField.setText("");
-					return false; //dont pass along the event
-				}
-				return true; //pass along the event
-			}
-		});
+
 		
 		messageTextField.setPosition(5, 5);
 		stage.addActor(messageTextField);
@@ -456,7 +460,7 @@ public class TheGame extends ApplicationAdapter
 			 * 		GuiManager.setCurrentGuiManager(mainMenuGuiManager);
 			 * } else if (...
 			 */
-			keyListening();
+			//keyListening();
 			
 			
 			batch.begin();
@@ -579,6 +583,49 @@ public class TheGame extends ApplicationAdapter
 	
 	public void addInGameActors() {
 		addChatboxToStage();
+		messageTextField.setVisible(false);
+		messageTextField.removeListener(inLobbyMessageTextFieldListener);
+		inGameMessageTextFieldListener = new InputListener() {
+			@Override
+			public boolean keyDown(InputEvent event, int keycode) {
+				System.out.println("key detected in messageTextField");
+				if (keycode == Input.Keys.ENTER) {
+					if (messageTextField.isVisible()) { //open up text field for message entry
+						//send the text as a message
+						JSONObject message = new JSONObject();
+						message.put("type", "chatMessage");
+						message.put("message", messageTextField.getText());
+						out.println(message);
+						addMessageToChatbox(player.username + ": " + messageTextField.getText());
+						messageTextField.setText("");
+						messageTextField.setVisible(false); //close the text field
+						messageTextField.setDisabled(true);
+						event.setBubbles(false); //stop the event from bubbling back up to the stage, which will handle ENTER again (we only want ENTER to be handled once)
+					}
+					return true; // the event is "handled" -- no propogation outside of this stage
+				}
+				return false; // the event is not "handled" -- propogates outside of stage
+			}
+		};
+		messageTextField.addListener(inGameMessageTextFieldListener);
+/*		messageTextField.setTextFieldFilter(new TextFieldFilter() {
+			@Override
+			public boolean acceptChar(TextField textField, char c) {
+				return Input.Keys.ENTER == c || messageTextField.isVisible(); //accept an input only if messageTextField is visible or if the input character is ENTER key (used to open/close the field)
+			}
+			
+		});*/
+		
+		stage.addListener(new InputListener() {
+			@Override
+			public boolean keyDown(InputEvent event, int keycode) {
+				if (keycode == Input.Keys.ENTER && !messageTextField.isVisible()) {
+					messageTextField.setVisible(true);
+					messageTextField.setDisabled(false);
+				}
+				return true;
+			}
+		});
 	}
 	
 	private RemotePlayer addRemotePlayerToList(String playerName, int uid) {
@@ -600,7 +647,7 @@ public class TheGame extends ApplicationAdapter
 		System.out.println("added player to lobby stage: " + player.username);
 	}
 	
-	public void keyListening() {
+/*	public void keyListening() {
 		
 		if (GuiManager.currentManager.equals(mapGuiManager)) 
 		{
@@ -643,7 +690,7 @@ public class TheGame extends ApplicationAdapter
 				}
 				
 			}
-/*		} else if (currentManager.equals(mainMenuGuiManager) {
+		} else if (currentManager.equals(mainMenuGuiManager) {
 			some other behavior
 		} else if (currentManager.equals(someOtherGuiManager) {
 			some other behavior
@@ -651,8 +698,8 @@ public class TheGame extends ApplicationAdapter
 		.
 		.
 		.
-*/
+
 		
 		
-	}
+	}*/
 }
