@@ -26,6 +26,7 @@ public class Player extends Entity
 
     GameMap currentMap;
     String username;
+    String sprite;
     int uid;
     
     public ItemCollector inv;
@@ -45,9 +46,9 @@ public class Player extends Entity
 
     }
     
-    protected void changeAppearance(String sprites)
+    protected void changeAppearance()
     {
-    	spriteSheet = new Texture(Gdx.files.internal(sprites));
+    	spriteSheet = new Texture(Gdx.files.internal(sprite));
         tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
         
         moveLeft = animate(9, 9);

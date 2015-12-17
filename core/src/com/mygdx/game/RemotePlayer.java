@@ -13,7 +13,8 @@ public class RemotePlayer extends Player
 	
 	public RemotePlayer(Shape shape, boolean passable) {
 		super(shape, passable);
-		changeAppearance("index2.png");
+		sprite = "Costume2.png";
+		changeAppearance();
 		currentAnimation = moveLeft;
 	}
 	

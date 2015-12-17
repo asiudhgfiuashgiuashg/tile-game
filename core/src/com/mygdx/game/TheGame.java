@@ -32,6 +32,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle;
@@ -157,7 +158,7 @@ public class TheGame extends ApplicationAdapter
 		Label serverAddressLabel = new Label("Server Address: ", labelStyle);
 	  
 		// Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
-		final TextButton connectButton = new TextButton("Connect", skin);
+		final TextButton connectButton = new TextButton(" Connect ", skin);
 				
 		final TextField serverPortField = new TextField("", skin);
 		serverPortField.setWidth(70);
@@ -294,9 +295,69 @@ public class TheGame extends ApplicationAdapter
 		final Label readyCheckBoxLabel = new Label("Ready?", skin);
 		readyCheckBoxLabel.setPosition(520,  70);
 		
+		//Creating checkboxes for the costume options while in lobby
+		final Label costumeCheckBoxLabel = new Label("Costumes", skin);
+		final CheckBox costumeCheckBox1 = new CheckBox(" 1", checkBoxStyle);
+		final CheckBox costumeCheckBox2 = new CheckBox(" 2", checkBoxStyle);
+		final CheckBox costumeCheckBox3 = new CheckBox(" 3", checkBoxStyle);
+		final CheckBox costumeCheckBox4 = new CheckBox(" 4", checkBoxStyle);
+		
+		
+		costumeCheckBoxLabel.setPosition(600, 350);
+		costumeCheckBox1.setPosition(600, 330);
+		costumeCheckBox2.setPosition(600, 310);
+		costumeCheckBox3.setPosition(600, 290);
+		costumeCheckBox4.setPosition(600, 270);
+		
+		ButtonGroup<CheckBox> costumeButtons = new ButtonGroup<CheckBox>(costumeCheckBox1, costumeCheckBox2, costumeCheckBox3, costumeCheckBox4);
+		costumeButtons.setMaxCheckCount(1);
+		costumeButtons.setUncheckLast(true);
+		costumeCheckBox1.setChecked(true);
+
+			
+		//applies costume change for localplayer. Might need to move this to another location.
+		costumeCheckBox1.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) {
+				if(!costumeCheckBox1.isChecked()){
+					player.sprite = "Costume1.png";
+				}
+				player.changeAppearance();	
+			}
+		});
+		costumeCheckBox2.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) {
+				if(!costumeCheckBox1.isChecked()){
+					player.sprite = "Costume2.png";
+				}
+				player.changeAppearance();	
+			}
+		});
+		costumeCheckBox3.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) {
+				if(!costumeCheckBox1.isChecked()){
+					player.sprite = "Costume3.png";
+				}
+				player.changeAppearance();	
+			}
+		});
+		costumeCheckBox4.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) {
+				if(!costumeCheckBox1.isChecked()){
+					player.sprite = "Costume4.png";
+				}
+				player.changeAppearance();	
+			}
+		});
+		
 		stage.clear();
 		stage.addActor(readyCheckBox);
 		stage.addActor(readyCheckBoxLabel);
+		stage.addActor(costumeCheckBoxLabel);
+		stage.addActor(costumeCheckBox1);
+		stage.addActor(costumeCheckBox2);
+		stage.addActor(costumeCheckBox3);
+		stage.addActor(costumeCheckBox4);
+		
 		lobbyTable = new Table();
 		lobbyTable.debugAll();
 		lobbyTable.setFillParent(true);
@@ -648,7 +709,8 @@ public class TheGame extends ApplicationAdapter
 		System.out.println("added player to lobby stage: " + player.username);
 	}
 	
-/*	public void keyListening() {
+	/*
+	public void keyListening() {
 		
 		if (GuiManager.currentManager.equals(mapGuiManager)) 
 		{
@@ -691,16 +753,14 @@ public class TheGame extends ApplicationAdapter
 				}
 				
 			}
-		} else if (currentManager.equals(mainMenuGuiManager) {
+		
+		} else if (currentManager.equals(mainMenuGuiManager)) {
 			some other behavior
-		} else if (currentManager.equals(someOtherGuiManager) {
+		} else if (currentManager.equals(someOtherGuiManager)) {
 			some other behavior
 		}
 		.
 		.
 		.
-
-		
-		
 	}*/
 }
