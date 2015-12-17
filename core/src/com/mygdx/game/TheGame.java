@@ -622,6 +622,7 @@ public class TheGame extends ApplicationAdapter
 				if (keycode == Input.Keys.ENTER && !messageTextField.isVisible()) {
 					messageTextField.setVisible(true);
 					messageTextField.setDisabled(false);
+					stage.setKeyboardFocus(messageTextField);
 				}
 				return true;
 			}
