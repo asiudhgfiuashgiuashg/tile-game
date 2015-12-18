@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.Preferences;
 import java.util.Scanner;
 import java.io.*;
 import java.net.*;
@@ -89,6 +90,7 @@ public class TheGame extends ApplicationAdapter
     private InputListener inGameMessageTextFieldListener;
     
     private LocalPlayer player;
+    private Preferences preferences;
     
     private static enum GameState {
         MAIN_MENU,
@@ -156,18 +158,21 @@ public class TheGame extends ApplicationAdapter
 		labelStyle.fontColor = Color.WHITE;
 		skin.add("default", labelStyle);
 		
+		//http://www.vogella.com/tutorials/JavaPreferences/article.html
+		preferences = Preferences.userRoot().node(this.getClass().getName()); //used to save/load fields on server connect page
+		
 		Label serverAddressLabel = new Label("Server Address: ", labelStyle);
 	  
 		// Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
 		final TextButton connectButton = new TextButton(" Connect ", skin);
 				
-		final TextField serverPortField = new TextField("", skin);
+		final TextField serverPortField = new TextField(preferences.get("serverPortField", ""), skin);
 		serverPortField.setWidth(70);
 		serverPortField.setAlignment(Align.center);
 		System.out.println(serverPortField.getWidth());
 		serverPortField.setHeight(30);
 		
-		final TextField serverAddressField = new TextField("", skin);
+		final TextField serverAddressField = new TextField(preferences.get("serverAddressField", ""), skin);
 		serverAddressField.setWidth(200);
 		serverAddressField.setHeight(30);
 		serverAddressField.setAlignment(Align.center);
@@ -212,7 +217,7 @@ public class TheGame extends ApplicationAdapter
 			}
 		});
 		
-		final TextField usernameField = new TextField("", skin);
+		final TextField usernameField = new TextField(preferences.get("username", ""), skin);
 		usernameField.setWidth(200);
 		usernameField.setHeight(30);
 		usernameField.setAlignment(Align.center);
@@ -238,7 +243,7 @@ public class TheGame extends ApplicationAdapter
 		mainMenuTable.row();
 		mainMenuTable.add(connectButton).colspan(4).center().padTop(40);
 		//mainMenuTable.debugAll(); //show bounding boxes
-		
+
 
 		// Add a listener to the button. ChangeListener is fired when the button's checked state changes, eg when clicked,
 		// Button#setChecked() is called, via a key press, etc. If the event.cancel() is called, the checked state will be reverted.
@@ -252,6 +257,15 @@ public class TheGame extends ApplicationAdapter
 				if (serverAddressField.getText().length() > 0
 						&& serverPortField.getText().length() > 0
 						&& connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()), usernameField.getText())) {
+					
+					//save textFields for next game session
+					preferences.put("username", usernameField.getText());
+					preferences.put("serverPortField", serverPortField.getText());
+					preferences.put("serverAddressField", serverAddressField.getText());
+					
+					
+					
+					
 					
 					setupLobby();
 				}
