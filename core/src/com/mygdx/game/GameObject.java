@@ -12,13 +12,13 @@ public class GameObject {
  
     private String name;
     private int id;
-    private Point pos;
+    protected Point pos;
     
     public static final String classFileLocation = "../core/assets/Object.txt";
     
 	String imageURI;
 	
-	private int width, height;
+	private float width, height;
 	
 	public GameObject(Shape shape, boolean passable) {
         this.shape = shape;
@@ -75,10 +75,10 @@ public class GameObject {
 	public int getId() {
         return id;    
     }
-    public int getWidth() {
+    public float getWidth() {
         return width;
     }
-    public int getHeight() {
+    public float getHeight() {
         return height;
     }
     public String getName() {
@@ -105,10 +105,10 @@ public class GameObject {
     public void setName(String name) {
         this.name = name;
     }
-    public void setWidth(int width) {
+    public void setWidth(float width) {
         this.width = width;
     }
-    public void setHeight(int height) {
+    public void setHeight(float height) {
         this.height = height;
     }
     

@@ -11,7 +11,6 @@ public class LocalPlayer extends Player {
 	boolean isMovingRight;
 	boolean isMovingUp;
 	boolean isMovingDown;
-	Direction direction;
 
 	private float moveSpeed;
 	int sightX = 400;
@@ -44,26 +43,26 @@ public class LocalPlayer extends Player {
 				if (isMovingLeft && !isMovingRight) {
 					if (pos.getX() > 0 - this.left && currentMap.moveLeft()) {
 						currentFrame = moveLeft.getKeyFrame(stateTime, true);
-						direction = Direction.LEFT;
+						direction = DirectionOfTravel.LEFT;
 					}
 				} else if (isMovingRight && !isMovingLeft) {
 					if (pos.getX() < currentMap.mapWidth - this.right && currentMap.moveRight()) {
 						currentFrame = moveRight.getKeyFrame(stateTime, true);
-						direction = Direction.RIGHT;
+						direction = DirectionOfTravel.RIGHT;
 					}
 				} else if (isMovingUp && !isMovingDown) {
 					if (pos.getY() < currentMap.mapHeight - this.up && currentMap.moveUp()) {
 						currentFrame = moveUp.getKeyFrame(stateTime, true);
-						direction = Direction.UP;
+						direction = DirectionOfTravel.UP;
 
 					}
 				} else if (isMovingDown && !isMovingUp) {
 					if (pos.getY() > this.down && currentMap.moveDown()) {
 						currentFrame = moveDown.getKeyFrame(stateTime, true);
-						direction = Direction.DOWN;
+						direction = DirectionOfTravel.DOWN;
 					}
 				} else {
-					direction = null;
+					direction = DirectionOfTravel.IDLE;
 					// no direction, just stopped
 				}
 			} catch (Exception e) {

@@ -29,7 +29,9 @@ public class Player extends Entity
     String sprite;
     int uid;
     
-    public ItemCollector inv;
+    protected ItemCollector inv;
+    
+    protected DirectionOfTravel direction;
     
     public Player(Shape shape, boolean passable)
     {
@@ -43,7 +45,7 @@ public class Player extends Entity
         pos = new Point(0, 0);
 
         inv = new ItemCollector();
-
+        direction = DirectionOfTravel.IDLE;
     }
     
     protected void changeAppearance()

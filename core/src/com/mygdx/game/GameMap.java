@@ -40,14 +40,15 @@ public class GameMap {
 	private boolean smallWidth;
 	private boolean smallHeight;
 	float stateTime;
+	
+	protected List<Player> players;
 
 	protected int mapPosX;
 	protected int mapPosY;
 
 	private int winX = 400;
 	private int winY = 240;
-	LocalPlayer player;
-	RemotePlayer player2;
+	protected LocalPlayer player;
 
 	boolean multiplayerEnabled = true;
 
@@ -61,7 +62,8 @@ public class GameMap {
 	AbstractMap < Object, Texture > thingToTextureMap;
 	public GameMap(String mapFile, String tileFile, LocalPlayer player) throws IOException {
 		thingToTextureMap = new HashMap < Object, Texture > ();
-
+		players = new ArrayList<Player>();
+		players.add(player);
 		this.player = player;
 		player.setCurrentMap(this);
 
@@ -71,7 +73,6 @@ public class GameMap {
 		new LineSeg(new Point(50, 55), new Point(50, 0)),
 		new LineSeg(new Point(50, 0), new Point(15, 0))),
 		new Point(0, 0));
-		player2 = new RemotePlayer(shape, true);
 
 		///////////////////////////////////
 		// convert mapFile into Tile[][] //
@@ -191,8 +192,9 @@ public class GameMap {
 	public void update(SpriteBatch batch) {
 		//All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
 		//player.update() must come before fov.setRegion or item drawing will lag behind map and player drawing
-		player.update(stateTime);
-		player2.update(stateTime);
+		for (Player player: players) {
+			player.update(stateTime);
+		}
 		fov.setRegion(mapPosX, mapHeight - (mapPosY + 2 * winY), 2 * winX, 2 * winY);
 		stateTime += Gdx.graphics.getDeltaTime();
 
@@ -240,7 +242,11 @@ public class GameMap {
 			}
 		}
 		if (multiplayerEnabled) {
-			player2.drawAtPos(batch, (float) player2.getPos().getX() - mapPosX, (float) player2.getPos().getY() - mapPosY);
+			for (Player player: players) {
+				if (player instanceof RemotePlayer) {
+					player.drawAtPos(batch, (float) player.getPos().getX() - mapPosX, (float) player.getPos().getY() - mapPosY);
+				}
+			}
 		}
 		player.draw(batch);
 	}
@@ -583,5 +589,14 @@ public class GameMap {
 			return futurePlayerShape.intersects(futureTile0Shape) || futurePlayerShape.intersects(futureTile1Shape);
 		}
 		return false;
+	}
+	
+	protected Player getPlayerByUid(int uid) {
+		for (Player player: players) {
+			if (player.uid == uid) {
+				return player;
+			}
+		}
+		return null;
 	}
 }

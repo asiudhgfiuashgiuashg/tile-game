@@ -33,7 +33,6 @@ public abstract class Entity extends GameObject
     TextureRegion[] animationFrames;
     TextureRegion currentFrame;
 
-    Point pos;
     float drawPosX;
     float drawPosY;
     //pixels relative to bottom left corner of current frame image

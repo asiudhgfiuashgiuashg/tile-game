@@ -56,7 +56,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class TheGame extends ApplicationAdapter 
 {
-	LocalPlayer player;
 	SpriteBatch batch;
 	
 	GameMap currentMap;
@@ -69,14 +68,14 @@ public class TheGame extends ApplicationAdapter
     private BufferedReader in;
     private long time;
     private final int SEND_SPACING = 50;
-    private Direction playerOldDirection;
+    private DirectionOfTravel playerOldDirection;
     private Skin skin;
     private Stage stage;
     private Socket socket;
     private Table mainMenuTable;
     private TextField errorTextField;
-    private List<Player> players;
-    private List<Player> playersDrawnInLobby;
+    
+    //private List<Player> playersDrawnInLobby;
     private LabelStyle labelStyle;
     private Table lobbyTable;
     private Shape playerShape;
@@ -88,6 +87,8 @@ public class TheGame extends ApplicationAdapter
     private TextField messageTextField;
     private InputListener inLobbyMessageTextFieldListener;
     private InputListener inGameMessageTextFieldListener;
+    
+    private LocalPlayer player;
     
     private static enum GameState {
         MAIN_MENU,
@@ -263,9 +264,8 @@ public class TheGame extends ApplicationAdapter
 	private void setupLobby() {
 		gameState = GameState.IN_LOBBY;
 		playerToCheckBoxMap = new HashMap<Player, CheckBox>();
-		players = new ArrayList<Player>();
 		//create local player
-		players.add(player);
+		//currentMap.players.add(player);
 		
 		final CheckBoxStyle checkBoxStyle = new CheckBoxStyle();
 		checkBoxStyle.checkboxOff = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("art/checkbox_unchecked.png"))));
@@ -274,7 +274,7 @@ public class TheGame extends ApplicationAdapter
 		skin.add("default", checkBoxStyle);
 		
 		final CheckBox readyCheckBox = new CheckBox("", checkBoxStyle);
-		playerToCheckBoxMap.put(player, readyCheckBox);
+		playerToCheckBoxMap.put(currentMap.player, readyCheckBox);
 		readyCheckBox.setPosition(600, 70);
 		//readyCheckBox.setWidth(100);
 		//readyCheckBox.setHeight(30);
@@ -316,10 +316,10 @@ public class TheGame extends ApplicationAdapter
 
 			
 		//applies costume change for localplayer. Might need to move this to another location.
-		class costumeChange extends ChangeListener{
+		class CostumeChange extends ChangeListener{
 			String sprite;
 			CheckBox checkBox;
-			costumeChange(CheckBox checkBox, String sprite){
+			public CostumeChange(CheckBox checkBox, String sprite){
 				this.checkBox = checkBox;
 				this.sprite = sprite;
 			}
@@ -332,10 +332,10 @@ public class TheGame extends ApplicationAdapter
 			
 		}
 		
-		costumeCheckBox1.addListener(new costumeChange(costumeCheckBox1, "Costume1.png"));
-		costumeCheckBox2.addListener(new costumeChange(costumeCheckBox1, "Costume2.png"));
-		costumeCheckBox3.addListener(new costumeChange(costumeCheckBox1, "Costume3.png"));
-		costumeCheckBox4.addListener(new costumeChange(costumeCheckBox1, "Costume4.png"));
+		costumeCheckBox1.addListener(new CostumeChange(costumeCheckBox1, "Costume1.png"));
+		costumeCheckBox2.addListener(new CostumeChange(costumeCheckBox1, "Costume2.png"));
+		costumeCheckBox3.addListener(new CostumeChange(costumeCheckBox1, "Costume3.png"));
+		costumeCheckBox4.addListener(new CostumeChange(costumeCheckBox1, "Costume4.png"));
 		
 		
 		stage.clear();
@@ -435,10 +435,15 @@ public class TheGame extends ApplicationAdapter
 			socket = new Socket(serverAddress, port);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			
+			
+			
 			player = new LocalPlayer(playerShape, false);
 			player.username = username;
-			
 			setupForInGame();
+			
+			
+			
 			//send server player info, such as username
 			JSONObject outObj = new JSONObject();
 			outObj.put("type", "playerInfo");
@@ -467,8 +472,6 @@ public class TheGame extends ApplicationAdapter
 	private void setupForInGame() {
 		batch = new SpriteBatch();
 		
-		//player.create(); responsibilities for create() moved to constructor
-		player.setFOV(player.sightX, player.sightY);
 		
 		Scanner sc = new Scanner(System.in);
         System.out.println("Which map would you like to test?");
@@ -476,16 +479,17 @@ public class TheGame extends ApplicationAdapter
         
         sc.close();
         
-		try
-        {
+		try {
             System.out.println("Working Directory = " + System.getProperty("user.dir"));
             currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", player);
         }
-        catch(IOException e)
-        {
+        catch(IOException e) {
             System.out.println(e.getMessage());
             System.out.println("Failed to create map object");
         }
+		
+		//player.create(); responsibilities for create() moved to constructor
+		player.setFOV(player.sightX, player.sightY);
 		
 		//initialize various GuiManagers, giving them appropriate GuiElements
 		mapGuiManager = new GuiManager();
@@ -503,134 +507,134 @@ public class TheGame extends ApplicationAdapter
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if (GameState.GAME_STARTED == gameState) {
-			//System.out.println(player.getShape());
-			/*
-			 * logic for switching between various GuiManagers could go here
-			 * if (character.health <= 0) {
-			 * 		GuiManager.setCurrentGuiManager(mainMenuGuiManager);
-			 * } else if (...
-			 */
-			//keyListening();
-			
-			
 			batch.begin();
 			
-			if(GuiManager.currentManager.equals(mapGuiManager))
-			{
-				currentMap.draw(batch);
-				currentMap.update(batch);
-			}
-			GuiManager.currentManager.draw(batch);
-			GuiManager.currentManager.update();
+			currentMap.draw(batch);
+			currentMap.update(batch);
+			
 			
 			batch.end();
+			
+			for (Player player: currentMap.players) {
+				if (player != currentMap.player) { //currentMap.player = this.player btw
+					//adjust label position for remote players
+					float xOffset = player.getWidth() / 2 - ((RemotePlayer) player).nameLabel.getWidth() / 2;
+					System.out.println(xOffset);
+					((RemotePlayer) player).nameLabel.setPosition((float) (player.getPos().getX() - currentMap.mapPosX) + xOffset, (float) (player.getPos().getY() - currentMap.mapPosY) - 18);
+				}
+			}
 		}
 		
 		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 		stage.draw();
 		
-		//*******Networking*****
-		//receiving during gameplay, after the game has started
-		if (GameState.MAIN_MENU != gameState) { 
-			try {
-				if (in.ready()) {
-					//spin until receive message from server to start game (signaling that other client has connected, etc)
-					if (GameState.IN_LOBBY == gameState) {
-						System.out.println("ready");
-						
-						String receivedStr = in.readLine();
-						//System.out.println("receivedStr: " + receivedStr);
-						JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
-						//System.out.println("received: " + received);
-						
-						if (received.get("type").equals("gameStartSignal")) {
-							gameState = GameState.GAME_STARTED;
-							stage.clear();
-							addInGameActors();
-							
-						} else if (received.get("type").equals("playerInfo")) {
-							String playerName = (String) received.get("username");
-							//System.out.println("playername: " + playerName);
-							RemotePlayer remotePlayer = addRemotePlayerToList(playerName, ((Number) received.get("uid")).intValue());
-							//System.out.println("remotePlayer info received: " + remotePlayer == null);
-							addPlayerToLobbyStage(remotePlayer);
-							lobbyTable.row();
-							
-						} else if (received.get("type").equals("readyStatus")) {
-							int uid = ((Number) received.get("uid")).intValue();
-							boolean isReady = (Boolean) received.get("readyStatus");
-							for (Player player: playerToCheckBoxMap.keySet()) {
-								if (player.uid == uid) {
-									playerToCheckBoxMap.get(player).setChecked(isReady);
-								}
-							}
-							
-						} else if (received.get("type").equals("uidUpdate")) {
-							player.uid = ((Number) received.get("uid")).intValue();
-							
-						} else if (received.get("type").equals("chatMessage")) {
-							String message = (String) received.get("message");
-							addMessageToChatbox(message);
-						}
-						
-					} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
-		        		String inputLine = in.readLine();
-		        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
-		        		String messageType = (String) received.get("type");
-		        		//position updates
-		        		if (messageType.equals("position")) {
-			        		double secondPlayerX = ((Number) received.get("charX")).floatValue();
-			        		double secondPlayerY = ((Number) received.get("charY")).floatValue();
-			        		currentMap.player2.setPos(new Point(secondPlayerX, secondPlayerY));
-		        		} else if (messageType.equals("animation")) { //animation updates
-		        			currentMap.player2.setAnimation((String) received.get("animationName"));
-		        			System.out.println("received animation message: " + received);
-		        		}
-		                
-					}
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			//sending messagse to server
-			//TODO maybe need a more advanced queue so we arent sending every message type at the same time
-			// maybe not, maybe tcp already handles queues of messages pretty well
-			if (GameState.GAME_STARTED == gameState) {
-		    	JSONObject obj = new JSONObject();
-		        if (System.currentTimeMillis() - time >= SEND_SPACING) {
-		        	//sending position
-		        	obj.clear();
-		        	if (!player.getPos().equals(oldPos)) { //don't send unnecessary updates
-			        	float charX = (float) player.getPos().getX();
-			        	float charY = (float) player.getPos().getY();
-			        	obj.put("type", "position"); //let server know that this message specifies a position update
-			            obj.put("charX", charX);
-			            obj.put("charY", charY);
-			        	out.println(obj.toString());
-			        	oldPos = player.getPos();
-		        	}
-		        	//sending direction
-		        	//note -- if not moving, all of these bools will be false
-		        	if (currentMap.player.direction != playerOldDirection) {
-			        	obj.clear();
-			        	obj.put("type", "direction");
-			        	obj.put("isMovingLeft", currentMap.player.isMovingLeft);
-			        	obj.put("isMovingRight", currentMap.player.isMovingRight);
-			        	obj.put("isMovingDown", currentMap.player.isMovingDown);
-			        	obj.put("isMovingUp", currentMap.player.isMovingUp);
-			        	out.println(obj.toString());
-		        	}
-		        	playerOldDirection = currentMap.player.direction;
-		        	
-		        	//update time
-		        	time = System.currentTimeMillis();
-		        }
-			}
-			//**end networking******
-		}
+		doNetworking();
 	}
 	
+	private void doNetworking() {
+			//*******Networking*****
+			if (GameState.MAIN_MENU != gameState) { 
+				try {
+					if (in.ready()) {
+						//spin until receive message from server to start game (signaling that other client has connected, etc)
+						if (GameState.IN_LOBBY == gameState) {
+							System.out.println("ready");
+							
+							String receivedStr = in.readLine();
+							//System.out.println("receivedStr: " + receivedStr);
+							JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
+							//System.out.println("received: " + received);
+							
+							if (received.get("type").equals("gameStartSignal")) {
+								gameState = GameState.GAME_STARTED;
+								stage.clear();
+								addInGameActors();
+								
+							} else if (received.get("type").equals("playerInfo")) {
+								String playerName = (String) received.get("username");
+								//System.out.println("playername: " + playerName);
+								RemotePlayer remotePlayer = addRemotePlayerToList(playerName, ((Number) received.get("uid")).intValue());
+								//System.out.println("remotePlayer info received: " + remotePlayer == null);
+								addPlayerToLobbyStage(remotePlayer);
+								lobbyTable.row();
+								
+							} else if (received.get("type").equals("readyStatus")) {
+								int uid = ((Number) received.get("uid")).intValue();
+								boolean isReady = (Boolean) received.get("readyStatus");
+								for (Player player: playerToCheckBoxMap.keySet()) {
+									if (player.uid == uid) {
+										playerToCheckBoxMap.get(player).setChecked(isReady);
+									}
+								}
+								
+							} else if (received.get("type").equals("uidUpdate")) {
+								player.uid = ((Number) received.get("uid")).intValue();
+								
+							} else if (received.get("type").equals("chatMessage")) {
+								String message = (String) received.get("message");
+								addMessageToChatbox(message);
+							}
+							
+						} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
+			        		String inputLine = in.readLine();
+			        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
+			        		String messageType = (String) received.get("type");
+			        		//position updates
+			        		if (messageType.equals("position")) {
+				        		double otherPlayerX = ((Number) received.get("charX")).floatValue();
+				        		double otherPlayerY = ((Number) received.get("charY")).floatValue();
+				        		int uid = ((Number) received.get("uid")).intValue();
+				        		currentMap.getPlayerByUid(uid).setPos(new Point(otherPlayerX, otherPlayerY));
+				        		
+			        		} else if (messageType.equals("animation")) { //animation updates
+			        			int uid = ((Number) received.get("uid")).intValue();
+			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));
+			        		}
+			                
+						}
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//sending messagse to server
+				//TODO maybe need a more advanced queue so we arent sending every message type at the same time
+				// maybe not, maybe tcp already handles queues of messages pretty well
+				if (GameState.GAME_STARTED == gameState) {
+			    	JSONObject obj = new JSONObject();
+			        if (System.currentTimeMillis() - time >= SEND_SPACING) {
+			        	//sending position
+			        	obj.clear();
+			        	if (!player.getPos().equals(oldPos)) { //don't send unnecessary updates
+				        	float charX = (float) player.getPos().getX();
+				        	float charY = (float) player.getPos().getY();
+				        	obj.put("type", "position"); //let server know that this message specifies a position update
+				            obj.put("charX", charX);
+				            obj.put("charY", charY);
+				            obj.put("uid", player.uid);
+				        	out.println(obj.toString());
+				        	oldPos = player.getPos();
+			        	}
+			        	//sending direction
+			        	//note -- if not moving, all of these bools will be false
+			        	if (player.direction != playerOldDirection) {
+			        		System.out.println(player.direction.toString());
+				        	obj.clear();
+				        	obj.put("type", "direction");
+				        	obj.put("direction", player.direction.toString());
+				        	out.println(obj.toString());
+			        	}
+			        	playerOldDirection = player.direction;
+			        	
+			        	//update time
+			        	time = System.currentTimeMillis();
+			        }
+				}
+			}
+				//**end networking******
+	}
+				
+				
 	public void addInGameActors() {
 		addChatboxToStage();
 		messageTextField.setVisible(false);
@@ -638,7 +642,6 @@ public class TheGame extends ApplicationAdapter
 		inGameMessageTextFieldListener = new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				System.out.println("key detected in messageTextField");
 				if (keycode == Input.Keys.ENTER) {
 					if (messageTextField.isVisible()) { //open up text field for message entry
 						//send the text as a message
@@ -677,13 +680,28 @@ public class TheGame extends ApplicationAdapter
 				return true;
 			}
 		});
+		
+		
+		for(Player player: currentMap.players) {
+			if (player != this.player) {
+				labelStyle = new LabelStyle();
+				labelStyle.font = skin.getFont("default");
+				labelStyle.fontColor = Color.WHITE;
+				Label playerNameLabel = new Label(player.username, labelStyle);
+				//System.out.println("position: " + player.getXPos());
+				playerNameLabel.setPosition((float) player.getXPos(), (float) player.getYPos());
+				((RemotePlayer) player).nameLabel = playerNameLabel;
+				stage.addActor(playerNameLabel);
+			}
+		}
 	}
 	
 	private RemotePlayer addRemotePlayerToList(String playerName, int uid) {
 		RemotePlayer remotePlayer = new RemotePlayer(playerShape, true);
 		remotePlayer.uid = uid;
 		remotePlayer.username = playerName;
-		players.add(remotePlayer);
+		currentMap.players.add(remotePlayer);
+		remotePlayer.setPos(new Point(-100, -100));
 		
 		return remotePlayer;
 	}

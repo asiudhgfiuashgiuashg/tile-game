@@ -153,5 +153,30 @@ public class Shape {
     		}
     	}
     }
+    
+    protected double getWidth() {
+    	double smallestX = getSmallestXOfTwoPoints(lineSegs.get(0).p1, lineSegs.get(0).p2);
+    	double largestX = getLargestXOfTwoPoints(lineSegs.get(0).p1, lineSegs.get(0).p2);
+    	for (int i = 1; i < lineSegs.size(); i++) {
+    		LineSeg lineSeg = lineSegs.get(i);
+    		double smallestXOfLineSeg = getSmallestXOfTwoPoints(lineSeg.p1, lineSeg.p2);
+    		double largestXOfLineSeg = getLargestXOfTwoPoints(lineSeg.p1, lineSeg.p2);
+    		if (smallestX > smallestXOfLineSeg) {
+    			smallestX = smallestXOfLineSeg;
+    		}
+    		if (largestX < largestXOfLineSeg) {
+    			largestX = largestXOfLineSeg;
+    		}
+    	}
+    	return largestX - smallestX;
+    }
+    
+    private double getSmallestXOfTwoPoints(Point p0, Point p1) {
+    	return p0.getX() < p1.getX() ? p0.getX() : p1.getX();
+    }
+    
+    private double getLargestXOfTwoPoints(Point p0, Point p1) {
+    	return p0.getX() > p1.getX() ? p0.getX() : p1.getX();
+    }
 }
 

@@ -4,18 +4,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 
 public class RemotePlayer extends Player
 {
 	private Animation currentAnimation;
 	boolean idle;
+	protected Label nameLabel;
 	
 	public RemotePlayer(Shape shape, boolean passable) {
 		super(shape, passable);
 		sprite = "Costume2.png";
 		changeAppearance();
 		currentAnimation = moveLeft;
+		super.setWidth(idleLeft.getRegionWidth());
 	}
 	
 	@Override
