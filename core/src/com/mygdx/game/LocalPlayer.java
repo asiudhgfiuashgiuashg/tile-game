@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -33,11 +34,6 @@ public class LocalPlayer extends Player {
 	}@Override
 	public void update(float stateTime) {
 		if (canMove()) {
-			isMovingLeft = (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) ? true : false;
-			isMovingRight = (Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D)) ? true : false;
-			isMovingUp = (Gdx.input.isKeyPressed(Keys.UP) || Gdx.input.isKeyPressed(Keys.W)) ? true : false;
-			isMovingDown = (Gdx.input.isKeyPressed(Keys.DOWN) || Gdx.input.isKeyPressed(Keys.S)) ? true : false;
-
 			try {
 				//Each direction has preset limits for the character pos to help prevent outofbounds errors and to smoothen movement along the edges. Once collision is perfected, these should'nt be necessary
 				if (isMovingLeft && !isMovingRight) {
@@ -82,5 +78,29 @@ public class LocalPlayer extends Player {
 	}
 	public float getMoveDist() {
 		return moveSpeed * Gdx.graphics.getDeltaTime();
+	}
+	
+	protected void handleKeyDown(int keycode) {
+		if ((Input.Keys.LEFT == keycode) || (Input.Keys.A == keycode)) {
+			isMovingLeft = true;
+		} else if ((Input.Keys.RIGHT == keycode) || (Input.Keys.D == keycode)) {
+			isMovingRight = true;
+		} else if ((Input.Keys.UP == keycode) || (Input.Keys.W == keycode)) {
+			isMovingUp = true;
+		} else if ((Input.Keys.DOWN == keycode) || (Input.Keys.S == keycode)) {
+			isMovingDown = true;
+		}
+	}
+
+	public void handleKeyUp(int keycode) {
+		if ((Input.Keys.LEFT == keycode) || (Input.Keys.A == keycode)) {
+			isMovingLeft = false;
+		} else if ((Input.Keys.RIGHT == keycode) || (Input.Keys.D == keycode)) {
+			isMovingRight = false;
+		} else if ((Input.Keys.UP == keycode) || (Input.Keys.W == keycode)) {
+			isMovingUp = false;
+		} else if ((Input.Keys.DOWN == keycode) || (Input.Keys.S == keycode)) {
+			isMovingDown = false;
+		}
 	}
 }

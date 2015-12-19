@@ -16,6 +16,8 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -89,8 +91,9 @@ public class TheGame extends ApplicationAdapter
     private InputListener inLobbyMessageTextFieldListener;
     private InputListener inGameMessageTextFieldListener;
     
-    private LocalPlayer player;
+    protected LocalPlayer localPlayer;
     private Preferences preferences;
+    private static final Color GREEN = new Color(.168f, .431f, .039f, 1);
     
     private static enum GameState {
         MAIN_MENU,
@@ -98,7 +101,9 @@ public class TheGame extends ApplicationAdapter
         IN_LOBBY,
         GAME_STARTED,
     }
-    GameState gameState;
+    private GameState gameState;
+    private InputMultiplexer inputMultiplexer; //will delegate events tos the game inputprocessor and the gui inputprocessor (the stage)
+    private InputProcessor gameInputProcessor;
     
 	@Override
 	public void create() {
@@ -106,8 +111,15 @@ public class TheGame extends ApplicationAdapter
 		oldPos = new Point(0, 0);
 		gameState = GameState.MAIN_MENU;
 		batch = new SpriteBatch();
-		stage = new Stage();
-		Gdx.input.setInputProcessor(stage); //the stage which contains the gui/hud gets to handle inputs first, and then pass the ones it doesn't handle down to the game
+		
+		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
+		// stage should get events first and then possibly gameInputProcessor
+		stage = new Stage(); //the gui is laid out here
+		inputMultiplexer = new InputMultiplexer();
+		inputMultiplexer.addProcessor(stage);
+		
+		Gdx.input.setInputProcessor(inputMultiplexer); //the stage which contains the gui/hud gets to handle inputs first, and then pass the ones it doesn't handle down to the game
+		
 		playerShape = new Shape(Arrays.asList(
 				new LineSeg(new Point(15, 0), new Point(15, 55)),
 				new LineSeg(new Point(15, 55), new Point(50, 55)),
@@ -146,7 +158,7 @@ public class TheGame extends ApplicationAdapter
 		skin.add("default", textButtonStyle);
 		
 		TextFieldStyle textFieldStyle = new TextFieldStyle();
-		textFieldStyle.background = skin.newDrawable("white", Color.OLIVE);
+		textFieldStyle.background = skin.newDrawable("white", GREEN);
 		textFieldStyle.font = skin.getFont("default");
 		textFieldStyle.fontColor = Color.WHITE;
 		textFieldStyle.cursor = skin.newDrawable("white", Color.WHITE);
@@ -303,7 +315,7 @@ public class TheGame extends ApplicationAdapter
 				out.println(readyMessage);
 				
 				//check the box by name as well
-				playerToCheckBoxMap.get(player).setChecked(readyCheckBox.isChecked());
+				playerToCheckBoxMap.get(localPlayer).setChecked(readyCheckBox.isChecked());
 			}
 		});
 		final Label readyCheckBoxLabel = new Label("Ready?", skin);
@@ -339,8 +351,8 @@ public class TheGame extends ApplicationAdapter
 			}
 			public void changed(ChangeEvent event, Actor actor){
 				if(!checkBox.isChecked()){
-					player.sprite = sprite;
-					player.changeAppearance();
+					localPlayer.sprite = sprite;
+					localPlayer.changeAppearance();
 				}
 			}
 			
@@ -367,7 +379,7 @@ public class TheGame extends ApplicationAdapter
 		lobbyTable.setSize(200, 300);
 		lobbyTable.center();
 		stage.addActor(lobbyTable);
-		addPlayerToLobbyStage(player);
+		addPlayerToLobbyStage(localPlayer);
 		lobbyTable.row();
 		
 		addChatboxToStage();
@@ -380,7 +392,7 @@ public class TheGame extends ApplicationAdapter
 					message.put("type", "chatMessage");
 					message.put("message", messageTextField.getText());
 					out.println(message);
-					addMessageToChatbox(player.username + ": " + messageTextField.getText());
+					addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
 					messageTextField.setText("");
 					return true; //dont pass along the event
 				}
@@ -452,8 +464,8 @@ public class TheGame extends ApplicationAdapter
 			
 			
 			
-			player = new LocalPlayer(playerShape, false);
-			player.username = username;
+			localPlayer = new LocalPlayer(playerShape, false);
+			localPlayer.username = username;
 			setupForInGame();
 			
 			
@@ -461,7 +473,7 @@ public class TheGame extends ApplicationAdapter
 			//send server player info, such as username
 			JSONObject outObj = new JSONObject();
 			outObj.put("type", "playerInfo");
-			outObj.put("username", player.username);
+			outObj.put("username", localPlayer.username);
 			out.println(outObj);
 			return true;
 			
@@ -495,7 +507,7 @@ public class TheGame extends ApplicationAdapter
         
 		try {
             System.out.println("Working Directory = " + System.getProperty("user.dir"));
-            currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", player);
+            currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", localPlayer);
         }
         catch(IOException e) {
             System.out.println(e.getMessage());
@@ -503,7 +515,7 @@ public class TheGame extends ApplicationAdapter
         }
 		
 		//player.create(); responsibilities for create() moved to constructor
-		player.setFOV(player.sightX, player.sightY);
+		localPlayer.setFOV(localPlayer.sightX, localPlayer.sightY);
 		
 		//initialize various GuiManagers, giving them appropriate GuiElements
 		mapGuiManager = new GuiManager();
@@ -582,7 +594,7 @@ public class TheGame extends ApplicationAdapter
 								}
 								
 							} else if (received.get("type").equals("uidUpdate")) {
-								player.uid = ((Number) received.get("uid")).intValue();
+								localPlayer.uid = ((Number) received.get("uid")).intValue();
 								
 							} else if (received.get("type").equals("chatMessage")) {
 								String message = (String) received.get("message");
@@ -619,26 +631,26 @@ public class TheGame extends ApplicationAdapter
 			        if (System.currentTimeMillis() - time >= SEND_SPACING) {
 			        	//sending position
 			        	obj.clear();
-			        	if (!player.getPos().equals(oldPos)) { //don't send unnecessary updates
-				        	float charX = (float) player.getPos().getX();
-				        	float charY = (float) player.getPos().getY();
+			        	if (!localPlayer.getPos().equals(oldPos)) { //don't send unnecessary updates
+				        	float charX = (float) localPlayer.getPos().getX();
+				        	float charY = (float) localPlayer.getPos().getY();
 				        	obj.put("type", "position"); //let server know that this message specifies a position update
 				            obj.put("charX", charX);
 				            obj.put("charY", charY);
-				            obj.put("uid", player.uid);
+				            obj.put("uid", localPlayer.uid);
 				        	out.println(obj.toString());
-				        	oldPos = player.getPos();
+				        	oldPos = localPlayer.getPos();
 			        	}
 			        	//sending direction
 			        	//note -- if not moving, all of these bools will be false
-			        	if (player.direction != playerOldDirection) {
-			        		System.out.println(player.direction.toString());
+			        	if (localPlayer.direction != playerOldDirection) {
+			        		System.out.println(localPlayer.direction.toString());
 				        	obj.clear();
 				        	obj.put("type", "direction");
-				        	obj.put("direction", player.direction.toString());
+				        	obj.put("direction", localPlayer.direction.toString());
 				        	out.println(obj.toString());
 			        	}
-			        	playerOldDirection = player.direction;
+			        	playerOldDirection = localPlayer.direction;
 			        	
 			        	//update time
 			        	time = System.currentTimeMillis();
@@ -663,7 +675,7 @@ public class TheGame extends ApplicationAdapter
 						message.put("type", "chatMessage");
 						message.put("message", messageTextField.getText());
 						out.println(message);
-						addMessageToChatbox(player.username + ": " + messageTextField.getText());
+						addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
 						messageTextField.setText("");
 						messageTextField.setVisible(false); //close the text field
 						messageTextField.setDisabled(true);
@@ -690,14 +702,15 @@ public class TheGame extends ApplicationAdapter
 					messageTextField.setVisible(true);
 					messageTextField.setDisabled(false);
 					stage.setKeyboardFocus(messageTextField);
+					return true;
 				}
-				return true;
+				return false;
 			}
 		});
 		
 		
-		for(Player player: currentMap.players) {
-			if (player != this.player) {
+		for (Player player: currentMap.players) {
+			if (player != this.localPlayer) {
 				labelStyle = new LabelStyle();
 				labelStyle.font = skin.getFont("default");
 				labelStyle.fontColor = Color.WHITE;
@@ -708,6 +721,9 @@ public class TheGame extends ApplicationAdapter
 				stage.addActor(playerNameLabel);
 			}
 		}
+		
+		gameInputProcessor = new GameInputProcessor(localPlayer);
+		inputMultiplexer.addProcessor(gameInputProcessor);
 	}
 	
 	private RemotePlayer addRemotePlayerToList(String playerName, int uid) {
