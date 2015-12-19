@@ -6,18 +6,15 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import java.util.Stack;
 
 public class LocalPlayer extends Player {
-	boolean isMovingLeft;
-	boolean isMovingRight;
-	boolean isMovingUp;
-	boolean isMovingDown;
-
 	private float moveSpeed;
 	int sightX = 400;
 	int sightY = 240;
 
 	private boolean canMove;
+	private Stack<DirectionOfTravel> directionStack; //used to figure out which way to move based on keypresses
 
 	public LocalPlayer(Shape shape, boolean passable) {
 		super(shape, passable);
@@ -30,32 +27,34 @@ public class LocalPlayer extends Player {
 	}
 
 	public void setCurrentMap(GameMap currentMap) {
+		directionStack = new Stack<DirectionOfTravel>();
 		this.currentMap = currentMap;
-	}@Override
+	}
+	
+	
+	
+	
+	@Override
 	public void update(float stateTime) {
 		if (canMove()) {
 			try {
 				//Each direction has preset limits for the character pos to help prevent outofbounds errors and to smoothen movement along the edges. Once collision is perfected, these should'nt be necessary
-				if (isMovingLeft && !isMovingRight) {
+				if (DirectionOfTravel.LEFT == directionStack.peek()) {
 					if (pos.getX() > 0 - this.left && currentMap.moveLeft()) {
 						currentFrame = moveLeft.getKeyFrame(stateTime, true);
-						direction = DirectionOfTravel.LEFT;
 					}
-				} else if (isMovingRight && !isMovingLeft) {
+				} else if (DirectionOfTravel.RIGHT == directionStack.peek()) {
 					if (pos.getX() < currentMap.mapWidth - this.right && currentMap.moveRight()) {
 						currentFrame = moveRight.getKeyFrame(stateTime, true);
-						direction = DirectionOfTravel.RIGHT;
 					}
-				} else if (isMovingUp && !isMovingDown) {
+				} else if (DirectionOfTravel.UP == directionStack.peek()) {
 					if (pos.getY() < currentMap.mapHeight - this.up && currentMap.moveUp()) {
 						currentFrame = moveUp.getKeyFrame(stateTime, true);
-						direction = DirectionOfTravel.UP;
 
 					}
-				} else if (isMovingDown && !isMovingUp) {
+				} else if (DirectionOfTravel.DOWN == directionStack.peek()) {
 					if (pos.getY() > this.down && currentMap.moveDown()) {
 						currentFrame = moveDown.getKeyFrame(stateTime, true);
-						direction = DirectionOfTravel.DOWN;
 					}
 				} else {
 					direction = DirectionOfTravel.IDLE;
@@ -82,25 +81,25 @@ public class LocalPlayer extends Player {
 	
 	protected void handleKeyDown(int keycode) {
 		if ((Input.Keys.LEFT == keycode) || (Input.Keys.A == keycode)) {
-			isMovingLeft = true;
+			directionStack.add(DirectionOfTravel.LEFT);
 		} else if ((Input.Keys.RIGHT == keycode) || (Input.Keys.D == keycode)) {
-			isMovingRight = true;
+			directionStack.add(DirectionOfTravel.RIGHT);
 		} else if ((Input.Keys.UP == keycode) || (Input.Keys.W == keycode)) {
-			isMovingUp = true;
+			directionStack.add(DirectionOfTravel.UP);
 		} else if ((Input.Keys.DOWN == keycode) || (Input.Keys.S == keycode)) {
-			isMovingDown = true;
+			directionStack.add(DirectionOfTravel.DOWN);
 		}
 	}
 
 	public void handleKeyUp(int keycode) {
 		if ((Input.Keys.LEFT == keycode) || (Input.Keys.A == keycode)) {
-			isMovingLeft = false;
+			directionStack.remove(DirectionOfTravel.LEFT);
 		} else if ((Input.Keys.RIGHT == keycode) || (Input.Keys.D == keycode)) {
-			isMovingRight = false;
+			directionStack.remove(DirectionOfTravel.RIGHT);
 		} else if ((Input.Keys.UP == keycode) || (Input.Keys.W == keycode)) {
-			isMovingUp = false;
+			directionStack.remove(DirectionOfTravel.UP);
 		} else if ((Input.Keys.DOWN == keycode) || (Input.Keys.S == keycode)) {
-			isMovingDown = false;
+			directionStack.remove(DirectionOfTravel.DOWN);
 		}
 	}
 }
