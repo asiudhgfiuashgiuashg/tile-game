@@ -550,7 +550,9 @@ public class TheGame extends ApplicationAdapter
 				if (player != currentMap.player) { //currentMap.player = this.player btw
 					//adjust label position for remote players
 					float xOffset = player.getWidth() / 2 - ((RemotePlayer) player).nameLabel.getWidth() / 2;
-					///System.out.println(xOffset);
+
+					//System.out.println(xOffset);
+
 					((RemotePlayer) player).nameLabel.setPosition((float) (player.getPos().getX() - currentMap.mapPosX) + xOffset, (float) (player.getPos().getY() - currentMap.mapPosY) - 18);
 				}
 			}
@@ -574,8 +576,9 @@ public class TheGame extends ApplicationAdapter
 							String receivedStr = in.readLine();
 							/////System.out.println("receivedStr: " + receivedStr);
 							JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
-							/////System.out.println("received: " + received);
-							
+
+							//System.out.println(received);
+
 							if (received.get("type").equals("gameStartSignal")) {
 								gameState = GameState.GAME_STARTED;
 								stage.clear();
@@ -604,7 +607,16 @@ public class TheGame extends ApplicationAdapter
 							} else if (received.get("type").equals("chatMessage")) {
 								String message = (String) received.get("message");
 								addMessageToChatbox(message);
-							}
+								
+							} else if (received.get("type").equals("sprite")) { //updates sprites for remoteplayers
+			        			int uid = ((Number) received.get("uid")).intValue();
+			        			System.out.println((currentMap.getPlayerByUid(uid)).sprite);
+			        			(currentMap.getPlayerByUid(uid)).sprite = (String) received.get("spriteID");
+			        			System.out.println((currentMap.getPlayerByUid(uid)).sprite);
+			        			(currentMap.getPlayerByUid(uid)).changeAppearance();
+			        			
+			        			
+			        		}
 							
 						} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
 			        		String inputLine = in.readLine();
@@ -622,12 +634,7 @@ public class TheGame extends ApplicationAdapter
 			        			int uid = ((Number) received.get("uid")).intValue();
 			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));
 			        			
-			        		} else if (messageType.equals("sprite")) { //updates sprites for remoteplayers
-			        			int uid = ((Number) received.get("uid")).intValue();
-			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).sprite = (String) received.get("spriteID");
-			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).changeAppearance();
-			        			
-			        		}
+			        		} 
 			                
 						}
 					}
@@ -655,7 +662,9 @@ public class TheGame extends ApplicationAdapter
 			        	}
 			        	//sending direction
 			        	if (localPlayer.direction != playerOldDirection) {
-			        		///System.out.println(localPlayer.direction.toString());
+
+			        		//System.out.println(localPlayer.direction.toString());
+
 				        	obj.clear();
 				        	obj.put("type", "direction");
 				        	obj.put("direction", localPlayer.direction.toString());

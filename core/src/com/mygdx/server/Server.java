@@ -221,8 +221,9 @@ public class Server {
 				
 			} else if (received.get("type").equals("sprite")) {
 				JSONObject spriteInfo = new JSONObject();
-				spriteInfo.put("spriteID", receiveFromClient.sprite);
+				spriteInfo.put("type", "sprite");
 				spriteInfo.put("uid", receiveFromClient.uid);
+				spriteInfo.put("spriteID", (String) received.get("spriteID"));
 				sendToAllFrom(spriteInfo, receiveFromClient);
 			}
 		}
