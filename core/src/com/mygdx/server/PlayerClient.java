@@ -15,6 +15,7 @@ public class PlayerClient {
     Queue<JSONObject> messageInQueue;
     boolean ready; //to start the game
     int uid; //unique id (usernames aren't unique)
+    String sprite;
 
     public PlayerClient(SocketChannel socketChannel) {
     	this.socketChannel = socketChannel;

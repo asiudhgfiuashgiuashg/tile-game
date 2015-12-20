@@ -354,6 +354,10 @@ public class TheGame extends ApplicationAdapter
 				if(!checkBox.isChecked()){
 					localPlayer.sprite = sprite;
 					localPlayer.changeAppearance();
+					JSONObject spriteInfo = new JSONObject();
+					spriteInfo.put("type", "sprite");
+					spriteInfo.put("spriteID", sprite);
+					out.println(spriteInfo);
 				}
 			}
 			
@@ -616,6 +620,12 @@ public class TheGame extends ApplicationAdapter
 			        		} else if (messageType.equals("animation")) { //animation updates
 			        			int uid = ((Number) received.get("uid")).intValue();
 			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));
+			        			
+			        		} else if (messageType.equals("sprite")) { //updates sprites for remoteplayers
+			        			int uid = ((Number) received.get("uid")).intValue();
+			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).sprite = (String) received.get("spriteID");
+			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).changeAppearance();
+			        			
 			        		}
 			                
 						}

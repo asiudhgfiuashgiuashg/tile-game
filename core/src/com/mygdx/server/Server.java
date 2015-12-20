@@ -218,6 +218,12 @@ public class Server {
 				received.put("message", message);
 				System.out.println("sending chat message: " + received);
 				sendToAllFrom(received, receiveFromClient);
+				
+			} else if (received.get("type").equals("sprite")) {
+				JSONObject spriteInfo = new JSONObject();
+				spriteInfo.put("spriteID", receiveFromClient.sprite);
+				spriteInfo.put("uid", receiveFromClient.uid);
+				sendToAllFrom(spriteInfo, receiveFromClient);
 			}
 		}
     }
