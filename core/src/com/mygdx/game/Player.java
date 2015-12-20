@@ -48,9 +48,10 @@ public class Player extends Entity
         direction = DirectionOfTravel.IDLE;
     }
     
-    protected void changeAppearance()
+    protected void changeAppearance(String sprite)
     {
-    	spriteSheet = new Texture(Gdx.files.internal(sprite));
+    	this.sprite = sprite;
+    	spriteSheet = new Texture(Gdx.files.internal(this.sprite));
         tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
         
         moveLeft = animate(9, 9);

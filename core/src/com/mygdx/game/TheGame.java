@@ -310,6 +310,7 @@ public class TheGame extends ApplicationAdapter
 		
 		readyCheckBox.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) { //notify server of readynes or unreadyness
+				if(readyCheckBox.isChecked()){
 				JSONObject readyMessage = new JSONObject();
 				readyMessage.put("type", "readyStatus");
 				readyMessage.put("readyStatus", readyCheckBox.isChecked());
@@ -317,7 +318,7 @@ public class TheGame extends ApplicationAdapter
 				
 				//check the box by name as well
 				playerToCheckBoxMap.get(localPlayer).setChecked(readyCheckBox.isChecked());
-			}
+				}}
 		});
 		final Label readyCheckBoxLabel = new Label("Ready?", skin);
 		readyCheckBoxLabel.setPosition(520,  70);
@@ -346,27 +347,28 @@ public class TheGame extends ApplicationAdapter
 		class CostumeChange extends ChangeListener{
 			String sprite;
 			CheckBox checkBox;
+			ButtonGroup<CheckBox> costumeButtons;
 			public CostumeChange(CheckBox checkBox, String sprite){
 				this.checkBox = checkBox;
 				this.sprite = sprite;
+				this.costumeButtons = costumeButtons;
 			}
 			public void changed(ChangeEvent event, Actor actor){
-				if(!checkBox.isChecked()){
-					localPlayer.sprite = sprite;
-					localPlayer.changeAppearance();
+				if(checkBox.isChecked()) {
+					localPlayer.changeAppearance(sprite);
 					JSONObject spriteInfo = new JSONObject();
 					spriteInfo.put("type", "sprite");
 					spriteInfo.put("spriteID", sprite);
 					out.println(spriteInfo);
-				}
+					}			
 			}
 			
 		}
 		
 		costumeCheckBox1.addListener(new CostumeChange(costumeCheckBox1, "Costume1.png"));
-		costumeCheckBox2.addListener(new CostumeChange(costumeCheckBox1, "Costume2.png"));
-		costumeCheckBox3.addListener(new CostumeChange(costumeCheckBox1, "Costume3.png"));
-		costumeCheckBox4.addListener(new CostumeChange(costumeCheckBox1, "Costume4.png"));
+		costumeCheckBox2.addListener(new CostumeChange(costumeCheckBox2, "Costume2.png"));
+		costumeCheckBox3.addListener(new CostumeChange(costumeCheckBox3, "Costume3.png"));
+		costumeCheckBox4.addListener(new CostumeChange(costumeCheckBox4, "Costume4.png"));
 		
 		
 		stage.clear();
@@ -610,11 +612,7 @@ public class TheGame extends ApplicationAdapter
 								
 							} else if (received.get("type").equals("sprite")) { //updates sprites for remoteplayers
 			        			int uid = ((Number) received.get("uid")).intValue();
-			        			System.out.println((currentMap.getPlayerByUid(uid)).sprite);
-			        			(currentMap.getPlayerByUid(uid)).sprite = (String) received.get("spriteID");
-			        			System.out.println((currentMap.getPlayerByUid(uid)).sprite);
-			        			(currentMap.getPlayerByUid(uid)).changeAppearance();
-			        			
+			        			(currentMap.getPlayerByUid(uid)).changeAppearance((String) received.get("spriteID"));
 			        			
 			        		}
 							

@@ -18,8 +18,7 @@ public class LocalPlayer extends Player {
 
 	public LocalPlayer(Shape shape, boolean passable) {
 		super(shape, passable);
-		sprite = "Costume1.png";
-		changeAppearance();
+		changeAppearance("Costume1.png");
 		moveSpeed = 200;
 		canMove = true;
 

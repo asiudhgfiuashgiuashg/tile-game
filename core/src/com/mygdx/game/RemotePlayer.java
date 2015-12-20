@@ -15,8 +15,7 @@ public class RemotePlayer extends Player
 	
 	public RemotePlayer(Shape shape, boolean passable) {
 		super(shape, passable);
-		sprite = "Costume2.png";
-		changeAppearance();
+		changeAppearance("Costume2.png");
 		currentAnimation = moveLeft;
 		super.setWidth(idleLeft.getRegionWidth());
 	}
