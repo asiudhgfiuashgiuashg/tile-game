@@ -669,7 +669,7 @@ public class TheGame extends ApplicationAdapter
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if (keycode == Input.Keys.ENTER) {
-					if (messageTextField.isVisible()) { //open up text field for message entry
+					if (messageTextField.isVisible()) { 
 						//send the text as a message
 						JSONObject message = new JSONObject();
 						message.put("type", "chatMessage");
@@ -699,9 +699,10 @@ public class TheGame extends ApplicationAdapter
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if (keycode == Input.Keys.ENTER && !messageTextField.isVisible()) {
-					messageTextField.setVisible(true);
+					messageTextField.setVisible(true); //open up text field for message entry
 					messageTextField.setDisabled(false);
 					stage.setKeyboardFocus(messageTextField);
+					localPlayer.directionStack.clear();
 					return true;
 				}
 				return false;

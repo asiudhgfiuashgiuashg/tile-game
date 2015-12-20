@@ -14,7 +14,7 @@ public class LocalPlayer extends Player {
 	int sightY = 240;
 
 	private boolean canMove;
-	private Stack<DirectionOfTravel> directionStack; //used to figure out which way to move based on keypresses
+	protected Stack<DirectionOfTravel> directionStack; //used to figure out which way to move based on keypresses
 
 	public LocalPlayer(Shape shape, boolean passable) {
 		super(shape, passable);
