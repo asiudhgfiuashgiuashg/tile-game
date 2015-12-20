@@ -37,31 +37,32 @@ public class LocalPlayer extends Player {
 	@Override
 	public void update(float stateTime) {
 		if (canMove()) {
-			try {
-				//Each direction has preset limits for the character pos to help prevent outofbounds errors and to smoothen movement along the edges. Once collision is perfected, these should'nt be necessary
-				if (DirectionOfTravel.LEFT == directionStack.peek()) {
-					if (pos.getX() > 0 - this.left && currentMap.moveLeft()) {
-						currentFrame = moveLeft.getKeyFrame(stateTime, true);
+			if (!directionStack.isEmpty()) {
+				direction = directionStack.peek();
+				try {
+					//Each direction has preset limits for the character pos to help prevent outofbounds errors and to smoothen movement along the edges. Once collision is perfected, these should'nt be necessary
+					if (DirectionOfTravel.LEFT == directionStack.peek()) {
+						if (pos.getX() > 0 - this.left && currentMap.moveLeft()) {
+							currentFrame = moveLeft.getKeyFrame(stateTime, true);
+						}
+					} else if (DirectionOfTravel.RIGHT == directionStack.peek()) {
+						if (pos.getX() < currentMap.mapWidth - this.right && currentMap.moveRight()) {
+							currentFrame = moveRight.getKeyFrame(stateTime, true);
+						}
+					} else if (DirectionOfTravel.UP == directionStack.peek()) {
+						if (pos.getY() < currentMap.mapHeight - this.up && currentMap.moveUp()) {
+							currentFrame = moveUp.getKeyFrame(stateTime, true);
+		
+						}
+					} else if (DirectionOfTravel.DOWN == directionStack.peek()) {
+						if (pos.getY() > this.down && currentMap.moveDown()) {
+							currentFrame = moveDown.getKeyFrame(stateTime, true);
+						}
 					}
-				} else if (DirectionOfTravel.RIGHT == directionStack.peek()) {
-					if (pos.getX() < currentMap.mapWidth - this.right && currentMap.moveRight()) {
-						currentFrame = moveRight.getKeyFrame(stateTime, true);
-					}
-				} else if (DirectionOfTravel.UP == directionStack.peek()) {
-					if (pos.getY() < currentMap.mapHeight - this.up && currentMap.moveUp()) {
-						currentFrame = moveUp.getKeyFrame(stateTime, true);
-
-					}
-				} else if (DirectionOfTravel.DOWN == directionStack.peek()) {
-					if (pos.getY() > this.down && currentMap.moveDown()) {
-						currentFrame = moveDown.getKeyFrame(stateTime, true);
-					}
-				} else {
-					direction = DirectionOfTravel.IDLE;
-					// no direction, just stopped
+				} catch (Exception e) {
+					System.out.println(e);
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
 			}
 		}
 	}
@@ -100,6 +101,9 @@ public class LocalPlayer extends Player {
 			directionStack.remove(DirectionOfTravel.UP);
 		} else if ((Input.Keys.DOWN == keycode) || (Input.Keys.S == keycode)) {
 			directionStack.remove(DirectionOfTravel.DOWN);
+		}
+		if (directionStack.isEmpty()) {
+			direction = direction.IDLE;
 		}
 	}
 }

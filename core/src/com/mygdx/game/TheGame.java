@@ -182,7 +182,7 @@ public class TheGame extends ApplicationAdapter
 		final TextField serverPortField = new TextField(preferences.get("serverPortField", ""), skin);
 		serverPortField.setWidth(70);
 		serverPortField.setAlignment(Align.center);
-		System.out.println(serverPortField.getWidth());
+		///System.out.println(serverPortField.getWidth());
 		serverPortField.setHeight(30);
 		
 		final TextField serverAddressField = new TextField(preferences.get("serverAddressField", ""), skin);
@@ -433,7 +433,7 @@ public class TheGame extends ApplicationAdapter
 			messageLabel.setText(message);
 		}
 		chatMessagesVGroup.addActorAt(0, messageLabel);
-		System.out.println("added: " + messageLabel);
+		///System.out.println("added: " + messageLabel);
 		numChatLines++;
 		BitmapFont font = messageLabel.getStyle().font;
 		int maxNumChatLines = (int) (CHAT_BOX_HEIGHT / (font.getCapHeight() + font.getAscent() + -font.getDescent()));
@@ -505,18 +505,18 @@ public class TheGame extends ApplicationAdapter
 		
 		
 		Scanner sc = new Scanner(System.in);
-        System.out.println("Which map would you like to test?");
+        ///System.out.println("Which map would you like to test?");
         String mapName = "1Square";//sc.nextLine();
         
         sc.close();
         
 		try {
-            System.out.println("Working Directory = " + System.getProperty("user.dir"));
+            ///System.out.println("Working Directory = " + System.getProperty("user.dir"));
             currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", localPlayer);
         }
         catch(IOException e) {
-            System.out.println(e.getMessage());
-            System.out.println("Failed to create map object");
+            ///System.out.println(e.getMessage());
+            ///System.out.println("Failed to create map object");
         }
 		
 		//player.create(); responsibilities for create() moved to constructor
@@ -550,7 +550,7 @@ public class TheGame extends ApplicationAdapter
 				if (player != currentMap.player) { //currentMap.player = this.player btw
 					//adjust label position for remote players
 					float xOffset = player.getWidth() / 2 - ((RemotePlayer) player).nameLabel.getWidth() / 2;
-					System.out.println(xOffset);
+					///System.out.println(xOffset);
 					((RemotePlayer) player).nameLabel.setPosition((float) (player.getPos().getX() - currentMap.mapPosX) + xOffset, (float) (player.getPos().getY() - currentMap.mapPosY) - 18);
 				}
 			}
@@ -569,12 +569,12 @@ public class TheGame extends ApplicationAdapter
 					if (in.ready()) {
 						//spin until receive message from server to start game (signaling that other client has connected, etc)
 						if (GameState.IN_LOBBY == gameState) {
-							System.out.println("ready");
+							///System.out.println("ready");
 							
 							String receivedStr = in.readLine();
-							//System.out.println("receivedStr: " + receivedStr);
+							/////System.out.println("receivedStr: " + receivedStr);
 							JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
-							//System.out.println("received: " + received);
+							/////System.out.println("received: " + received);
 							
 							if (received.get("type").equals("gameStartSignal")) {
 								gameState = GameState.GAME_STARTED;
@@ -583,9 +583,9 @@ public class TheGame extends ApplicationAdapter
 								
 							} else if (received.get("type").equals("playerInfo")) {
 								String playerName = (String) received.get("username");
-								//System.out.println("playername: " + playerName);
+								/////System.out.println("playername: " + playerName);
 								RemotePlayer remotePlayer = addRemotePlayerToList(playerName, ((Number) received.get("uid")).intValue());
-								//System.out.println("remotePlayer info received: " + remotePlayer == null);
+								/////System.out.println("remotePlayer info received: " + remotePlayer == null);
 								addPlayerToLobbyStage(remotePlayer);
 								lobbyTable.row();
 								
@@ -618,6 +618,7 @@ public class TheGame extends ApplicationAdapter
 				        		currentMap.getPlayerByUid(uid).setPos(new Point(otherPlayerX, otherPlayerY));
 				        		
 			        		} else if (messageType.equals("animation")) { //animation updates
+			        			//System.out.println("animation: " + received);
 			        			int uid = ((Number) received.get("uid")).intValue();
 			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));
 			        			
@@ -653,9 +654,8 @@ public class TheGame extends ApplicationAdapter
 				        	oldPos = localPlayer.getPos();
 			        	}
 			        	//sending direction
-			        	//note -- if not moving, all of these bools will be false
 			        	if (localPlayer.direction != playerOldDirection) {
-			        		System.out.println(localPlayer.direction.toString());
+			        		///System.out.println(localPlayer.direction.toString());
 				        	obj.clear();
 				        	obj.put("type", "direction");
 				        	obj.put("direction", localPlayer.direction.toString());
@@ -727,7 +727,7 @@ public class TheGame extends ApplicationAdapter
 				labelStyle.font = skin.getFont("default");
 				labelStyle.fontColor = Color.WHITE;
 				Label playerNameLabel = new Label(player.username, labelStyle);
-				//System.out.println("position: " + player.getXPos());
+				/////System.out.println("position: " + player.getXPos());
 				playerNameLabel.setPosition((float) player.getXPos(), (float) player.getYPos());
 				((RemotePlayer) player).nameLabel = playerNameLabel;
 				stage.addActor(playerNameLabel);
@@ -755,7 +755,7 @@ public class TheGame extends ApplicationAdapter
 		playerToCheckBoxMap.put(player, readyCheckBox);
 		lobbyTable.add(playerNameLabel).padTop(15).padRight(20);
 		lobbyTable.add(readyCheckBox);
-		System.out.println("added player to lobby stage: " + player.username);
+		///System.out.println("added player to lobby stage: " + player.username);
 	}
 	
 	/*
