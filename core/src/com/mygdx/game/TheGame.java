@@ -57,6 +57,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
+import com.mygdx.server.Server;
 public class TheGame extends ApplicationAdapter 
 {
 	SpriteBatch batch;
