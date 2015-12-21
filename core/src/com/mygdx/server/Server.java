@@ -5,8 +5,13 @@ import java.io.*;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+import com.mygdx.game.Player;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.net.InetSocketAddress;
@@ -20,95 +25,109 @@ import java.net.SocketOption;
 
 public class Server {
 	private static final int MAX_CLIENTS = 5;
-	private static List<PlayerClient> clients;
-
-    public static void main(String[] args) throws IOException {	
-	    clients = new ArrayList<PlayerClient>();
-	    ServerSocketChannel serverSocketChannel;
+	private int port;
+	List<PlayerClient> clients;
+	private int numClientsConnected;
+	private ServerSocketChannel serverSocketChannel;
+	int currentUID; //used to give each client a  unique id (an integer which is incremented for every new connection)
+	public Map<Player, PlayerClient> playerToPlayerClientMap;
+	
+	
+	public Server(int port) {
+		setupServer(port);
+		currentUID = 0;
+		playerToPlayerClientMap = new HashMap<Player, PlayerClient>();
+	}
+	
+	public void setupServer(int port) {
+		this.port = port;
+		clients = new ArrayList<PlayerClient>();
+	    
 	    int numClientsConnected = 0;
 	    int currentUID = 0;
-	    
-        if (args.length != 1) {
-            System.err.println("Usage: java EchoServer <port number>");
-            System.exit(1);
-        }
-        
-        int portNumber = Integer.parseInt(args[0]);
         
         try {
-            //ServerSocket serverSocket = new ServerSocket(Integer.parseInt(args[0]));
-
             serverSocketChannel =  ServerSocketChannel.open();
-            serverSocketChannel.socket().bind(new InetSocketAddress(Integer.parseInt(args[0]))); //give it da port
+            serverSocketChannel.socket().bind(new InetSocketAddress(port)); //give it da port
             serverSocketChannel.configureBlocking(false);
+            
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
+	}
+	
+	public void checkForConnections() {
+    	if (numClientsConnected < MAX_CLIENTS) {
+    		SocketChannel socketChannel = null;
+    		try {
+				socketChannel =  serverSocketChannel.accept();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} 
+    		
+    		
+    		//see if a connection is immediatly available, will return null if one isnt (non-blocking I/O)
+    		PlayerClient playerClient = null;
+    		if (socketChannel != null) { //got a connection
+        		//Socket clientSocket = socketChannel.socket();
+        		try {
+					socketChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+         
+	        		playerClient = new PlayerClient(socketChannel);
+	        		socketChannel.configureBlocking(false);
+        		} catch (IOException e) {
+	        		e.printStackTrace();
+	        	}
+        		
+        		playerClient.socketChannel = socketChannel;
+        		playerClient.uid = currentUID;
+        		currentUID++;
+        		clients.add(playerClient);
+
+        		System.out.println("client number " + String.valueOf(numClientsConnected) + " connected");
+        		numClientsConnected++;
+        		
+        		//give newly connected player the player info of everyone else
+				JSONObject playerInfo = new JSONObject();
+				for (PlayerClient client: clients) {
+					if (!client.equals(playerClient)) {
+						playerInfo.put("type", "playerInfo");
+						playerInfo.put("username", client.username);
+						playerInfo.put("uid", client.uid);
+						sendJSONOnSocketChannel(playerInfo, playerClient.socketChannel);
+						playerInfo.clear();
+					}
+				}
+
+				//send newly connected player their UID;
+				JSONObject uidInfo = new JSONObject();
+				uidInfo.put("type", "uidUpdate");
+				uidInfo.put("uid", playerClient.uid);
+				sendJSONOnSocketChannel(uidInfo, playerClient.socketChannel);
 
 
-            //main server loop
-            while (true) {
-            	SocketChannel socketChannel = null;
-            	if (numClientsConnected < MAX_CLIENTS) {
-            		socketChannel =  serverSocketChannel.accept(); //see if a connection is immediatly available, will return null if one isnt (non-blocking I/O)
-
-            		if (socketChannel != null) { //got a connection
-		        		//Socket clientSocket = socketChannel.socket();
-		        		socketChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
-                 
-		        		PlayerClient playerClient = new PlayerClient(socketChannel);
-		        		socketChannel.configureBlocking(false);
-		        		playerClient.socketChannel = socketChannel;
-		        		playerClient.uid = currentUID;
-		        		currentUID++;
-		        		clients.add(playerClient);
-
-		        		System.out.println("client number " + String.valueOf(numClientsConnected) + " connected");
-		        		numClientsConnected++;
-		        		
-		        		//give newly connected player the player info of everyone else
-						JSONObject playerInfo = new JSONObject();
-						for (PlayerClient client: clients) {
-							if (!client.equals(playerClient)) {
-								playerInfo.put("type", "playerInfo");
-								playerInfo.put("username", client.username);
-								playerInfo.put("uid", client.uid);
-								sendJSONOnSocketChannel(playerInfo, playerClient.socketChannel);
-								playerInfo.clear();
-							}
-						}
-
-						//send newly connected player their UID;
-						JSONObject uidInfo = new JSONObject();
-						uidInfo.put("type", "uidUpdate");
-						uidInfo.put("uid", playerClient.uid);
-						sendJSONOnSocketChannel(uidInfo, playerClient.socketChannel);
-
-
-						//send everyone the uid of the newly-connected player
+				//send everyone the uid of the newly-connected player
 /*		
-						sendToAllFrom(uidInfo, )
+				sendToAllFrom(uidInfo, )
 */
 
-						
-						
-		        	}
-            	}
-            	
-            	for (int i = 0; i < clients.size(); i++)  {
-            		attemptReadFrom(clients.get(i));
-            		handleMessageFrom(clients.get(i));
-            	}
-            }
-        } catch (IOException e) {
-            System.out.println("Exception caught when trying to listen on port "
-                + portNumber + " or listening for a connection");
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
-    }
+				
+				
+        	}
+    	}
+	}
+
+	public void dealWithMessages() {
+		for (int i = 0; i < clients.size(); i++)  {
+    		attemptReadFrom(clients.get(i));
+    		handleMessageFrom(clients.get(i));
+    	}
+	}
 
     /**
     * remember there is one socketChannel per client
     */
-    public static void sendJSONOnSocketChannel(JSONObject jsonObj, SocketChannel socketChannel) {
+    public void sendJSONOnSocketChannel(JSONObject jsonObj, SocketChannel socketChannel) {
     	String stringToSend = jsonObj.toString() + '\n';
     	ByteBuffer toSend = ByteBuffer.allocate(stringToSend.length());	
 		toSend.clear();
@@ -127,7 +146,7 @@ public class Server {
   
 
 
-    public static void attemptReadFrom(PlayerClient client) {
+    public void attemptReadFrom(PlayerClient client) {
     	JSONObject receiveTo = new JSONObject();
     	try {
     		ByteBuffer byteBuffer = ByteBuffer.allocate(1000);
@@ -159,7 +178,7 @@ public class Server {
     	}
     }
 
-    public static void handleMessageFrom(PlayerClient client) {
+    public void handleMessageFrom(PlayerClient client) {
     	PlayerClient receiveFromClient = client;
         if (client.messageInQueue.peek() != null) { //something in queue
         	JSONObject received = client.messageInQueue.remove();
@@ -229,7 +248,7 @@ public class Server {
 		}
     }
 
-    public static boolean allAreReady() {
+    public boolean allAreReady() {
     	for (PlayerClient client: clients) {
     		if (!client.ready) {
     			System.out.println("not ready");
@@ -242,7 +261,7 @@ public class Server {
     /**
      * let everyone know the game is starting
      */
-    public static void endLobby() {
+    public void endLobby() {
 		JSONObject readyObject = new JSONObject();
 		readyObject.put("type", "gameStartSignal");
 		for (PlayerClient client: clients) {
@@ -251,7 +270,7 @@ public class Server {
     	}
     }
 
-    public static void sendToAllFrom(JSONObject toSend, PlayerClient from) {
+    public void sendToAllFrom(JSONObject toSend, PlayerClient from) {
     	for (PlayerClient client: clients) {
 			if (client != from) {
         		sendJSONOnSocketChannel(toSend, client.socketChannel);

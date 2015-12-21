@@ -48,7 +48,12 @@ public class Player extends Entity
         direction = DirectionOfTravel.IDLE;
     }
     
-    protected void changeAppearance(String sprite)
+/*    public Player() {
+		super()
+	}*/
+
+
+	protected void changeAppearance(String sprite)
     {
     	this.sprite = sprite;
     	spriteSheet = new Texture(Gdx.files.internal(this.sprite));
