@@ -24,7 +24,7 @@ import java.net.StandardSocketOptions;
 import java.net.SocketOption;
 
 public class Server {
-	private static final int MAX_CLIENTS = 5;
+	private static final int MAX_CLIENTS = 999;
 	private int port;
 	List<PlayerClient> clients;
 	private int numClientsConnected;
