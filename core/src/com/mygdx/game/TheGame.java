@@ -107,6 +107,9 @@ public class TheGame extends ApplicationAdapter
     private InputMultiplexer inputMultiplexer; //will delegate events tos the game inputprocessor and the gui inputprocessor (the stage)
     private InputProcessor gameInputProcessor;
     
+    private Server server;
+    private boolean hosting;
+    
 	@Override
 	public void create() {
 		numChatLines = 0;
@@ -169,7 +172,7 @@ public class TheGame extends ApplicationAdapter
 		labelStyle.fontColor = Color.WHITE;
 		skin.add("default", labelStyle);
 		
-		final TextButton joinServerButton = new TextButton("Join Server", skin);
+		TextButton joinServerButton = new TextButton("Join Server", skin);
 		joinServerButton.addListener(new ChangeListener() {
 
 			@Override
@@ -181,6 +184,23 @@ public class TheGame extends ApplicationAdapter
 		
 		joinServerButton.setPosition(stage.getWidth() / 2 - joinServerButton.getWidth() / 2, stage.getHeight() / 2);
 		stage.addActor(joinServerButton);
+		
+		TextButton hostServerButton = new TextButton("Host", skin);
+		hostServerButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				setupLobbyAsHost();
+			}
+		});
+		
+		hostServerButton.setPosition(stage.getWidth() / 2 - hostServerButton.getWidth() / 2, 200);
+		stage.addActor(hostServerButton);
+	}
+	
+	private void setupLobbyAsHost() {
+		server = new Server(8080);
+		hosting = true;
+		gameState = GameState.IN_LOBBY;
 	}
 	
 	private void setupConnectMenu() {
@@ -596,19 +616,25 @@ public class TheGame extends ApplicationAdapter
 	}
 	
 	private void doNetworking() {
+		
+		
+		if (!hosting) {
 			//*******Networking*****
 			if (GameState.SERVER_CONNECT_SCREEN != gameState) { 
 				try {
 					if (in.ready()) {
+						String receivedStr = in.readLine();
+						JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
+						
+						if (received.get("type").equals("chatMessage")) {
+							String message = (String) received.get("message");
+							System.out.println("message: " + message);
+							addMessageToChatbox(message);
+						}
+						
+						
 						//spin until receive message from server to start game (signaling that other client has connected, etc)
 						if (GameState.IN_LOBBY == gameState) {
-							///System.out.println("ready");
-							
-							String receivedStr = in.readLine();
-							/////System.out.println("receivedStr: " + receivedStr);
-							JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
-
-							//System.out.println(received);
 
 							if (received.get("type").equals("gameStartSignal")) {
 								gameState = GameState.GAME_STARTED;
@@ -635,10 +661,6 @@ public class TheGame extends ApplicationAdapter
 							} else if (received.get("type").equals("uidUpdate")) {
 								localPlayer.uid = ((Number) received.get("uid")).intValue();
 								
-							} else if (received.get("type").equals("chatMessage")) {
-								String message = (String) received.get("message");
-								addMessageToChatbox(message);
-								
 							} else if (received.get("type").equals("sprite")) { //updates sprites for remoteplayers
 			        			int uid = ((Number) received.get("uid")).intValue();
 			        			(currentMap.getPlayerByUid(uid)).changeAppearance((String) received.get("spriteID"));
@@ -646,8 +668,6 @@ public class TheGame extends ApplicationAdapter
 			        		}
 							
 						} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
-			        		String inputLine = in.readLine();
-			        		JSONObject received = (JSONObject) JSONValue.parse(inputLine);
 			        		String messageType = (String) received.get("type");
 			        		//position updates
 			        		if (messageType.equals("position")) {
@@ -661,7 +681,7 @@ public class TheGame extends ApplicationAdapter
 			        			int uid = ((Number) received.get("uid")).intValue();
 			        			((RemotePlayer) currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));
 			        			
-			        		} 
+			        		}
 			                
 						}
 					}
@@ -704,6 +724,12 @@ public class TheGame extends ApplicationAdapter
 			        }
 				}
 			}
+		} else { //hosting
+			if (GameState.IN_LOBBY == gameState) {
+				server.checkForConnections();
+			}
+			server.dealWithMessages();
+		}
 				//**end networking******
 	}
 				
