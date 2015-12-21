@@ -76,7 +76,7 @@ public class TheGame extends ApplicationAdapter
     private Skin skin;
     private Stage stage;
     private Socket socket;
-    private Table mainMenuTable;
+    private Table serverConnectTable;
     private TextField errorTextField;
     
     //private List<Player> playersDrawnInLobby;
@@ -97,7 +97,8 @@ public class TheGame extends ApplicationAdapter
     private static final Color GREEN = new Color(.168f, .431f, .039f, 1);
     
     private static enum GameState {
-        MAIN_MENU,
+    	MAIN_MENU,
+        SERVER_CONNECT_SCREEN,
         CONNECTED_TO_SERVER,
         IN_LOBBY,
         GAME_STARTED,
@@ -110,7 +111,7 @@ public class TheGame extends ApplicationAdapter
 	public void create() {
 		numChatLines = 0;
 		oldPos = new Point(0, 0);
-		gameState = GameState.MAIN_MENU;
+		gameState = GameState.SERVER_CONNECT_SCREEN;
 		batch = new SpriteBatch();
 		
 		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
@@ -130,14 +131,11 @@ public class TheGame extends ApplicationAdapter
 				new Point(0,0));
 		
 		
-
 		setupMainMenu();
 	}
 	
-	
 	private void setupMainMenu() {
-		// A skin can be loaded via JSON or defined programmatically, either is fine. Using a skin is optional but strongly
-		// recommended solely for the convenience of getting a texture, region, etc as a drawable, tinted drawable, etc.
+		stage.clear();
 		skin = new Skin();
 
 		// Generate a 1x1 white texture and store it in the skin named "white".
@@ -170,6 +168,27 @@ public class TheGame extends ApplicationAdapter
 		labelStyle.font = skin.getFont("default");
 		labelStyle.fontColor = Color.WHITE;
 		skin.add("default", labelStyle);
+		
+		final TextButton joinServerButton = new TextButton("Join Server", skin);
+		joinServerButton.addListener(new ChangeListener() {
+
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				setupConnectMenu();
+			}
+			
+		});
+		
+		joinServerButton.setPosition(stage.getWidth() / 2 - joinServerButton.getWidth() / 2, stage.getHeight() / 2);
+		stage.addActor(joinServerButton);
+	}
+	
+	private void setupConnectMenu() {
+		
+		stage.clear();
+		// A skin can be loaded via JSON or defined programmatically, either is fine. Using a skin is optional but strongly
+		// recommended solely for the convenience of getting a texture, region, etc as a drawable, tinted drawable, etc.
+		
 		
 		//http://www.vogella.com/tutorials/JavaPreferences/article.html
 		preferences = Preferences.userRoot().node(this.getClass().getName()); //used to save/load fields on server connect page
@@ -236,34 +255,44 @@ public class TheGame extends ApplicationAdapter
 		usernameField.setAlignment(Align.center);
 		
 		Label usernameLabel = new Label("Username: ", labelStyle);	
-
+		
+		TextButton backButton = new TextButton("Back", skin);
+		backButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				setupMainMenu();
+			}
+		});
+		backButton.setPosition(700, 30);
 		
 		//create a table that fills the screen
-		mainMenuTable = new Table();
-		mainMenuTable.setFillParent(true);
-		mainMenuTable.setSize(200, 300);
-		mainMenuTable.center();
-		stage.addActor(mainMenuTable);
+		serverConnectTable = new Table();
+		serverConnectTable.setFillParent(true);
+		serverConnectTable.setSize(200, 300);
+		serverConnectTable.center();
+		stage.addActor(serverConnectTable);
 		
 		//populate table
-		mainMenuTable.add(serverAddressLabel);
-		mainMenuTable.add(serverAddressField);
-		mainMenuTable.add(serverPortLabel).padLeft(20);
-		mainMenuTable.add(serverPortField).width(70);
-		mainMenuTable.row();  //new row
-		mainMenuTable.add(usernameLabel).padTop(20);
-		mainMenuTable.add(usernameField).padTop(20);
-		mainMenuTable.row();
-		mainMenuTable.add(connectButton).colspan(4).center().padTop(40);
+		serverConnectTable.add(serverAddressLabel);
+		serverConnectTable.add(serverAddressField);
+		serverConnectTable.add(serverPortLabel).padLeft(20);
+		serverConnectTable.add(serverPortField).width(70);
+		serverConnectTable.row();  //new row
+		serverConnectTable.add(usernameLabel).padTop(20);
+		serverConnectTable.add(usernameField).padTop(20);
+		serverConnectTable.row();
+		serverConnectTable.add(connectButton).colspan(4).center().padTop(40);
 		//mainMenuTable.debugAll(); //show bounding boxes
-
+		
+		stage.addActor(backButton);
 
 		// Add a listener to the button. ChangeListener is fired when the button's checked state changes, eg when clicked,
 		// Button#setChecked() is called, via a key press, etc. If the event.cancel() is called, the checked state will be reverted.
 		// ClickListener could have been used, but would only fire when clicked. Also, canceling a ClickListener event won't
 		// revert the checked state.
 		connectButton.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
 				if (null != errorTextField) {
 					errorTextField.remove();
 				}
@@ -495,7 +524,7 @@ public class TheGame extends ApplicationAdapter
 	
 	private void displayConnectError(TextField error) {
 		error.setDisabled(true); //so it can't be edited
-		mainMenuTable.addActorAt(2, error);
+		serverConnectTable.addActorAt(2, error);
 		//error.debug();
 	}
 	
@@ -568,7 +597,7 @@ public class TheGame extends ApplicationAdapter
 	
 	private void doNetworking() {
 			//*******Networking*****
-			if (GameState.MAIN_MENU != gameState) { 
+			if (GameState.SERVER_CONNECT_SCREEN != gameState) { 
 				try {
 					if (in.ready()) {
 						//spin until receive message from server to start game (signaling that other client has connected, etc)
