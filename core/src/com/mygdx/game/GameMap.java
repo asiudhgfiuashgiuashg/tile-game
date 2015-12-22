@@ -19,10 +19,14 @@ import java.util.Scanner;
 import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.mygdx.ai.DefaultIndexedGraphWithPublicNodes;
 import com.mygdx.ai.GraphCreator;
 import com.mygdx.ai.PositionIndexedNode;
@@ -67,8 +71,10 @@ public class GameMap {
     
     DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> nodeGraph;
 	private TextureRegion defaultNodeTextureRegion;
+	private ShapeRenderer shapeRenderer;
     
     public GameMap(String mapFile, String tileFile, LocalPlayer player) throws IOException {
+    	shapeRenderer = new ShapeRenderer();
     	defaultNodeTextureRegion = new TextureRegion(new Texture(Gdx.files.internal("art/node_circle_default.png")));
     	
         thingToTextureMap = new HashMap < Object, Texture > ();
@@ -313,6 +319,19 @@ public class GameMap {
         return nearbyItemList;
     }
 
+    protected void debugGraph() {
+    	if (nodeGraph != null) {
+    		shapeRenderer.setColor(Color.GREEN);
+    		shapeRenderer.begin(ShapeType.Line);
+        	for (PositionIndexedNode node: nodeGraph.getNodes()) {
+        		for (Connection<PositionIndexedNode> connection: node.getConnections()) {
+        			shapeRenderer.line(connection.getFromNode().x - mapPosX, connection.getFromNode().y - mapPosY, connection.getToNode().x - mapPosX, connection.getToNode().y - mapPosY);
+        		}
+        	}
+        	shapeRenderer.end();
+    		//shapeRenderer.flush();
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////
     // set's the map and character draw positions based on char position //

@@ -56,9 +56,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.mygdx.ai.PositionIndexedNode;
 import com.mygdx.server.Server;
-public class TheGame extends ApplicationAdapter 
-{
+public class TheGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	
 	GameMap currentMap;
@@ -108,9 +109,12 @@ public class TheGame extends ApplicationAdapter
     
     private Server server;
     private boolean hosting;
+    boolean debug;
     
 	@Override
 	public void create() {
+		debug = true;
+		
 		numChatLines = 0;
 		oldPos = new Point(0, 0);
 		gameState = GameState.SERVER_CONNECT_SCREEN;
@@ -634,6 +638,11 @@ public class TheGame extends ApplicationAdapter
 			
 			batch.end();
 			
+			
+			if (debug) {
+				currentMap.debugGraph(); //MUST COME AFTER BATCH, batch and shaperenderer cannot mix
+			}
+			
 			for (Player player: currentMap.players) {
 				if (player != currentMap.player) { //currentMap.player = this.player btw
 					//adjust label position for remote players
@@ -648,6 +657,7 @@ public class TheGame extends ApplicationAdapter
 		
 		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 		stage.draw();
+		
 		
 		doNetworking();
 	}

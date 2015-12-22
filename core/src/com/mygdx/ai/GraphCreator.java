@@ -14,11 +14,11 @@ import com.mygdx.game.GameMap;
 import com.badlogic.gdx.ai.pfa.Connection;
 
 public class GraphCreator {
-    private static final int NODE_SPACING = 20;
+    private static final int NODE_SPACING = 135;
     
     public static DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> graphFromMap(GameMap map) {
-        int mapWidth = GameMap.TILE_WIDTH * map.numCols;
-        int mapHeight = GameMap.TILE_HEIGHT * map.numRows;
+        int mapWidth = map.mapWidth;
+        int mapHeight = map.mapHeight;
         
         
       	int index = 0; // in an IndexedGraph, each node needs to have an index (sequential, starting at 0)
