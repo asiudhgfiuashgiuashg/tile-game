@@ -577,7 +577,8 @@ public class TheGame extends ApplicationAdapter
 	
 	private void displayConnectError(TextField error) {
 		error.setDisabled(true); //so it can't be edited
-		serverConnectTable.addActorAt(2, error);
+		error.setPosition(0, 50);
+		stage.addActor(error);
 		//error.debug();
 	}
 	
@@ -597,6 +598,9 @@ public class TheGame extends ApplicationAdapter
 		try {
             ///System.out.println("Working Directory = " + System.getProperty("user.dir"));
             currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", localPlayer);
+            if (hosting) {
+            	currentMap.initializeGraph();
+            }
         }
         catch(IOException e) {
             ///System.out.println(e.getMessage());
