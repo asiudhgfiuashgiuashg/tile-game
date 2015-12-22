@@ -51,12 +51,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-
 import com.mygdx.server.Server;
 public class TheGame extends ApplicationAdapter 
 {
@@ -142,6 +141,7 @@ public class TheGame extends ApplicationAdapter
 		Table table = new Table();
 		preferences = Preferences.userRoot().node(this.getClass().getName());
 		final TextField userNameTextField = new TextField(preferences.get("username", ""), skin);
+		userNameTextField.setAlignment(Align.center);
 		Label userNameLabel = new Label("Username: ", skin);
 		table.add(userNameLabel);
 		table.add(userNameTextField);
@@ -476,11 +476,13 @@ public class TheGame extends ApplicationAdapter
 			public boolean keyDown(InputEvent event, int keycode) {
 				if (keycode == Input.Keys.ENTER) {
 					JSONObject message = new JSONObject();
-					message.put("type", "chatMessage");
-					message.put("message", messageTextField.getText());
-					out.println(message);
-					addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
-					messageTextField.setText("");
+					if (messageTextField.getText().length() > 0) {
+						message.put("type", "chatMessage");
+						message.put("message", messageTextField.getText());
+						out.println(message);
+						addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
+						messageTextField.setText("");
+					}
 					return true; //dont pass along the event
 				}
 				return false; //pass along the event
@@ -770,14 +772,17 @@ public class TheGame extends ApplicationAdapter
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
 				if (keycode == Input.Keys.ENTER) {
-					if (messageTextField.isVisible()) { 
+					if (messageTextField.isVisible()) {
 						//send the text as a message
-						JSONObject message = new JSONObject();
-						message.put("type", "chatMessage");
-						message.put("message", messageTextField.getText());
-						out.println(message);
-						addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
-						messageTextField.setText("");
+						if (messageTextField.getText().length() > 0) {
+							JSONObject message = new JSONObject();
+							message.put("type", "chatMessage");
+							message.put("message", messageTextField.getText());
+							out.println(message);
+							addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
+							messageTextField.setText("");
+						}
+							
 						messageTextField.setVisible(false); //close the text field
 						messageTextField.setDisabled(true);
 						event.setBubbles(false); //stop the event from bubbling back up to the stage, which will handle ENTER again (we only want ENTER to be handled once)

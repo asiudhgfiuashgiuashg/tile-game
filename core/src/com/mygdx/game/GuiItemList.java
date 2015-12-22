@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 
 
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
@@ -26,6 +27,7 @@ import com.badlogic.gdx.graphics.Texture;
  */
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Align;
 
 public class GuiItemList extends GuiElement
 {
@@ -108,7 +110,7 @@ public class GuiItemList extends GuiElement
         {
             tempItemList += itemList.getItemName(x) + "\n";
         }
-        font.drawMultiLine(batch, tempItemList, posX, posY);
+        font.draw(batch, tempItemList, posX, posY);
     }
     
     @Override
