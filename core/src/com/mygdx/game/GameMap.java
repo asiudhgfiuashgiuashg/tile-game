@@ -316,7 +316,7 @@ public class GameMap {
     protected void debugGraph() {
     	if (nodeGraph != null) {
     		shapeRenderer.setAutoShapeType(true);
-    		shapeRenderer.begin();
+    		shapeRenderer.begin(ShapeType.Filled);
         	for (PositionIndexedNode node: nodeGraph.getNodes()) {
         		shapeRenderer.setColor(Color.GREEN);
         		for (Connection<PositionIndexedNode> connection: node.getConnections()) {
