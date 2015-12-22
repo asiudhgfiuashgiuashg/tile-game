@@ -11,6 +11,7 @@ import com.mygdx.game.LineSeg;
 import com.mygdx.game.Point;
 import com.mygdx.game.Shape;
 import com.mygdx.game.GameMap;
+import com.badlogic.gdx.ai.pfa.Connection;
 
 public class GraphCreator {
     private static final int NODE_SPACING = 20;
@@ -39,6 +40,18 @@ public class GraphCreator {
                     }
                 }
             }
+        }
+        
+        //checks for nodes with no connections, and then removes them from the array
+        Array<Integer> indexValues = new Array<Integer>();
+        for(PositionIndexedNode node: nodes) {
+            if(node.getConnections().size == 0) {
+                indexValues.add(nodes.indexOf(node, true)); //the boolean has to do with using .equals or == to do the search.
+                											//true is .equals, this might be the incorrect search to use.
+            }
+        }
+        for(int indexVal: indexValues) {
+            nodes.removeIndex(indexVal);
         }
         
         IndexedGraph<PositionIndexedNode> graph = new DefaultIndexedGraph<PositionIndexedNode>(nodes);
