@@ -10,8 +10,8 @@ import com.badlogic.gdx.ai.pfa.Heuristic;
 public class PositionalHeuristic implements Heuristic<PositionIndexedNode>{
 
 	@Override
-	public float estimate(PositionIndexedNode startNode, PositionIndexedNode endNode) {
-		float dist = (float) Math.sqrt(Math.pow(startNode.x - endNode.x, 2) + Math.pow(startNode.y - endNode.y, 2));
+	public float estimate(PositionIndexedNode currentNode, PositionIndexedNode endNode) {
+		float dist = (float) Math.sqrt(Math.pow(currentNode.x - endNode.x, 2) + Math.pow(currentNode.y - endNode.y, 2));
 		return dist;
 	}
 

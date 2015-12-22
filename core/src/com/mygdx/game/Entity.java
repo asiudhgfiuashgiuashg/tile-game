@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -19,19 +20,26 @@ public abstract class Entity extends GameObject
 		super(shape, passable);
 	}
 	
-    int FRAME_COLS = 13;
-    int FRAME_ROWS = 21;
+    protected int FRAME_COLS = 13;
+    protected int FRAME_ROWS = 21;
 
     SpriteBatch batch;
 
-    Animation moveRight;
-    Animation moveLeft;
-    Animation moveUp;
-    Animation moveDown;
-    Texture spriteSheet;
-    TextureRegion[][] tmp;
-    TextureRegion[] animationFrames;
-    TextureRegion currentFrame;
+    protected Animation moveRight;
+    protected Animation moveLeft;
+    protected Animation moveUp;
+    protected Animation moveDown;
+    protected Texture spriteSheet;
+    protected TextureRegion[][] tmp;
+    protected TextureRegion[] animationFrames;
+    protected TextureRegion currentFrame;
+    
+    protected TextureRegion idleRight;
+    protected TextureRegion idleLeft;
+    protected TextureRegion idleUp;
+    protected TextureRegion idleDown;
+    
+    protected String spriteResourceIdentifier;
 
     float drawPosX;
     float drawPosY;
@@ -58,4 +66,21 @@ public abstract class Entity extends GameObject
     }
     abstract public void setX(double newX);
     abstract public void setY(double newY);
+    
+    protected void changeAppearance(String sprite)
+    {
+    	this.spriteResourceIdentifier = sprite;
+    	spriteSheet = new Texture(Gdx.files.internal(this.spriteResourceIdentifier));
+        tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
+        
+        moveLeft = animate(9, 9);
+        idleLeft = tmp[9][0];
+        moveRight = animate(11, 9);
+        idleRight = tmp[11][0];
+        moveUp = animate(8, 9);
+        idleUp = tmp[8][0];
+        moveDown = animate(10, 9);
+        idleDown = tmp[10][0];
+        currentFrame = idleUp;
+    }
 }

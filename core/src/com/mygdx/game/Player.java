@@ -19,14 +19,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Player extends Entity
 {
-    TextureRegion idleRight;
-    TextureRegion idleLeft;
-    TextureRegion idleUp;
-    TextureRegion idleDown;
 
     GameMap currentMap;
     String username;
-    String sprite;
+    
     int uid;
     
     protected ItemCollector inv;
@@ -53,22 +49,7 @@ public class Player extends Entity
 	}*/
 
 
-	protected void changeAppearance(String sprite)
-    {
-    	this.sprite = sprite;
-    	spriteSheet = new Texture(Gdx.files.internal(this.sprite));
-        tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
-        
-        moveLeft = animate(9, 9);
-        idleLeft = tmp[9][0];
-        moveRight = animate(11, 9);
-        idleRight = tmp[11][0];
-        moveUp = animate(8, 9);
-        idleUp = tmp[8][0];
-        moveDown = animate(10, 9);
-        idleDown = tmp[10][0];
-        currentFrame = idleUp;
-    }
+	
     
     protected Animation animate(int row, int length)
     {
