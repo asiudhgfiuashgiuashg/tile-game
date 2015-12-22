@@ -66,8 +66,11 @@ public class GameMap {
     AbstractMap<Object, Texture> thingToTextureMap;
     
     DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> nodeGraph;
+	private TextureRegion defaultNodeTextureRegion;
     
     public GameMap(String mapFile, String tileFile, LocalPlayer player) throws IOException {
+    	defaultNodeTextureRegion = new TextureRegion(new Texture(Gdx.files.internal("art/node_circle_default.png")));
+    	
         thingToTextureMap = new HashMap < Object, Texture > ();
         players = new ArrayList<Player>();
         players.add(player);
@@ -261,7 +264,8 @@ public class GameMap {
             }
             if (nodeGraph != null) {
             	for (PositionIndexedNode node: nodeGraph.getNodes()) {
-            		node.draw(batch, player.idleRight, -mapPosX, -mapPosY);
+            		TextureRegion textureRegion = defaultNodeTextureRegion;
+            		node.draw(batch, textureRegion, -mapPosX, -mapPosY);
             	}
             }
         }
