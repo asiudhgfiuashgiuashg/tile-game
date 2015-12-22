@@ -23,6 +23,7 @@ import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.ai.DefaultIndexedGraphWithPublicNodes;
 import com.mygdx.ai.GraphCreator;
 import com.mygdx.ai.PositionIndexedNode;
 
@@ -64,7 +65,7 @@ public class GameMap {
     // thing = GameObject or Item
     AbstractMap<Object, Texture> thingToTextureMap;
     
-    IndexedGraph<PositionIndexedNode> nodeGraph;
+    DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> nodeGraph;
     
     public GameMap(String mapFile, String tileFile, LocalPlayer player) throws IOException {
         thingToTextureMap = new HashMap < Object, Texture > ();
@@ -257,6 +258,11 @@ public class GameMap {
                 if (player instanceof RemotePlayer) {
                     player.drawAtPos(batch, (float) player.getPos().getX() - mapPosX, (float) player.getPos().getY() - mapPosY);
                 }
+            }
+            if (nodeGraph != null) {
+            	for (PositionIndexedNode node: nodeGraph.getNodes()) {
+            		node.draw(batch, player.idleRight, -mapPosX, -mapPosY);
+            	}
             }
         }
         player.draw(batch);
