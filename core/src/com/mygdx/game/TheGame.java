@@ -641,6 +641,7 @@ public class TheGame extends ApplicationAdapter {
 			
 			if (debug) {
 				currentMap.debugGraph(); //MUST COME AFTER BATCH, batch and shaperenderer cannot mix
+				currentMap.debugShapes();
 			}
 			
 			for (Player player: currentMap.players) {

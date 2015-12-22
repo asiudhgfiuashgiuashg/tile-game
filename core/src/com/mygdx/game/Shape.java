@@ -3,6 +3,10 @@ package com.mygdx.game;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+
 public class Shape {
     //pos relative to origin of map
     Point pos;
@@ -177,6 +181,13 @@ public class Shape {
     
     private double getLargestXOfTwoPoints(Point p0, Point p1) {
     	return p0.getX() > p1.getX() ? p0.getX() : p1.getX();
+    }
+    
+    protected void drawDebug(ShapeRenderer renderer, float offsetX, float offsetY) {
+    	renderer.setColor(Color.RED);
+    	for (LineSeg lineSeg: lineSegs) {
+    		renderer.line((float) lineSeg.p1.getX() + offsetX, (float) lineSeg.p1.getY() + offsetY, (float) lineSeg.p2.getX() + offsetX, (float) lineSeg.p2.getY() + offsetY);
+    	}
     }
 }
 

@@ -332,6 +332,18 @@ public class GameMap {
     		//shapeRenderer.flush();
         }
     }
+    
+    protected void debugShapes() {
+    	if (nodeGraph != null) {
+    		shapeRenderer.setColor(Color.GREEN);
+    		shapeRenderer.begin(ShapeType.Line);
+    		for (GameObject object: objectList.objectList) {
+    			object.getShape().drawDebug(shapeRenderer, -mapPosX, -mapPosY);
+    		}
+        	shapeRenderer.end();
+    		//shapeRenderer.flush();
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////
     // set's the map and character draw positions based on char position //

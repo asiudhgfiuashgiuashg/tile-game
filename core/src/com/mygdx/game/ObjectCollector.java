@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class ObjectCollector
 {
-	private List<GameObject> objectList;
+	protected List<GameObject> objectList;
 	// 2d positional grid of objects
 	// Currently, this will be one-to-one with the map grid aka
 	//  for each tile in the map grid there is exactly one tile in the objectGrid
