@@ -14,7 +14,7 @@ import com.mygdx.game.GameMap;
 import com.badlogic.gdx.ai.pfa.Connection;
 
 public class GraphCreator {
-    private static final int NODE_SPACING = 100;
+    private static final int NODE_SPACING = 300;
     
     public static DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> graphFromMap(GameMap map) {
         int mapWidth = map.mapWidth;

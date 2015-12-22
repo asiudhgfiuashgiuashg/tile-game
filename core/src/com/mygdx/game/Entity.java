@@ -43,9 +43,9 @@ public abstract class Entity extends GameObject
     
     //abstract void create(); why do we even have this instead of a constructor?
     abstract protected Animation animate(int row, int length);
-    abstract void update(float stateTime);              // updates it in the case of movement or status changes
+    protected abstract void update(float stateTime);              // updates it in the case of movement or status changes
 
-    abstract void draw(SpriteBatch batch);              // renders entity
+    protected abstract void draw(SpriteBatch batch);              // renders entity
     
     abstract public float getRight();
     abstract public float getLeft();

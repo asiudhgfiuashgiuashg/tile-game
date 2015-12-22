@@ -314,7 +314,7 @@ public class GameMap {
     }
 
     protected void debugGraph() {
-    	if (nodeGraph != null) {
+    	if (nodeGraph != null) { //if hosting
     		shapeRenderer.setAutoShapeType(true);
     		shapeRenderer.begin(ShapeType.Filled);
         	for (PositionIndexedNode node: nodeGraph.getNodes()) {
