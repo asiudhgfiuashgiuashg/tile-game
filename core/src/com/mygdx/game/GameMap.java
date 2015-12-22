@@ -268,12 +268,6 @@ public class GameMap {
                     player.drawAtPos(batch, (float) player.getPos().getX() - mapPosX, (float) player.getPos().getY() - mapPosY);
                 }
             }
-            if (nodeGraph != null) {
-            	for (PositionIndexedNode node: nodeGraph.getNodes()) {
-            		TextureRegion textureRegion = defaultNodeTextureRegion;
-            		node.draw(batch, textureRegion, -mapPosX, -mapPosY);
-            	}
-            }
         }
         player.draw(batch);
     }
@@ -321,12 +315,15 @@ public class GameMap {
 
     protected void debugGraph() {
     	if (nodeGraph != null) {
-    		shapeRenderer.setColor(Color.GREEN);
-    		shapeRenderer.begin(ShapeType.Line);
+    		shapeRenderer.setAutoShapeType(true);
+    		shapeRenderer.begin();
         	for (PositionIndexedNode node: nodeGraph.getNodes()) {
+        		shapeRenderer.setColor(Color.GREEN);
         		for (Connection<PositionIndexedNode> connection: node.getConnections()) {
         			shapeRenderer.line(connection.getFromNode().x - mapPosX, connection.getFromNode().y - mapPosY, connection.getToNode().x - mapPosX, connection.getToNode().y - mapPosY);
         		}
+        		shapeRenderer.setColor(Color.BLUE);
+        		node.draw(shapeRenderer, -mapPosX, -mapPosY);
         	}
         	shapeRenderer.end();
     		//shapeRenderer.flush();

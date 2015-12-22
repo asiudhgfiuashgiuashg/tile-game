@@ -627,9 +627,14 @@ public class TheGame extends ApplicationAdapter {
 	@Override
 	public void render()
 	{
+		
+		
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if (GameState.GAME_STARTED == gameState) {
+			
+			
+			
 			batch.begin();
 			
 			currentMap.draw(batch);
@@ -638,11 +643,12 @@ public class TheGame extends ApplicationAdapter {
 			
 			batch.end();
 			
-			
 			if (debug) {
 				currentMap.debugGraph(); //MUST COME AFTER BATCH, batch and shaperenderer cannot mix
 				currentMap.debugShapes();
 			}
+			
+			
 			
 			for (Player player: currentMap.players) {
 				if (player != currentMap.player) { //currentMap.player = this.player btw

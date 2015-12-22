@@ -6,9 +6,11 @@ import java.util.List;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.DefaultConnection;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedNode;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -53,8 +55,8 @@ public class PositionIndexedNode implements IndexedNode<PositionIndexedNode> {
 		this.connections.add(outgoingConnection);
 	}
 	
-	public void draw(SpriteBatch batch, TextureRegion textureRegion, int xOffset, int yOffset) {
-		batch.draw(textureRegion, x + xOffset, y + yOffset);
+	public void draw(ShapeRenderer renderer, int xOffset, int yOffset) {
+		renderer.circle(x + xOffset, y + yOffset, 12);
 	}
 
 }
