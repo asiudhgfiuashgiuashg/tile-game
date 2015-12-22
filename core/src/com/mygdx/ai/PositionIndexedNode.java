@@ -8,6 +8,11 @@ import com.badlogic.gdx.ai.pfa.DefaultConnection;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedNode;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * represents a 2d coordinate
+ * @author elimonent
+ *
+ */
 public class PositionIndexedNode implements IndexedNode<PositionIndexedNode> {
 
 	public float x;
@@ -34,7 +39,7 @@ public class PositionIndexedNode implements IndexedNode<PositionIndexedNode> {
 	}
 	
 	public void connectToBidirectionally(PositionIndexedNode other) {
-		Connection<PositionIndexedNode> outgoingConnection = new DefaultConnection<PositionIndexedNode>(this, other);
+		Connection<PositionIndexedNode> outgoingConnection = new DefaultConnection<PositionIndexedNode>(this, other); //default cost of 1
 		this.connections.add(outgoingConnection);
 		Connection<PositionIndexedNode> incomingConnection = new DefaultConnection<PositionIndexedNode>(other, this);
 		other.connections.add(incomingConnection);
