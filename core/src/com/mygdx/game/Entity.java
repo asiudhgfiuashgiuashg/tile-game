@@ -41,8 +41,8 @@ public abstract class Entity extends GameObject
     
     protected String spriteResourceIdentifier;
 
-    float drawPosX;
-    float drawPosY;
+    protected float drawPosX;
+    protected float drawPosY;
     //pixels relative to bottom left corner of current frame image
     float up;
     float down;
@@ -50,17 +50,13 @@ public abstract class Entity extends GameObject
     float right;
     
     //abstract void create(); why do we even have this instead of a constructor?
-    abstract protected Animation animate(int row, int length);
     protected abstract void update(float stateTime);              // updates it in the case of movement or status changes
 
-    protected abstract void draw(SpriteBatch batch);              // renders entity
     
     abstract public float getRight();
     abstract public float getLeft();
     abstract public float getTop();
     abstract public float getBottom();
-    abstract public Point getPos();
-    abstract public void setPos(Point point);
     public void translate(Point dist) {
     	shape.translate(dist);
     }
@@ -82,5 +78,39 @@ public abstract class Entity extends GameObject
         moveDown = animate(10, 9);
         idleDown = tmp[10][0];
         currentFrame = idleUp;
+    }
+    	
+    protected Animation animate(int row, int length)
+    {
+        animationFrames = new TextureRegion[length];
+        int index = 0;
+        for (int j = 0; j < length; j++)
+        {
+            animationFrames[index++] = tmp[row][j];
+        }
+        Animation movement = new Animation(0.025f, animationFrames);
+
+        return movement;
+    }
+    
+    public void drawAtPos(SpriteBatch batch, float drawPosX, float drawPosY) {
+        batch.draw(currentFrame, drawPosX, drawPosY);
+        //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
+        //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
+    }
+    
+    public void draw(SpriteBatch batch) {
+	    batch.draw(currentFrame, drawPosX, drawPosY);
+	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
+	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
+    }
+    
+    public Point getPos() {
+    	return pos;
+    }
+    
+    public void setPos(Point newPos) {
+    	pos = newPos;
+    	shape.setPos(newPos);
     }
 }

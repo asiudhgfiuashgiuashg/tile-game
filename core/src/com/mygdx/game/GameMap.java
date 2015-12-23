@@ -27,6 +27,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.mygdx.ai.Agent;
 import com.mygdx.ai.DefaultIndexedGraphWithPublicNodes;
 import com.mygdx.ai.GraphCreator;
 import com.mygdx.ai.PositionIndexedNode;
@@ -69,11 +70,15 @@ public class GameMap {
     // thing = GameObject or Item
     AbstractMap<Object, Texture> thingToTextureMap;
     
-    DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> nodeGraph;
+    public DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> nodeGraph;
 	private TextureRegion defaultNodeTextureRegion;
 	private ShapeRenderer shapeRenderer;
     
+	protected List<Agent> agents;
+	
     public GameMap(String mapFile, String tileFile, LocalPlayer player) throws IOException {
+    	agents = new ArrayList<Agent>();
+    	
     	shapeRenderer = new ShapeRenderer();
     	defaultNodeTextureRegion = new TextureRegion(new Texture(Gdx.files.internal("art/node_circle_default.png")));
     	
@@ -219,7 +224,9 @@ public class GameMap {
         fov.setRegion(mapPosX, mapHeight - (mapPosY + 2 * winY), 2 * winX, 2 * winY);
         stateTime += Gdx.graphics.getDeltaTime();
 
-
+        for (Agent agent: agents) {
+        	agent.update(stateTime);
+        }
 
     }
 
@@ -270,6 +277,11 @@ public class GameMap {
             }
         }
         player.draw(batch);
+        
+        for (Agent agent: agents) {
+        	agent.drawAtPos(batch, (float) agent.getPos().getX() - mapPosX, (float) agent.getPos().getY() - mapPosY);
+        	agent.update(stateTime);
+        }
     }
 
     //////////////////////////

@@ -43,47 +43,16 @@ public class Player extends Entity
         inv = new ItemCollector();
         direction = DirectionOfTravel.IDLE;
     }
-    
-/*    public Player() {
-		super()
-	}*/
-
 
 	
     
-    protected Animation animate(int row, int length)
-    {
-        animationFrames = new TextureRegion[length];
-        int index = 0;
-        for (int j = 0; j < length; j++)
-        {
-            animationFrames[index++] = tmp[row][j];
-        }
-        Animation movement = new Animation(0.025f, animationFrames);
-
-        return movement;
-    }
+    
     
     @Override
     public void update(float stateTime) {
     	
     }
-    
 
-    public void drawAtPos(SpriteBatch batch, float drawPosX, float drawPosY) {
-        batch.draw(currentFrame, drawPosX, drawPosY);
-        //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
-        //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
-    }
-    
-    @Override
-    public void draw(SpriteBatch batch) {
-	    batch.draw(currentFrame, drawPosX, drawPosY);
-	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
-	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
-    }
-    
-    
     @Override
     public float getRight() {
     	return right;
@@ -104,15 +73,7 @@ public class Player extends Entity
     	return down;
     }
     
-    @Override
-    public Point getPos() {
-    	return pos;
-    }
-    @Override 
-    public void setPos(Point newPos) {
-    	pos = newPos;
-    	shape.setPos(newPos);
-    }
+
     @Override
     public void translate(Point dist) {
     	pos.plus(dist);

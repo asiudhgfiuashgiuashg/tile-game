@@ -57,7 +57,9 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.mygdx.ai.Agent;
 import com.mygdx.ai.PositionIndexedNode;
+import com.mygdx.ai.TestAi;
 import com.mygdx.server.Server;
 public class TheGame extends ApplicationAdapter {
 	SpriteBatch batch;
@@ -605,6 +607,7 @@ public class TheGame extends ApplicationAdapter {
             if (hosting) {
             	currentMap.initializeGraph();
             }
+            currentMap.agents.add(new TestAi(playerShape, true, currentMap));
         }
         catch(IOException e) {
             ///System.out.println(e.getMessage());
@@ -627,7 +630,6 @@ public class TheGame extends ApplicationAdapter {
 	@Override
 	public void render()
 	{
-		
 		
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

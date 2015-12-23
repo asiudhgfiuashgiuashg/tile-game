@@ -30,17 +30,11 @@ public class GraphCreator {
                 index++;
             }
         }
+        
         for (int i = 0; i < nodes.size; i++) {
-        	PositionIndexedNode node = nodes.get(i);
-            for (int j = 0; j < nodes.size; j++) {
-            	PositionIndexedNode otherNode = nodes.get(j);
-                if (node != otherNode) { //don't connect a node to itself
-                    if (canDrawLineBetween(node, otherNode, map)) {
-                       node.connectToBidirectionally(otherNode);
-                    }
-                }
-            }
+        	connectNode(nodes.get(i), nodes, map);
         }
+        
         
         //checks for nodes with no connections, and then removes them from the array
         Array<Integer> indexValues = new Array<Integer>();
@@ -73,6 +67,17 @@ public class GraphCreator {
         }
         
         return valid;
+    }
+    
+    protected static void connectNode(PositionIndexedNode node, Array<PositionIndexedNode> allNodes, GameMap map) {
+    	for (int j = 0; j < allNodes.size; j++) {
+        	PositionIndexedNode otherNode = allNodes.get(j);
+            if (node != otherNode) { //don't connect a node to itself
+                if (canDrawLineBetween(node, otherNode, map)) {
+                   node.connectToBidirectionally(otherNode);
+                }
+            }
+        }
     }
 }
 
