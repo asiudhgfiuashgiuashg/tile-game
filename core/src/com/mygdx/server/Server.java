@@ -155,9 +155,9 @@ public class Server {
 				String receivedStr = new String(byteBuffer.array(), 0, numBytesRead, "ASCII");
 				String lines[] = receivedStr.split("\\r?\\n");
 				for (String line: lines) {                    
-					System.out.println("--------------------------------------");
+					//System.out.println("--------------------------------------");
 					receiveTo = (JSONObject) JSONValue.parse(line);
-					System.out.println("received json value: " + receiveTo);
+					//System.out.println("received json value: " + receiveTo);
 					client.messageInQueue.add(receiveTo);
 
                     if(receiveTo == null)
@@ -182,13 +182,13 @@ public class Server {
     	PlayerClient receiveFromClient = client;
         if (client.messageInQueue.peek() != null) { //something in queue
         	JSONObject received = client.messageInQueue.remove();
-			System.out.println("handling: " + received.toString());
+			//System.out.println("handling: " + received.toString());
 			//position messages
 			if (received.get("type").equals("position")) {
 				//record position
 				receiveFromClient.charX = ((Number) received.get("charX")).floatValue();
 				receiveFromClient.charY = ((Number) received.get("charY")).floatValue();
-				System.out.println(received);
+				//System.out.println(received);
 	    		// send coordinates to other clients
 	    		sendToAllFrom(received, receiveFromClient);
 
@@ -235,7 +235,7 @@ public class Server {
 				received.clear();
 				received.put("type", "chatMessage");
 				received.put("message", message);
-				System.out.println("sending chat message: " + received);
+				//System.out.println("sending chat message: " + received);
 				sendToAllFrom(received, receiveFromClient);
 				
 			} else if (received.get("type").equals("sprite")) {

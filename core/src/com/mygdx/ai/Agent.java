@@ -28,8 +28,9 @@ public abstract class Agent extends Entity {
 	}
 
 	public void headTowards(int mapGoalPosX, int mapGoalPosY, GameMap map) {
-		DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> graph = new DefaultIndexedGraphWithPublicNodes<PositionIndexedNode>(
-				new Array<PositionIndexedNode>(map.nodeGraph.getNodes()));
+		Array<PositionIndexedNode> arrayCopy = GraphCreator.graphFromMap(map).getNodes();
+		
+		DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> graph = new DefaultIndexedGraphWithPublicNodes<PositionIndexedNode>(arrayCopy);
 		
 		PositionIndexedNode startNode = new PositionIndexedNode((float) this
 				.getPos().getX(), (float) this.getPos().getY(),
@@ -43,8 +44,8 @@ public abstract class Agent extends Entity {
 		
 		graph.getNodes().add(goalNode);
 
-		GraphCreator.connectNode(startNode, map.nodeGraph.getNodes(), map);
-		GraphCreator.connectNode(goalNode, map.nodeGraph.getNodes(), map);
+		GraphCreator.connectNode(startNode, graph.getNodes(), map);
+		GraphCreator.connectNode(goalNode, graph.getNodes(), map);
 		
 		IndexedAStarPathFinder<PositionIndexedNode> pathFinder = new IndexedAStarPathFinder<PositionIndexedNode>(graph);
 		GraphPath<PositionIndexedNode> graphPath = new DefaultGraphPath<PositionIndexedNode>();

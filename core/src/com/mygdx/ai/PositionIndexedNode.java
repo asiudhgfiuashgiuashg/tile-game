@@ -58,5 +58,9 @@ public class PositionIndexedNode implements IndexedNode<PositionIndexedNode> {
 	public void draw(ShapeRenderer renderer, int xOffset, int yOffset) {
 		renderer.circle(x + xOffset, y + yOffset, 12);
 	}
-
+	
+	@Override
+	public String toString() {
+		return "[node] x: " + x + " y: " + y;
+	}
 }
