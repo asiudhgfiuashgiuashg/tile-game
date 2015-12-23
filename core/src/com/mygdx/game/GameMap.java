@@ -330,13 +330,21 @@ public class GameMap {
     protected void debugGraph() {
     	if (nodeGraph != null) { //if hosting
     		shapeRenderer.setAutoShapeType(true);
-    		shapeRenderer.begin(ShapeType.Filled);
+    		shapeRenderer.begin(ShapeType.Line);
+    		shapeRenderer.setColor(Color.GREEN);
+    		
+    		//draw connections
         	for (PositionIndexedNode node: nodeGraph.getNodes()) {
-        		shapeRenderer.setColor(Color.GREEN);
         		for (Connection<PositionIndexedNode> connection: node.getConnections()) {
         			shapeRenderer.line(connection.getFromNode().x - mapPosX, connection.getFromNode().y - mapPosY, connection.getToNode().x - mapPosX, connection.getToNode().y - mapPosY);
         		}
-        		shapeRenderer.setColor(Color.BLUE);
+        	}
+        	shapeRenderer.end();
+        	
+        	//draw nodes
+        	shapeRenderer.begin(ShapeType.Filled);
+        	shapeRenderer.setColor(Color.BLUE);
+        	for (PositionIndexedNode node: nodeGraph.getNodes()) {
         		node.draw(shapeRenderer, -mapPosX, -mapPosY);
         	}
         	shapeRenderer.end();
@@ -673,16 +681,16 @@ public class GameMap {
 	
 	private void drawGraphPath(GraphPath<PositionIndexedNode> graphPath) {
 		shapeRenderer.setAutoShapeType(true);
-		shapeRenderer.begin(ShapeType.Filled);
+		shapeRenderer.begin(ShapeType.Line);
 		int nodeIndex = 0;
     	for (PositionIndexedNode node: graphPath) {
     		Array<Connection<PositionIndexedNode>> connections = node.getConnections();
     		
     		//highlight connection of path
-    		if (nodeIndex < graphPath.getCount() - 2) {
+    		if (nodeIndex <= graphPath.getCount() - 2) {
 	    		for (int i = 0; i < connections.size; i++) {
 	    			if (connections.get(i).getToNode().equals(graphPath.get(nodeIndex + 1))) {
-	    				shapeRenderer.setColor(Color.PINK);
+	    				shapeRenderer.setColor(Color.PINK);    			System.out.println("green");
 	    				shapeRenderer.line(connections.get(i).getFromNode().x 
 	    						- mapPosX, connections.get(i).getFromNode().y 
 	    						- mapPosY, connections.get(i).getToNode().x 
