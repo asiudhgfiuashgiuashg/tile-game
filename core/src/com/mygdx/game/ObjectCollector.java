@@ -142,6 +142,12 @@ public class ObjectCollector
 	{
 		return objectList.get(index).getYPos();
 	}
+	public float getWidth(int index) {
+		return getObject(index).getWidth();
+	}
+	public float getHeight(int index) {
+		return getObject(index).getHeight();
+	}
 	
 	public String getImage(int index)
 	{

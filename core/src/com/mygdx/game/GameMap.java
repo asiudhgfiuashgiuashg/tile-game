@@ -256,7 +256,7 @@ public class GameMap {
         for (int x = 0; x < objectList.getListSize(); x++) {
             GameObject object = objectList.getObject(x);
             Texture textureToUse = thingToTextureMap.get(object);
-            if ((objectList.getXPos(x) + 150 > mapPosX && objectList.getXPos(x) < mapPosX + 2 * winX) && (objectList.getYPos(x) + 150 > mapPosY && objectList.getYPos(x) < mapPosY + 2 * winX)) {
+            if ((objectList.getXPos(x) + objectList.getWidth(x) > mapPosX && objectList.getXPos(x) < mapPosX + 2 * winX) && (objectList.getYPos(x) + objectList.getHeight(x) > mapPosY && objectList.getYPos(x) < mapPosY + 2 * winX)) {
                 if (textureToUse == null) { //Item doesnt map to any texture, so make it one
                     textureToUse = new Texture(objectList.getImage(x));
                     thingToTextureMap.put(object, textureToUse); // save texture to use later

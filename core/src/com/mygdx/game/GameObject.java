@@ -57,6 +57,8 @@ public class GameObject {
 		setName(currentAttributes[0]);
 		setId(Integer.parseInt(currentAttributes[1]));
 		setImage(currentAttributes[2]);
+		setWidth(Float.parseFloat(currentAttributes[3]));
+		setHeight(Float.parseFloat(currentAttributes[4]));
 		List < LineSeg > lines = new ArrayList < LineSeg > ();
 		List < Point > points = new ArrayList < Point > ();
 		for (int x = 3; x < currentAttributes.length; x += 2) {
