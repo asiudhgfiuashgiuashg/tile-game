@@ -17,7 +17,7 @@ public abstract class Agent extends Entity {
 	protected Heuristic<PositionIndexedNode> heuristic; // heuristic for use in
 														// A*
 
-	protected GraphPath<PositionIndexedNode> graphPath;
+	public GraphPath<PositionIndexedNode> graphPath;
 
 	public Agent(Shape shape, boolean passable) {
 		super(shape, passable);

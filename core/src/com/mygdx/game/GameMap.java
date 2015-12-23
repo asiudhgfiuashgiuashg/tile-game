@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.Connection;
+import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -27,6 +28,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.ai.Agent;
 import com.mygdx.ai.DefaultIndexedGraphWithPublicNodes;
 import com.mygdx.ai.GraphCreator;
@@ -660,4 +662,47 @@ public class GameMap {
         }
         return null;
     }
+
+	public void debugAgents() {
+		for (Agent agent: agents) {
+			if (agent.graphPath != null) {
+				drawGraphPath(agent.graphPath);
+			}
+		}
+	}
+	
+	private void drawGraphPath(GraphPath<PositionIndexedNode> graphPath) {
+		shapeRenderer.setAutoShapeType(true);
+		shapeRenderer.begin(ShapeType.Filled);
+		int nodeIndex = 0;
+    	for (PositionIndexedNode node: graphPath) {
+    		Array<Connection<PositionIndexedNode>> connections = node.getConnections();
+    		
+    		//highlight connection of path
+    		if (nodeIndex < graphPath.getCount() - 2) {
+	    		for (int i = 0; i < connections.size; i++) {
+	    			if (connections.get(i).getToNode().equals(graphPath.get(nodeIndex + 1))) {
+	    				shapeRenderer.setColor(Color.PINK);
+	    				shapeRenderer.line(connections.get(i).getFromNode().x 
+	    						- mapPosX, connections.get(i).getFromNode().y 
+	    						- mapPosY, connections.get(i).getToNode().x 
+	    						- mapPosX, connections.get(i).getToNode().y - mapPosY);
+	    			}
+	    		}
+    		}
+    		
+    		//highlight node
+    		if (nodeIndex == 0) { //color start node
+    			shapeRenderer.setColor(Color.GREEN);
+    		} else if (nodeIndex == graphPath.getCount() - 1) { //color end node
+    			shapeRenderer.setColor(Color.RED);
+    		} else {
+    			shapeRenderer.setColor(Color.PURPLE); //color intermediate nodes
+    		}
+    		node.draw(shapeRenderer, -mapPosX, -mapPosY);
+    		nodeIndex++;
+    	}
+    	shapeRenderer.end();
+    	
+	}
 }
