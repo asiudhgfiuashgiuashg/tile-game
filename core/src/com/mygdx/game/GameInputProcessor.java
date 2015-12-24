@@ -1,10 +1,16 @@
 package com.mygdx.game;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
-
+/**
+ * handle input associated with controlling character
+ * @author elimonent
+ *
+ */
 public class GameInputProcessor implements InputProcessor {
 
 	private LocalPlayer localPlayer;
+	
 	public GameInputProcessor(LocalPlayer localPlayer) {
 		this.localPlayer = localPlayer;
 	}
@@ -23,7 +29,6 @@ public class GameInputProcessor implements InputProcessor {
 
 	@Override
 	public boolean keyTyped(char character) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

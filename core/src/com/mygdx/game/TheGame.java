@@ -61,6 +61,8 @@ import com.mygdx.ai.Agent;
 import com.mygdx.ai.PositionIndexedNode;
 import com.mygdx.ai.TestAi;
 import com.mygdx.server.Server;
+
+
 public class TheGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	
@@ -76,7 +78,7 @@ public class TheGame extends ApplicationAdapter {
     private final int SEND_SPACING = 50;
     private DirectionOfTravel playerOldDirection;
     private Skin skin;
-    private Stage stage;
+    private ExtendedStage stage;
     private Socket socket;
     private Table serverConnectTable;
     private TextField errorTextField;
@@ -107,7 +109,7 @@ public class TheGame extends ApplicationAdapter {
     }
     private GameState gameState;
     private InputMultiplexer inputMultiplexer; //will delegate events tos the game inputprocessor and the gui inputprocessor (the stage)
-    private InputProcessor gameInputProcessor;
+    private GameInputProcessor gameInputProcessor;
     
     private Server server;
     private boolean hosting;
@@ -124,7 +126,7 @@ public class TheGame extends ApplicationAdapter {
 		
 		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
 		// stage should get events first and then possibly gameInputProcessor
-		stage = new Stage(); //the gui is laid out here
+		stage = new ExtendedStage(); //the gui is laid out here
 		inputMultiplexer = new InputMultiplexer();
 		inputMultiplexer.addProcessor(stage);
 		
@@ -606,11 +608,11 @@ public class TheGame extends ApplicationAdapter {
             currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", localPlayer);
             if (hosting) {
             	currentMap.initializeGraph();
+            	 TestAi testAi = new TestAi(playerShape, true, currentMap);
+                 testAi.setFollowPlayer(localPlayer, true);
+                 currentMap.agents.add(testAi);
             }
-            
-            TestAi testAi = new TestAi(playerShape, true, currentMap);
-            testAi.setFollowPlayer(localPlayer, true);
-            currentMap.agents.add(testAi);
+            stage.currentMap = currentMap;
         }
         catch(IOException e) {
             ///System.out.println(e.getMessage());
@@ -857,6 +859,7 @@ public class TheGame extends ApplicationAdapter {
 		}
 		
 		gameInputProcessor = new GameInputProcessor(localPlayer);
+		gameInputProcessor.currentMap = currentMap;
 		inputMultiplexer.addProcessor(gameInputProcessor);
 	}
 	
