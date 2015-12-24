@@ -101,9 +101,10 @@ public class TestAi extends Agent {
 					}
 				}
 			} else if (movementState == State.MOVING_TOWARDS_GOAL) { //after finishing path, move short distance to goal pos
-				if (moveTowards(goal.getX(), goal.getY())) { //reached goal
+				movementState = null;
+				/*if (moveTowards(goal.getX(), goal.getY())) { //reached goal
 					movementState = null;
-				}
+				}*/
 			}
 		} else { //there is no path, so trigger the choosing of a new random path and subsequent path generation to that point
 			movementState = null;
