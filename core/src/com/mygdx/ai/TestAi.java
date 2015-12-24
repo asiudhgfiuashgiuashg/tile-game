@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.DirectionOfTravel;
 import com.mygdx.game.GameMap;
+import com.mygdx.game.Player;
 import com.mygdx.game.Point;
 import com.mygdx.game.Shape;
 
@@ -23,6 +24,9 @@ public class TestAi extends Agent {
 	public GameMap map;
 	private int indexOfCurrentPathDestination;;
 	double speed;
+	boolean followingPlayer;
+	Player player;
+	Point playerOldPos;
 	
 	public TestAi(Shape shape, boolean passable, GameMap map) {
 		super(shape, passable);
@@ -35,18 +39,31 @@ public class TestAi extends Agent {
 		
 		indexOfCurrentPathDestination = 0;
 		speed = 1.5;
+		followingPlayer = false;
+		playerOldPos = new Point(-100, -100);
 	}
-
+	
+	public void setFollowPlayer(Player player, boolean follow) {
+		this.player = player;
+		this.followingPlayer = follow;
+	}
 
 	@Override
 	protected void update(float stateTime) {
 		currentFrame = currentAnimation.getKeyFrame(stateTime, true);
 		
-		if (null == movementState) {
-			Random rand = new Random();
-			headTowards(rand.nextInt(map.mapWidth), rand.nextInt(map.mapHeight), map.nodeGraph);
-			System.out.println("graph path size: " + graphPath.getCount());
-			indexOfCurrentPathDestination = 0;
+		if (followingPlayer) {
+			if (!closeTo(player.getPos(), playerOldPos)) {		
+				headTowards(player.getPos().getX(), player.getPos().getY(), map.nodeGraph);
+				indexOfCurrentPathDestination = 0;
+				playerOldPos = player.getPos();
+			}
+		} else {
+			if (null == movementState) {
+					Random rand = new Random();
+					headTowards(rand.nextInt(map.mapWidth), rand.nextInt(map.mapHeight), map.nodeGraph);
+					indexOfCurrentPathDestination = 0;
+			}
 		}
 		
 		if (graphPath.getCount() > 0) { //(couldnt find a path, for example if the goal position unreachable)
@@ -116,7 +133,6 @@ public class TestAi extends Agent {
 			}
 			pos.translate(0, translateAmt);
 		}
-		System.out.println("pos: " + pos + " desired: " + new Point(x, y));
 		return closeTo(pos, new Point(x, y));
 	}
 

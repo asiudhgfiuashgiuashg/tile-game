@@ -607,7 +607,10 @@ public class TheGame extends ApplicationAdapter {
             if (hosting) {
             	currentMap.initializeGraph();
             }
-            currentMap.agents.add(new TestAi(playerShape, true, currentMap));
+            
+            TestAi testAi = new TestAi(playerShape, true, currentMap);
+            testAi.setFollowPlayer(localPlayer, true);
+            currentMap.agents.add(testAi);
         }
         catch(IOException e) {
             ///System.out.println(e.getMessage());

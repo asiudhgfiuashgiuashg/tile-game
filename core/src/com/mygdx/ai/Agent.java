@@ -34,7 +34,7 @@ public abstract class Agent extends Entity {
 		graphPath = null;
 	}
 
-	public void headTowards(int mapGoalPosX, int mapGoalPosY, DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> graph) {
+	public void headTowards(double mapGoalPosX, double mapGoalPosY, DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> graph) {
 		goal = new Point(mapGoalPosX, mapGoalPosY);
 		
 		
