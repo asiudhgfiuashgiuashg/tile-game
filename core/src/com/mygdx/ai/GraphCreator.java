@@ -14,20 +14,18 @@ import com.mygdx.game.GameMap;
 import com.badlogic.gdx.ai.pfa.Connection;
 
 public class GraphCreator {
-    private static final int NODE_SPACING = 300;
-    
+    private static final int NODE_SPACING = 57;
+    private static final double EPSILON = 0.0001;
     public static DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> graphFromMap(GameMap map) {
         int mapWidth = map.mapWidth;
         int mapHeight = map.mapHeight;
         
         
-      	int index = 0; // in an IndexedGraph, each node needs to have an index (sequential, starting at 0)
         Array<PositionIndexedNode> nodes = new Array<PositionIndexedNode>();
         for (int x = 0; x < mapWidth; x += NODE_SPACING) {
             for (int y = 0; y < mapHeight; y+= NODE_SPACING) {
-                PositionIndexedNode node = new PositionIndexedNode(x, y, index);
+                PositionIndexedNode node = new PositionIndexedNode(x, y);
                 nodes.add(node);
-                index++;
             }
         }
         
@@ -39,7 +37,7 @@ public class GraphCreator {
         //checks for nodes with no connections, and then removes them from the array
         Array<Integer> indexValues = new Array<Integer>();
         for (PositionIndexedNode node: nodes) {
-            if(node.getConnections().size == 0) {
+            if (node.getConnections().size == 0) {
                 indexValues.add(nodes.indexOf(node, true)); //the boolean has to do with using .equals or == to do the search.
                 											//true is .equals, this might be the incorrect search to use.
             }
@@ -47,13 +45,18 @@ public class GraphCreator {
         for (int indexVal: indexValues) {
             nodes.removeIndex(indexVal);
         }
-        
+        //hand out sequential indexes, starting at 0 (used by AStarIndexedPathFinder)
+        int nodeIndex = 0;
+        for (PositionIndexedNode node: nodes) {
+        	node.index = nodeIndex;
+        	nodeIndex++;
+        }
         DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> graph = new DefaultIndexedGraphWithPublicNodes<PositionIndexedNode>(nodes);
         return graph;
     }
     
     //creates a GameObject using the two node points given, and then sees if it intersects with any of the objects on the map
-    public static boolean canDrawLineBetween(PositionIndexedNode firstNode, PositionIndexedNode secondNode, GameMap map) {
+    public static boolean canDrawNonDiagonalLineBetween(PositionIndexedNode firstNode, PositionIndexedNode secondNode, GameMap map) {
         List<LineSeg> list = new ArrayList<LineSeg>();
         list.add(new LineSeg(new Point(firstNode.x, firstNode.y), new Point(secondNode.x, secondNode.y)));
         
@@ -66,6 +69,11 @@ public class GraphCreator {
             }
         }
         
+        //make sure nodes are either in same row or same column
+        if (Math.abs(firstNode.x - secondNode.x) > EPSILON && Math.abs(firstNode.y - secondNode.y) > EPSILON) {
+        	valid = false;
+        }
+        
         return valid;
     }
     
@@ -73,7 +81,7 @@ public class GraphCreator {
     	for (int j = 0; j < allNodes.size; j++) {
         	PositionIndexedNode otherNode = allNodes.get(j);
             if (node != otherNode) { //don't connect a node to itself
-                if (canDrawLineBetween(node, otherNode, map)) {
+                if (canDrawNonDiagonalLineBetween(node, otherNode, map)) {
                    node.connectToBidirectionally(otherNode);
                 }
             }

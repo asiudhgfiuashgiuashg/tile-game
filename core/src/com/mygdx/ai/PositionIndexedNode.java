@@ -26,7 +26,7 @@ public class PositionIndexedNode implements IndexedNode<PositionIndexedNode> {
 	public Array<Connection<PositionIndexedNode>> connections; //a resizeable array provided by libgdx
 																//array of connections outgoing from this IndexedNode.
 	
-	public PositionIndexedNode(float x, float y, int index) {
+	public PositionIndexedNode(float x, float y) {
 		this.x = x;
 		this.y = y;
 		this.index = index;

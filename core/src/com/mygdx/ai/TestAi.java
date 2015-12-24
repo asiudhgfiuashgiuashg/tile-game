@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.DirectionOfTravel;
 import com.mygdx.game.GameMap;
 import com.mygdx.game.Point;
 import com.mygdx.game.Shape;
@@ -20,7 +21,8 @@ import java.util.Random;
 public class TestAi extends Agent {
 	private Animation currentAnimation;
 	public GameMap map;
-	private int indexOfCurrentPathDestination;
+	private int indexOfCurrentPathDestination;;
+	double speed;
 	
 	public TestAi(Shape shape, boolean passable, GameMap map) {
 		super(shape, passable);
@@ -30,6 +32,9 @@ public class TestAi extends Agent {
 		setPos(new Point(100, 100));
 		System.out.println("POSITION: " + pos);
 		this.map = map;
+		
+		indexOfCurrentPathDestination = 0;
+		speed = 1.5;
 	}
 
 
@@ -37,45 +42,90 @@ public class TestAi extends Agent {
 	protected void update(float stateTime) {
 		currentFrame = currentAnimation.getKeyFrame(stateTime, true);
 		
-		if (null == graphPath) {
+		if (null == movementState) {
 			Random rand = new Random();
-			headTowards(rand.nextInt(map.mapWidth), rand.nextInt(map.mapHeight), map);
+			headTowards(rand.nextInt(map.mapWidth), rand.nextInt(map.mapHeight), map.nodeGraph);
 			System.out.println("graph path size: " + graphPath.getCount());
 			indexOfCurrentPathDestination = 0;
 		}
 		
 		if (graphPath.getCount() > 0) { //(couldnt find a path, for example if the goal position unreachable)
-			PositionIndexedNode currentNode = graphPath.get(indexOfCurrentPathDestination);
-			double speed = 0.5;
-			double newX = pos.getX();
-			double newY = pos.getY();
-			if (pos.getX() < currentNode.x) {
-				newX += speed;
-			} else {
-				newX -= speed;
-			}
-			
-			if (pos.getY() < currentNode.y) {
-				newY += speed;
-			} else {
-				newY -= speed;
-			}
-			pos = new Point(newX, newY);
-			
-			if (closeTo(new Point(currentNode.x, currentNode.y), pos)) {
-				System.out.println("close to node " + currentNode);
-				indexOfCurrentPathDestination += 1;
-				if (indexOfCurrentPathDestination < graphPath.getCount()) {
-					currentNode = graphPath.get(indexOfCurrentPathDestination);
+			if (State.MOVING_TOWARDS_FIRST_NODE == movementState) { //move to first node of chosen path
+				PositionIndexedNode firstNode = graphPath.get(0);
+				if (moveTowards(firstNode.x, firstNode.y)) {
+					movementState = State.TRAVERSING_PATH; //reached first node
+				}
+				
+				
+			} else if (State.TRAVERSING_PATH == movementState) {
+				PositionIndexedNode currentNode = graphPath.get(indexOfCurrentPathDestination);
+				
+				double newX = pos.getX();
+				double newY = pos.getY();
+				if (pos.getX() < currentNode.x) {
+					newX += speed;
 				} else {
-					graphPath = null;
+					newX -= speed;
+				}
+				
+				if (pos.getY() < currentNode.y) {
+					newY += speed;
+				} else {
+					newY -= speed;
+				}
+				pos = new Point(newX, newY);
+				
+				if (closeTo(new Point(currentNode.x, currentNode.y), pos)) {
+					indexOfCurrentPathDestination += 1;
+					if (indexOfCurrentPathDestination < graphPath.getCount()) {
+						currentNode = graphPath.get(indexOfCurrentPathDestination);
+					} else {
+						movementState = State.MOVING_TOWARDS_GOAL;
+					}
+				}
+			} else if (movementState == State.MOVING_TOWARDS_GOAL) { //after finishing path, move short distance to goal pos
+				if (moveTowards(goal.getX(), goal.getY())) { //reached goal
+					movementState = null;
 				}
 			}
-		} else {
-			graphPath = null;
+		} else { //there is no path, so trigger the choosing of a new random path and subsequent path generation to that point
+			movementState = null;
 		}
 	}
 	
+	/**
+	 *
+	 * @param x goal x
+	 * @param y goal y
+	 * @return true if pos of Agent is close to goal x and y
+	 */
+	private boolean moveTowards(double x, double y) {
+		double translateAmt = 0;
+		if (notClose(pos.getX(), x)) {
+			if (pos.getX() < x) {
+				translateAmt = speed > x - pos.getX() ? x - pos.getX() : speed;
+			} else if (pos.getX() > x) {
+				translateAmt = speed > pos.getX() - x ? -(pos.getX() - x) : -speed;
+			}
+			pos.translate(translateAmt, 0);
+		} else if (notClose(pos.getY(), y)){
+			if (pos.getY() < y) {
+				translateAmt = speed > y - pos.getY() ? y - pos.getY() : speed;
+			} else if (pos.getY() > y) {
+				translateAmt = speed > pos.getY() - y ? -(pos.getY() - y) : -speed;
+			}
+			pos.translate(0, translateAmt);
+		}
+		System.out.println("pos: " + pos + " desired: " + new Point(x, y));
+		return closeTo(pos, new Point(x, y));
+	}
+
+
+	private boolean notClose(double x0, double x1) {
+		return Math.abs(x0 - x1) > 0.00001;
+	}
+
+
 	private boolean closeTo(Point currentPos, Point desiredPos) {
 		float dist = (float) Math.sqrt(
 	            Math.pow(currentPos.getX() - desiredPos.getX(), 2) +

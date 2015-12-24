@@ -690,7 +690,7 @@ public class GameMap {
     		if (nodeIndex <= graphPath.getCount() - 2) {
 	    		for (int i = 0; i < connections.size; i++) {
 	    			if (connections.get(i).getToNode().equals(graphPath.get(nodeIndex + 1))) {
-	    				shapeRenderer.setColor(Color.PINK);    			System.out.println("green");
+	    				shapeRenderer.setColor(Color.PINK);
 	    				shapeRenderer.line(connections.get(i).getFromNode().x 
 	    						- mapPosX, connections.get(i).getFromNode().y 
 	    						- mapPosY, connections.get(i).getToNode().x 
