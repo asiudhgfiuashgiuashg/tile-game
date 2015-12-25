@@ -42,6 +42,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.List.ListStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
@@ -119,6 +120,26 @@ public class TheGame extends ApplicationAdapter {
 	public void create() {
 		debug = true;
 		
+		
+		//setup the skin (resources for gui)
+		skin = new Skin();
+		// Generate a 1x1 white texture and store it in the skin named "white".
+		Pixmap pixmap = new Pixmap(1, 1, Format.RGBA8888);
+		pixmap.setColor(Color.WHITE);
+		pixmap.fill();
+		skin.add("white", new Texture(pixmap));
+
+		// Store the default libgdx font under the name "default".
+		skin.add("default", new BitmapFont());
+		
+		
+		ListStyle listStyle = new ListStyle();
+		listStyle.font = skin.getFont("default");
+		listStyle.fontColorSelected = Color.WHITE;
+		listStyle.fontColorUnselected = Color.LIGHT_GRAY;
+		listStyle.selection = skin.newDrawable("white", Color.FIREBRICK);
+		skin.add("default", listStyle);
+		
 		numChatLines = 0;
 		oldPos = new Point(0, 0);
 		gameState = GameState.SERVER_CONNECT_SCREEN;
@@ -127,6 +148,8 @@ public class TheGame extends ApplicationAdapter {
 		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
 		// stage should get events first and then possibly gameInputProcessor
 		stage = new ExtendedStage(); //the gui is laid out here
+		stage.setDebugAll(true);
+		stage.skin = skin;
 		inputMultiplexer = new InputMultiplexer();
 		inputMultiplexer.addProcessor(stage);
 		
@@ -174,16 +197,6 @@ public class TheGame extends ApplicationAdapter {
 	
 	private void setupMainMenu() {
 		stage.clear();
-		skin = new Skin();
-
-		// Generate a 1x1 white texture and store it in the skin named "white".
-		Pixmap pixmap = new Pixmap(1, 1, Format.RGBA8888);
-		pixmap.setColor(Color.WHITE);
-		pixmap.fill();
-		skin.add("white", new Texture(pixmap));
-
-		// Store the default libgdx font under the name "default".
-		skin.add("default", new BitmapFont());
 
 		// Configure a TextButtonStyle and name it "default". Skin resources are stored by type, so this doesn't overwrite the font.
 		final TextButtonStyle textButtonStyle = new TextButtonStyle();
@@ -859,7 +872,6 @@ public class TheGame extends ApplicationAdapter {
 		}
 		
 		gameInputProcessor = new GameInputProcessor(localPlayer);
-		gameInputProcessor.currentMap = currentMap;
 		inputMultiplexer.addProcessor(gameInputProcessor);
 	}
 	

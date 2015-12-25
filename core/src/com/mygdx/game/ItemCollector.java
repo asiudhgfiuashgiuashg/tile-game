@@ -11,8 +11,8 @@
 package com.mygdx.game;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.badlogic.gdx.utils.Array;
 /**
  * (Insert a comment that briefly describes the purpose of this class definition.)
  *
@@ -23,14 +23,14 @@ import java.util.List;
  */
 public class ItemCollector
 {
-	List<Item> itemList = new ArrayList<Item>();
+	Array<Item> itemList = new Array<Item>();
 	
 	ItemCollector()
 	{
 		
 	}
 	
-	ItemCollector(List<Item> items)
+	ItemCollector(Array<Item> items)
 	{
 		itemList = items;
 	}
@@ -62,7 +62,7 @@ public class ItemCollector
 
 	public boolean isEmpty()
 	{
-		if (itemList.isEmpty())
+		if (itemList.size == 0)
 		{
 			return true;
 		}
@@ -83,20 +83,20 @@ public class ItemCollector
 		for (int x = 0; x < deletedList.getListSize(); x++)
 		{
 			
-			itemList.remove(deletedList.getItem(x));
+			itemList.removeValue(deletedList.getItem(x), true);
 			
-			for (int y = 0; y < itemList.size(); y++)
+			for (int y = 0; y < itemList.size; y++)
 			{
 				System.out.println(itemList.get(y).getName());
 			}
 		}
 	}
 	
-	public ItemCollector createSubCollection(List<Integer> indexValues)
+	public ItemCollector createSubCollection(Array<Integer> indexValues)
 	{	
-		List<Item> childItemList = new ArrayList<Item>();
+		Array<Item> childItemList = new Array<Item>();
 		
-		for (int x = 0; x < indexValues.size(); x++)
+		for (int x = 0; x < indexValues.size; x++)
 		{
 			childItemList.add(itemList.get(indexValues.get(x)));
 		}
@@ -107,12 +107,12 @@ public class ItemCollector
 	
 	public void deleteItem(int index)
 	{
-		itemList.remove(index);
+		itemList.removeIndex(index);
 	}
 	
 	public void deleteItem(Item x)
 	{
-		itemList.remove(x);
+		itemList.removeValue(x, true);
 	}
 	
 	public Item getItem(int index)
@@ -155,7 +155,7 @@ public class ItemCollector
 	
 	public int getListSize()
 	{
-		return itemList.size();
+		return itemList.size;
 	}
 	@Override
 	public String toString() {

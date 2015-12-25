@@ -299,7 +299,7 @@ public class GameMap {
         double itemRefPosY;
         double charRefPosX = player.getPos().getX() + player.getLeft();
         double charRefPosY = player.getPos().getY() + player.getBottom();
-        ArrayList < Integer > indexValues = new ArrayList < Integer > ();
+        Array < Integer > indexValues = new Array < Integer > ();
 
         for (int x = 0; x < itemsOnField.getListSize(); x++) {
             if (player.getPos().getX() > itemsOnField.getXPos(x) + itemsOnField.getWidth(x)) {
