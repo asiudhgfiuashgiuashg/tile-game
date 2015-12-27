@@ -68,13 +68,8 @@ public class TheGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	
 	GameMap currentMap;
-	GuiManager mapGuiManager; //holds all gui elements which are displayed when map is visible
-	GuiManager mainMenuGuiManager;
-	//GuiManager mainMenuGuiManager
-	//etc
-	private boolean itemListExists;
-	private PrintWriter out;
-    private BufferedReader in;
+	public static PrintWriter out;
+    public static BufferedReader in;
     private long time;
     private final int SEND_SPACING = 50;
     private DirectionOfTravel playerOldDirection;
@@ -461,7 +456,7 @@ public class TheGame extends ApplicationAdapter {
 					spriteInfo.put("type", "sprite");
 					spriteInfo.put("spriteID", sprite);
 					out.println(spriteInfo);
-					}			
+				}			
 			}
 			
 		}
@@ -624,23 +619,21 @@ public class TheGame extends ApplicationAdapter {
             	 TestAi testAi = new TestAi(playerShape, true, currentMap);
                  testAi.setFollowPlayer(localPlayer, true);
                  currentMap.agents.add(testAi);
+                 
+                 server.gameMap = currentMap;
             }
             stage.currentMap = currentMap;
+            
         }
         catch(IOException e) {
-            ///System.out.println(e.getMessage());
-            ///System.out.println("Failed to create map object");
+        	System.out.println("Failed to create map object");
+            System.out.println(e.getMessage());
         }
 		
 		//player.create(); responsibilities for create() moved to constructor
 		localPlayer.setFOV(localPlayer.sightX, localPlayer.sightY);
 		
 		//initialize various GuiManagers, giving them appropriate GuiElements
-		mapGuiManager = new GuiManager();
-		mainMenuGuiManager = new GuiManager();
-		GuiManager.setCurrentManager(mapGuiManager);
-		itemListExists = false;
-		
 		
 		time = System.currentTimeMillis();
 	}
@@ -715,8 +708,8 @@ public class TheGame extends ApplicationAdapter {
 							
 						} else if (received.get("type").equals("playerInfo")) {
 							String playerName = (String) received.get("username");
-							/////System.out.println("playername: " + playerName);
-							RemotePlayer remotePlayer = addRemotePlayerToList(playerName, ((Number) received.get("uid")).intValue());
+							int uid = ((Number) received.get("uid")).intValue();
+							RemotePlayer remotePlayer = addRemotePlayerToList(playerName, uid);
 							/////System.out.println("remotePlayer info received: " + remotePlayer == null);
 							addPlayerToLobbyStage(remotePlayer);
 							lobbyTable.row();
@@ -753,6 +746,14 @@ public class TheGame extends ApplicationAdapter {
 		        			int uid = ((Number) received.get("uid")).intValue();
 		        			((RemotePlayer) currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));
 		        			
+		        		} else if (messageType.equals("removedItem")) { //item removed from ground
+		        			int uid = ((Number) received.get("uid")).intValue(); //unique identifier of item which was removed
+		        			currentMap.itemsOnField.removeByUid(uid);
+		        			stage.updateItemList(); //repopulate itemList to get rid of the listing for the removed item
+		        			
+		        		} else if (messageType.equals("inventoryAddition")) { //arrives before the removedItem message
+		        			int uid = ((Number) received.get("uid")).intValue();
+		        			localPlayer.inv.addItem(currentMap.itemsOnField.getByUid(uid));
 		        		}
 		                
 					}
@@ -846,7 +847,7 @@ public class TheGame extends ApplicationAdapter {
 		stage.addListener(new InputListener() {
 			@Override
 			public boolean keyDown(InputEvent event, int keycode) {
-				if (keycode == Input.Keys.ENTER && !messageTextField.isVisible()) {
+				if (keycode == Input.Keys.ENTER && !messageTextField.isVisible() && !(stage.itemList != null)) {
 					messageTextField.setVisible(true); //open up text field for message entry
 					messageTextField.setDisabled(false);
 					stage.setKeyboardFocus(messageTextField);
@@ -881,6 +882,10 @@ public class TheGame extends ApplicationAdapter {
 		remotePlayer.username = playerName;
 		currentMap.players.add(remotePlayer);
 		remotePlayer.setPos(new Point(-100, -100));
+		
+		if (hosting) {
+			
+		}
 		
 		return remotePlayer;
 	}

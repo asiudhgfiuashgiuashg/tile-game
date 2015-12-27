@@ -52,14 +52,14 @@ public class GameMap {
     private boolean smallHeight;
     float stateTime;
     
-    protected List<Player> players;
+    public List<Player> players;
 
     protected int mapPosX;
     protected int mapPosY;
 
     private int winX = 400;
     private int winY = 240;
-    protected LocalPlayer player;
+    public LocalPlayer player;
 
     boolean multiplayerEnabled = true;
 
@@ -89,13 +89,6 @@ public class GameMap {
         players.add(player);
         this.player = player;
         player.setCurrentMap(this);
-
-        Shape shape = new Shape(Arrays.asList(
-        new LineSeg(new Point(15, 0), new Point(15, 55)),
-        new LineSeg(new Point(15, 55), new Point(50, 55)),
-        new LineSeg(new Point(50, 55), new Point(50, 0)),
-        new LineSeg(new Point(50, 0), new Point(15, 0))),
-        new Point(0, 0));
 
         ///////////////////////////////////
         // convert mapFile into Tile[][] //

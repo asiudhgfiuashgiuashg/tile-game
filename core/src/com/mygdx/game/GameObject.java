@@ -73,7 +73,6 @@ public class GameObject {
 
 	}
 
-
 	public int getId() {
 		return id;
 	}

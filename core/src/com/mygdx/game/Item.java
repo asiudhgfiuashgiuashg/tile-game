@@ -17,9 +17,13 @@ public class Item {
     private String floorImageURI;
     
     private int width, height;
-    
+    private static int uidIncrementer = 0; //temporary
+    public int uid; //unique identifier for an item
+
     public Item(int id, Point pos) throws FileNotFoundException
     {
+    	this.uid = uidIncrementer; //temporary until uids are specified by item file or server
+    	uidIncrementer++;
     	this.id = id;
     	this.pos = pos;
     	
@@ -49,6 +53,7 @@ public class Item {
 		
     }
     
+
     public int getId() {
         return id;    
     }
@@ -107,4 +112,20 @@ public class Item {
     	return name.replace("_", " ");
     }
     
+    @Override
+    public int hashCode() {
+    	return this.uid;
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+    	if (this == other) {
+    		return true;
+    	}
+    	if (!(other instanceof Item)) {
+    		return false;
+    	}
+    	Item theOther = (Item) other;
+    	return theOther.uid == this.uid;
+    }
 }

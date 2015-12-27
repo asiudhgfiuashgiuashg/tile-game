@@ -7,40 +7,26 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.listeners.ItemListListener;
 
 public class ExtendedStage extends Stage {
 	
 	protected GameMap currentMap;
 	protected Skin skin;
-	private List<Item> itemList;
+	List<Item> itemList;
 	
 	@Override
 	public boolean keyDown(int keycode) {
 		if (!super.keyDown(keycode)) { //if not already handled by some listener on the stage, take action or do nothing based on the keycode
 			if (currentMap != null && Input.Keys.G == keycode) {
+				ItemCollector items = currentMap.getNearbyItemList();
 				if (null == itemList) {
 					//view items on ground nearby
-					ItemCollector items = currentMap.getNearbyItemList();
 					itemList = new List<Item>(skin);
 					itemList.setItems(items.itemList);
 					itemList.setPosition((float) currentMap.player.getPos().getX(), (float) currentMap.player.getPos().getY());
-					itemList.addListener(new InputListener() {
-						@Override
-						public boolean keyDown(InputEvent event, int keycode) {
-							if (Input.Keys.S == keycode) {
-								if (itemList.getSelectedIndex() < itemList.getItems().size - 1) {
-									itemList.setSelectedIndex(itemList.getSelectedIndex() + 1);
-								}
-								return true; //handled
-							} else if (Input.Keys.W == keycode) {
-								if (itemList.getSelectedIndex() > 0) {
-									itemList.setSelectedIndex(itemList.getSelectedIndex() - 1);
-								}
-								return true; //handled
-							}
-							return false; //not handled
-						}
-					});
+					itemList.addListener(new ItemListListener(itemList, currentMap));
 					
 					itemList.debug();
 
@@ -58,5 +44,16 @@ public class ExtendedStage extends Stage {
 			return true;
 		}
 		return false;//not handled
+	}
+
+	/**
+	 * 
+	 * @param uid
+	 */
+	public void updateItemList() {
+		if (null != itemList) {
+			Gdx.app.log(getClass().getSimpleName(), "updating item list: " + currentMap.getNearbyItemList().itemList);
+			itemList.setItems(new Array<Item>(currentMap.getNearbyItemList().itemList));
+		}
 	}
 }

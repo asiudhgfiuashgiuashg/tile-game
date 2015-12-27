@@ -6,6 +6,9 @@ import java.io.*;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.badlogic.gdx.Gdx;
+import com.mygdx.game.GameMap;
+import com.mygdx.game.Item;
 import com.mygdx.game.Player;
 
 import java.util.HashMap;
@@ -30,13 +33,11 @@ public class Server {
 	private int numClientsConnected;
 	private ServerSocketChannel serverSocketChannel;
 	int currentUID; //used to give each client a  unique id (an integer which is incremented for every new connection)
-	public Map<Player, PlayerClient> playerToPlayerClientMap;
-	
+	public GameMap gameMap;
 	
 	public Server(int port) {
 		setupServer(port);
 		currentUID = 0;
-		playerToPlayerClientMap = new HashMap<Player, PlayerClient>();
 	}
 	
 	public void setupServer(int port) {
@@ -66,7 +67,7 @@ public class Server {
 			} 
     		
     		
-    		//see if a connection is immediatly available, will return null if one isnt (non-blocking I/O)
+    		//see if a connection is immediately available, will return null if one isnt (non-blocking I/O)
     		PlayerClient playerClient = null;
     		if (socketChannel != null) { //got a connection
         		//Socket clientSocket = socketChannel.socket();
@@ -84,7 +85,7 @@ public class Server {
         		currentUID++;
         		clients.add(playerClient);
 
-        		System.out.println("client number " + String.valueOf(numClientsConnected) + " connected");
+        		Gdx.app.log(getClass().getSimpleName(), "client number " + String.valueOf(numClientsConnected) + " connected");
         		numClientsConnected++;
         		
         		//give newly connected player the player info of everyone else
@@ -104,14 +105,6 @@ public class Server {
 				uidInfo.put("type", "uidUpdate");
 				uidInfo.put("uid", playerClient.uid);
 				sendJSONOnSocketChannel(uidInfo, playerClient.socketChannel);
-
-
-				//send everyone the uid of the newly-connected player
-/*		
-				sendToAllFrom(uidInfo, )
-*/
-
-				
 				
         	}
     	}
@@ -244,14 +237,44 @@ public class Server {
 				spriteInfo.put("uid", receiveFromClient.uid);
 				spriteInfo.put("spriteID", (String) received.get("spriteID"));
 				sendToAllFrom(spriteInfo, receiveFromClient);
+				
+			} else if (received.get("type").equals("itemPickupRequest")) { //client asks to pick up an item on the ground
+				int uid = ((Number) received.get("uid")).intValue();
+				
+				Item removed = gameMap.getItemList().removeByUid(uid);
+				if (null != removed) { //remove item from server's/hosting client's version of map
+					//send message telling player who picked up item that it is in their inventory
+					JSONObject inventoryAdditionMessage = new JSONObject();
+					inventoryAdditionMessage.put("type", "inventoryAddition");
+					inventoryAdditionMessage.put("uid", uid);
+					sendJSONOnSocketChannel(inventoryAdditionMessage, receiveFromClient.socketChannel);
+					
+					//make appropriate updates to Player's inventory in the host's version of the game
+					Player playerToUpdate = getPlayerByUid(receiveFromClient.uid);
+					playerToUpdate.inv.addItem(removed);
+					
+					//send message to everyone that the item is no longer on the ground
+					JSONObject removedItemMessage = new JSONObject();
+					removedItemMessage.put("type", "removedItem");
+					removedItemMessage.put("uid", uid);
+					sendToAll(removedItemMessage);
+				}
 			}
 		}
     }
 
-    public boolean allAreReady() {
+    private Player getPlayerByUid(int uid) {
+		for (Player player: gameMap.players) {
+			if (player.uid == uid) {
+				return player;
+			}
+		}
+		return null;
+	}
+
+	public boolean allAreReady() {
     	for (PlayerClient client: clients) {
     		if (!client.ready) {
-    			System.out.println("not ready");
     			return false;
     		}
     	}
@@ -275,6 +298,20 @@ public class Server {
 			if (client != from) {
         		sendJSONOnSocketChannel(toSend, client.socketChannel);
         	}
+    	}
+    }
+    
+    public void sendToAll(JSONObject toSend) {
+    	for (PlayerClient client: clients) {
+    		sendJSONOnSocketChannel(toSend, client.socketChannel);
+    	}
+    }
+    
+    public void sendToAllExceptHost(JSONObject toSend) {
+    	for (PlayerClient client: clients) {
+    		if (getPlayerByUid(client.uid) != gameMap.player){
+    			sendJSONOnSocketChannel(toSend, client.socketChannel);
+    		}
     	}
     }
 }
