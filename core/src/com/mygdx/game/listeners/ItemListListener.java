@@ -40,15 +40,6 @@ public class ItemListListener extends InputListener {
 			} else if (Input.Keys.ENTER == keycode) {
 				if (itemList.getItems().size > 0) {
 					Item itemToPickup = itemList.getSelected();
-					//currentMap.player.inv.addItem(itemToPickup);
-					//Array<Item> items = itemList.getItems();
-					//int removedIndex = itemList.getSelectedIndex();
-					//items.removeIndex(itemList.getSelectedIndex());
-					//Array<Item> newItemsArray = new Array<Item>();
-					//newItemsArray.addAll(items);
-					//currentMap.getItemList().deleteItem(removedIndex);
-					//itemList.setItems(newItemsArray);
-					
 					//ask server if can pickup this item
 					JSONObject itemPickupRequestMsg = new JSONObject();
 					itemPickupRequestMsg.put("type", "itemPickupRequest");

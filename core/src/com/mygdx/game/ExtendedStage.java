@@ -53,7 +53,7 @@ public class ExtendedStage extends Stage {
 	public void updateItemList() {
 		if (null != itemList) {
 			Gdx.app.log(getClass().getSimpleName(), "updating item list: " + currentMap.getNearbyItemList().itemList);
-			itemList.setItems(new Array<Item>(currentMap.getNearbyItemList().itemList));
+			itemList.setItems(currentMap.getNearbyItemList().itemList);
 		}
 	}
 }
