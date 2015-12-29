@@ -2,11 +2,16 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.listeners.ItemListListener;
 
@@ -15,6 +20,11 @@ public class ExtendedStage extends Stage {
 	protected GameMap currentMap;
 	protected Skin skin;
 	List<Item> itemList;
+	
+	
+	public ExtendedStage() {
+		
+	}
 	
 	@Override
 	public boolean keyDown(int keycode) {
@@ -52,7 +62,6 @@ public class ExtendedStage extends Stage {
 	 */
 	public void updateItemList() {
 		if (null != itemList) {
-			Gdx.app.log(getClass().getSimpleName(), "updating item list: " + currentMap.getNearbyItemList().itemList);
 			itemList.setItems(currentMap.getNearbyItemList().itemList);
 		}
 	}

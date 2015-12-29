@@ -61,6 +61,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.mygdx.ai.Agent;
 import com.mygdx.ai.PositionIndexedNode;
 import com.mygdx.ai.TestAi;
+import com.mygdx.game.listeners.InventoryButtonListener;
 import com.mygdx.server.Server;
 
 
@@ -86,7 +87,7 @@ public class TheGame extends ApplicationAdapter {
     private Point oldPos;
     private Map<Player, CheckBox> playerToCheckBoxMap;
     private VerticalGroup chatMessagesVGroup;
-    private static final int CHAT_BOX_HEIGHT = 150;
+    private static final int CHAT_BOX_HEIGHT = 80;
     private int numChatLines; //for in-lobby chat
     private TextField messageTextField;
     private InputListener inLobbyMessageTextFieldListener;
@@ -109,11 +110,14 @@ public class TheGame extends ApplicationAdapter {
     
     private Server server;
     private boolean hosting;
-    boolean debug;
+    public static boolean debug;
+    
+    public static int SCREEN_WIDTH = 800;
+    public static int SCREEN_HEIGHT = 480;
     
 	@Override
 	public void create() {
-		debug = true;
+		debug = false;
 		
 		
 		//setup the skin (resources for gui)
@@ -134,6 +138,13 @@ public class TheGame extends ApplicationAdapter {
 		listStyle.fontColorUnselected = Color.LIGHT_GRAY;
 		listStyle.selection = skin.newDrawable("white", Color.FIREBRICK);
 		skin.add("default", listStyle);
+		
+		//register a small label style with skin for use in inventory and stuff
+		BitmapFont smallFont = new BitmapFont();
+		smallFont.getData().setScale(0.7f);
+		LabelStyle smallLabel = new LabelStyle();
+		smallLabel.font = smallFont;
+		skin.add("small", smallLabel);
 		
 		numChatLines = 0;
 		oldPos = new Point(0, 0);
@@ -616,9 +627,11 @@ public class TheGame extends ApplicationAdapter {
             currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", localPlayer);
             if (hosting) {
             	currentMap.initializeGraph();
-            	 TestAi testAi = new TestAi(playerShape, true, currentMap);
-                 testAi.setFollowPlayer(localPlayer, true);
-                 currentMap.agents.add(testAi);
+            	if (debug) {
+            		TestAi testAi = new TestAi(playerShape, true, currentMap);
+	                testAi.setFollowPlayer(localPlayer, true);
+	                currentMap.agents.add(testAi);
+            	}
                  
                  server.gameMap = currentMap;
             }
@@ -836,13 +849,6 @@ public class TheGame extends ApplicationAdapter {
 			}
 		};
 		messageTextField.addListener(inGameMessageTextFieldListener);
-/*		messageTextField.setTextFieldFilter(new TextFieldFilter() {
-			@Override
-			public boolean acceptChar(TextField textField, char c) {
-				return Input.Keys.ENTER == c || messageTextField.isVisible(); //accept an input only if messageTextField is visible or if the input character is ENTER key (used to open/close the field)
-			}
-			
-		});*/
 		
 		stage.addListener(new InputListener() {
 			@Override
@@ -872,6 +878,18 @@ public class TheGame extends ApplicationAdapter {
 			}
 		}
 		
+		//setup horizontal portion of in-game gui
+		Table horizontalGuiTable = new Table();
+		horizontalGuiTable.padLeft(3);
+		horizontalGuiTable.align(Align.topLeft);
+		TextButton inventoryButton = new TextButton("inv", skin);
+		inventoryButton.align(Align.bottom);
+		inventoryButton.addListener(new InventoryButtonListener(stage, localPlayer, skin));
+		horizontalGuiTable.add(inventoryButton).width(50).height(30); //parents set the position and height of children
+		horizontalGuiTable.setPosition(chatMessagesVGroup.getX() + chatMessagesVGroup.getWidth(), chatMessagesVGroup.getHeight() + chatMessagesVGroup.getY());
+		
+		stage.addActor(horizontalGuiTable);
+		
 		gameInputProcessor = new GameInputProcessor(localPlayer);
 		inputMultiplexer.addProcessor(gameInputProcessor);
 	}
@@ -882,11 +900,6 @@ public class TheGame extends ApplicationAdapter {
 		remotePlayer.username = playerName;
 		currentMap.players.add(remotePlayer);
 		remotePlayer.setPos(new Point(-100, -100));
-		
-		if (hosting) {
-			
-		}
-		
 		return remotePlayer;
 	}
 	/** add player's info to lobby page**/
