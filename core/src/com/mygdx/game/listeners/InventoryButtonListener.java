@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -32,11 +33,13 @@ public class InventoryButtonListener extends InputListener {
 	private LocalPlayer player;
 	private Skin skin;
 	private static List<Texture> toDisposeOf;
+	private static List<Actor> toRemove;
 	
 	public InventoryButtonListener(ExtendedStage stage, LocalPlayer player, Skin skin) {
 		this.stage = stage;
 		this.player = player;
 		toDisposeOf = new ArrayList<Texture>();
+		toRemove = new ArrayList<Actor>();
 		this.skin = skin;
 	}
 	
@@ -53,6 +56,7 @@ public class InventoryButtonListener extends InputListener {
 		Image inventoryBg = new Image(inventoryBgTexture);
 		inventoryBg.setPosition(TheGame.SCREEN_WIDTH / 2 - inventoryBg.getWidth() / 2, (TheGame.SCREEN_HEIGHT - inventoryBg.getHeight()) / 2);
 		stage.addActor(inventoryBg);
+		toRemove.add(inventoryBg);
 		
 		//add pictures + text for all items in inventory
 		Table invTable = new Table(skin);
@@ -71,6 +75,7 @@ public class InventoryButtonListener extends InputListener {
 				Image itemImage = new Image(itemTexture);
 				itemImage.setScaling(Scaling.fill);
 				invTable.add(itemImage).width(itemWidth).height(30).padRight(10);
+				toRemove.add(itemImage);
 				
 				//Label itemLabel = new Label(item.getName(), skin.get("small", LabelStyle.class));
 				//invTable.add(itemLabel).padBottom(5);
@@ -83,6 +88,7 @@ public class InventoryButtonListener extends InputListener {
 		}
 		
 		stage.addActor(invTable);
+		toRemove.add(invTable);
 		
 		//stick a close button on the inventory screen
 		Texture closeButtonTexture = new Texture(Gdx.files.internal("art/inventory/closeButton.png"));
@@ -91,6 +97,10 @@ public class InventoryButtonListener extends InputListener {
 		
 		Button closeButton = new Button(closeButtonDrawable);
 		closeButton.setPosition(inventoryBg.getX() + inventoryBg.getWidth() - closeButton.getWidth() / 1.5f, inventoryBg.getY() + inventoryBg.getHeight() - closeButton.getHeight() / 1.5f);
+		closeButton.addListener(new InventoryCloseButtonListener(toDisposeOf, toRemove));
+		
 		stage.addActor(closeButton);
+		toRemove.add(closeButton);
+		
 	}
 }
