@@ -77,8 +77,8 @@ public class InventoryButtonListener extends InputListener {
 				invTable.add(itemImage).width(itemWidth).height(30).padRight(10);
 				toRemove.add(itemImage);
 				
-				//Label itemLabel = new Label(item.getName(), skin.get("small", LabelStyle.class));
-				//invTable.add(itemLabel).padBottom(5);
+				itemImage.addListener(new InventoryItemClickListener(item, skin, toRemove,
+						toDisposeOf, stage, inventoryBg.getX() + inventoryBg.getWidth(), inventoryBg.getY() + inventoryBg.getHeight() / 1.5f));
 				
 				if (itemWidth * (j + 1) > inventoryBg.getWidth()) {
 					j = 0;
