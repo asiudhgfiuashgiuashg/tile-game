@@ -61,6 +61,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.mygdx.ai.Agent;
 import com.mygdx.ai.PositionIndexedNode;
 import com.mygdx.ai.TestAi;
+import com.mygdx.game.listeners.InLobbyMessageTextFieldListener;
 import com.mygdx.game.listeners.InventoryButtonListener;
 import com.mygdx.server.Server;
 
@@ -68,7 +69,7 @@ import com.mygdx.server.Server;
 public class TheGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	
-	GameMap currentMap;
+	public static GameMap currentMap;
 	public static PrintWriter out;
     public static BufferedReader in;
     private long time;
@@ -77,34 +78,25 @@ public class TheGame extends ApplicationAdapter {
     private Skin skin;
     private ExtendedStage stage;
     private Socket socket;
-    private Table serverConnectTable;
-    private TextField errorTextField;
     
-    //private List<Player> playersDrawnInLobby;
-    private LabelStyle labelStyle;
-    private Table lobbyTable;
+    
+    
     private Shape playerShape;
     private Point oldPos;
-    private Map<Player, CheckBox> playerToCheckBoxMap;
-    private VerticalGroup chatMessagesVGroup;
-    private static final int CHAT_BOX_HEIGHT = 80;
-    private int numChatLines; //for in-lobby chat
-    private TextField messageTextField;
-    private InputListener inLobbyMessageTextFieldListener;
-    private InputListener inGameMessageTextFieldListener;
+    
+    
     
     protected LocalPlayer localPlayer;
-    private Preferences preferences;
-    private static final Color GREEN = new Color(.168f, .431f, .039f, 1);
     
-    private static enum GameState {
+    
+    protected static enum GameState {
     	MAIN_MENU,
         SERVER_CONNECT_SCREEN,
         SERVER_HOST_SCREEN,
         IN_LOBBY,
         GAME_STARTED,
     }
-    private GameState gameState;
+    static GameState gameState;
     private InputMultiplexer inputMultiplexer; //will delegate events tos the game inputprocessor and the gui inputprocessor (the stage)
     private GameInputProcessor gameInputProcessor;
     
@@ -146,14 +138,14 @@ public class TheGame extends ApplicationAdapter {
 		smallLabel.font = smallFont;
 		skin.add("small", smallLabel);
 		
-		numChatLines = 0;
+		
 		oldPos = new Point(0, 0);
 		gameState = GameState.SERVER_CONNECT_SCREEN;
 		batch = new SpriteBatch();
 		
 		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
 		// stage should get events first and then possibly gameInputProcessor
-		stage = new ExtendedStage(); //the gui is laid out here
+		stage = new ExtendedStage(skin, this); //the gui is laid out here
 		stage.setDebugAll(true);
 		stage.skin = skin;
 		inputMultiplexer = new InputMultiplexer();
@@ -173,85 +165,11 @@ public class TheGame extends ApplicationAdapter {
 		setupMainMenu();
 	}
 	
-	private void setupServerHostScreen() {
-		stage.clear();
-		Table table = new Table();
-		preferences = Preferences.userRoot().node(this.getClass().getName());
-		final TextField userNameTextField = new TextField(preferences.get("username", ""), skin);
-		userNameTextField.setAlignment(Align.center);
-		Label userNameLabel = new Label("Username: ", skin);
-		table.add(userNameLabel);
-		table.add(userNameTextField);
-		table.row();
-		table.setPosition(stage.getWidth() / 2 - table.getWidth() / 2, stage.getHeight() / 2);
-		
-		stage.addActor(table);
-		
-		TextButton hostServerButton = new TextButton("Host", skin);
-		hostServerButton.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				preferences.put("username", userNameTextField.getText());
-				setupLobbyAsHost(userNameTextField.getText());
-			}
-		});
-		
-		hostServerButton.setPosition(stage.getWidth() / 2 - hostServerButton.getWidth() / 2, table.getY() - 100);
-		
-		stage.addActor(hostServerButton);
-	}
-	
 	private void setupMainMenu() {
-		stage.clear();
-
-		// Configure a TextButtonStyle and name it "default". Skin resources are stored by type, so this doesn't overwrite the font.
-		final TextButtonStyle textButtonStyle = new TextButtonStyle();
-		textButtonStyle.up = skin.newDrawable("white", Color.DARK_GRAY);
-		textButtonStyle.down = skin.newDrawable("white", Color.DARK_GRAY);
-		textButtonStyle.checked = skin.newDrawable("white", Color.DARK_GRAY);
-		textButtonStyle.over = skin.newDrawable("white", Color.DARK_GRAY);
-		textButtonStyle.font = skin.getFont("default");
-		skin.add("default", textButtonStyle);
-		
-		TextFieldStyle textFieldStyle = new TextFieldStyle();
-		textFieldStyle.background = skin.newDrawable("white", GREEN);
-		textFieldStyle.font = skin.getFont("default");
-		textFieldStyle.fontColor = Color.WHITE;
-		textFieldStyle.cursor = skin.newDrawable("white", Color.WHITE);
-		textFieldStyle.cursor.setMinWidth(2f);
-		skin.add("default", textFieldStyle);
-		
-		labelStyle = new LabelStyle();
-		labelStyle.font = skin.getFont("default");
-		labelStyle.fontColor = Color.WHITE;
-		skin.add("default", labelStyle);
-		
-		TextButton joinServerButton = new TextButton("Join Server", skin);
-		joinServerButton.addListener(new ChangeListener() {
-
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				setupConnectMenu();
-			}
-			
-		});
-		
-		joinServerButton.setPosition(stage.getWidth() / 2 - joinServerButton.getWidth() / 2, stage.getHeight() / 2);
-		stage.addActor(joinServerButton);
-		
-		TextButton hostServerButton = new TextButton("Host", skin);
-		hostServerButton.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				setupServerHostScreen();
-			}
-		});
-		
-		hostServerButton.setPosition(stage.getWidth() / 2 - hostServerButton.getWidth() / 2, 200);
-		stage.addActor(hostServerButton);
+		stage.setupMainMenu();
 	}
 	
-	private void setupLobbyAsHost(String username) {
+	protected void setupLobbyAsHost(String username) {
 		server = new Server(8080);
 		hosting = true;
 		gameState = GameState.IN_LOBBY;
@@ -259,325 +177,18 @@ public class TheGame extends ApplicationAdapter {
 		setupLobby();
 	}
 
-	
-	private void setupConnectMenu() {
-		
-		stage.clear();
-		// A skin can be loaded via JSON or defined programmatically, either is fine. Using a skin is optional but strongly
-		// recommended solely for the convenience of getting a texture, region, etc as a drawable, tinted drawable, etc.
-		
-		
-		//http://www.vogella.com/tutorials/JavaPreferences/article.html
-		preferences = Preferences.userRoot().node(this.getClass().getName()); //used to save/load fields on server connect page
-		
-		Label serverAddressLabel = new Label("Server Address: ", labelStyle);
-	  
-		// Create a button with the "default" TextButtonStyle. A 3rd parameter can be used to specify a name other than "default".
-		final TextButton connectButton = new TextButton(" Connect ", skin);
-				
-		final TextField serverPortField = new TextField(preferences.get("serverPortField", ""), skin);
-		serverPortField.setWidth(70);
-		serverPortField.setAlignment(Align.center);
-		///System.out.println(serverPortField.getWidth());
-		serverPortField.setHeight(30);
-		
-		final TextField serverAddressField = new TextField(preferences.get("serverAddressField", ""), skin);
-		serverAddressField.setWidth(200);
-		serverAddressField.setHeight(30);
-		serverAddressField.setAlignment(Align.center);
-		serverAddressField.setTextFieldFilter(new TextFieldFilter() {
-
-			@Override
-			public boolean acceptChar(TextField textField, char c) {
-				if ('.' == c || Character.isDigit(c) || Character.isAlphabetic(c)) {
-					if (serverPortField.getText().length() > 0) { //highlight and enable connect button
-						setEnabledAndHighlight(connectButton, true);
-					}
-					return true;
-				}
-				if (textField.getText().length() == 0) {
-					setEnabledAndHighlight(connectButton, false);
-				}
-				return false;
-			}
-			
-		});
-		
-		;
-				
-		Label serverPortLabel = new Label("Port: ", labelStyle);
-		
-		
-		//only accept digits in port field
-		serverPortField.setTextFieldFilter(new TextFieldFilter() {
-
-			@Override
-			public boolean acceptChar(TextField textField, char c) {
-				if (Character.isDigit(c)) {
-					if (serverAddressField.getText().length() > 0) { //highlight and enable connect button
-						setEnabledAndHighlight(connectButton, true);
-					}
-					return true;
-				}
-				if (textField.getText().length() == 0) {
-					setEnabledAndHighlight(connectButton, false);
-				}
-				return false;
-			}
-		});
-		
-		final TextField usernameField = new TextField(preferences.get("username", ""), skin);
-		usernameField.setWidth(200);
-		usernameField.setHeight(30);
-		usernameField.setAlignment(Align.center);
-		
-		Label usernameLabel = new Label("Username: ", labelStyle);	
-		
-		TextButton backButton = new TextButton("Back", skin);
-		backButton.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				setupMainMenu();
-			}
-		});
-		backButton.setPosition(700, 30);
-		
-		//create a table that fills the screen
-		serverConnectTable = new Table();
-		serverConnectTable.setFillParent(true);
-		serverConnectTable.setSize(200, 300);
-		serverConnectTable.center();
-		stage.addActor(serverConnectTable);
-		
-		//populate table
-		serverConnectTable.add(serverAddressLabel);
-		serverConnectTable.add(serverAddressField);
-		serverConnectTable.add(serverPortLabel).padLeft(20);
-		serverConnectTable.add(serverPortField).width(70);
-		serverConnectTable.row();  //new row
-		serverConnectTable.add(usernameLabel).padTop(20);
-		serverConnectTable.add(usernameField).padTop(20);
-		serverConnectTable.row();
-		serverConnectTable.add(connectButton).colspan(4).center().padTop(40);
-		//mainMenuTable.debugAll(); //show bounding boxes
-		
-		stage.addActor(backButton);
-
-		// Add a listener to the button. ChangeListener is fired when the button's checked state changes, eg when clicked,
-		// Button#setChecked() is called, via a key press, etc. If the event.cancel() is called, the checked state will be reverted.
-		// ClickListener could have been used, but would only fire when clicked. Also, canceling a ClickListener event won't
-		// revert the checked state.
-		connectButton.addListener(new ChangeListener() {
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				if (null != errorTextField) {
-					errorTextField.remove();
-				}
-				if (serverAddressField.getText().length() > 0
-						&& serverPortField.getText().length() > 0
-						&& connectToServer(serverAddressField.getText(), Integer.parseInt(serverPortField.getText()), usernameField.getText())) {
-					
-					//save textFields for next game session
-					preferences.put("username", usernameField.getText());
-					preferences.put("serverPortField", serverPortField.getText());
-					preferences.put("serverAddressField", serverAddressField.getText());
-					
-					
-					
-					
-					
-					setupLobby();
-				}
-			}
-		});
-
-		// Add an image actor. Have to set the size, else it would be the size of the drawable (which is the 1x1 texture).
-		//table.add(new Image(skin.newDrawable("white", Color.RED))).size(64);
-	}
 
 	private void setupLobby() {
-		gameState = GameState.IN_LOBBY;
-		playerToCheckBoxMap = new HashMap<Player, CheckBox>();
-		//create local player
-		//currentMap.players.add(player);
-		
-		final CheckBoxStyle checkBoxStyle = new CheckBoxStyle();
-		checkBoxStyle.checkboxOff = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("art/checkbox_unchecked.png"))));
-		checkBoxStyle.checkboxOn = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("art/checkbox_checked.png"))));
-		checkBoxStyle.font = skin.getFont("default");
-		skin.add("default", checkBoxStyle);
-		
-		final CheckBox readyCheckBox = new CheckBox("", checkBoxStyle);
-		playerToCheckBoxMap.put(currentMap.player, readyCheckBox);
-		readyCheckBox.setPosition(600, 70);
-		//readyCheckBox.setWidth(100);
-		//readyCheckBox.setHeight(30);
-		//readyCheckBox.debug();
-		//readyCheckBox.setSize(100, 50);
-		
-		readyCheckBox.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) { //notify server of readynes or unreadyness
-				if(readyCheckBox.isChecked()){
-				JSONObject readyMessage = new JSONObject();
-				readyMessage.put("type", "readyStatus");
-				readyMessage.put("readyStatus", readyCheckBox.isChecked());
-				out.println(readyMessage);
-				
-				//check the box by name as well
-				playerToCheckBoxMap.get(localPlayer).setChecked(readyCheckBox.isChecked());
-				}}
-		});
-		final Label readyCheckBoxLabel = new Label("Ready?", skin);
-		readyCheckBoxLabel.setPosition(520,  70);
-		
-		//Creating checkboxes for the costume options while in lobby
-		final Label costumeCheckBoxLabel = new Label("Costumes", skin);
-		final CheckBox costumeCheckBox1 = new CheckBox(" 1", checkBoxStyle);
-		final CheckBox costumeCheckBox2 = new CheckBox(" 2", checkBoxStyle);
-		final CheckBox costumeCheckBox3 = new CheckBox(" 3", checkBoxStyle);
-		final CheckBox costumeCheckBox4 = new CheckBox(" 4", checkBoxStyle);
-		
-		
-		costumeCheckBoxLabel.setPosition(600, 350);
-		costumeCheckBox1.setPosition(600, 330);
-		costumeCheckBox2.setPosition(600, 310);
-		costumeCheckBox3.setPosition(600, 290);
-		costumeCheckBox4.setPosition(600, 270);
-		
-		ButtonGroup<CheckBox> costumeButtons = new ButtonGroup<CheckBox>(costumeCheckBox1, costumeCheckBox2, costumeCheckBox3, costumeCheckBox4);
-		costumeButtons.setMaxCheckCount(1);
-		costumeButtons.setUncheckLast(true);
-		costumeCheckBox1.setChecked(true);
-
-			
-		//applies costume change for localplayer. Might need to move this to another location.
-		class CostumeChange extends ChangeListener{
-			String sprite;
-			CheckBox checkBox;
-			ButtonGroup<CheckBox> costumeButtons;
-			public CostumeChange(CheckBox checkBox, String sprite){
-				this.checkBox = checkBox;
-				this.sprite = sprite;
-				this.costumeButtons = costumeButtons;
-			}
-			public void changed(ChangeEvent event, Actor actor){
-				if(checkBox.isChecked()) {
-					localPlayer.changeAppearance(sprite);
-					JSONObject spriteInfo = new JSONObject();
-					spriteInfo.put("type", "sprite");
-					spriteInfo.put("spriteID", sprite);
-					out.println(spriteInfo);
-				}			
-			}
-			
-		}
-		
-		costumeCheckBox1.addListener(new CostumeChange(costumeCheckBox1, "Costume1.png"));
-		costumeCheckBox2.addListener(new CostumeChange(costumeCheckBox2, "Costume2.png"));
-		costumeCheckBox3.addListener(new CostumeChange(costumeCheckBox3, "Costume3.png"));
-		costumeCheckBox4.addListener(new CostumeChange(costumeCheckBox4, "Costume4.png"));
-		
-		
-		stage.clear();
-		stage.addActor(readyCheckBox);
-		stage.addActor(readyCheckBoxLabel);
-		stage.addActor(costumeCheckBoxLabel);
-		stage.addActor(costumeCheckBox1);
-		stage.addActor(costumeCheckBox2);
-		stage.addActor(costumeCheckBox3);
-		stage.addActor(costumeCheckBox4);
-		
-		lobbyTable = new Table();
-		lobbyTable.debugAll();
-		lobbyTable.setFillParent(true);
-		lobbyTable.setSize(200, 300);
-		lobbyTable.center();
-		stage.addActor(lobbyTable);
-		addPlayerToLobbyStage(localPlayer);
-		lobbyTable.row();
-		
-		addChatboxToStage();
-		
-		inLobbyMessageTextFieldListener  = new InputListener() {
-			@Override
-			public boolean keyDown(InputEvent event, int keycode) {
-				if (keycode == Input.Keys.ENTER) {
-					JSONObject message = new JSONObject();
-					if (messageTextField.getText().length() > 0) {
-						message.put("type", "chatMessage");
-						message.put("message", messageTextField.getText());
-						out.println(message);
-						addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
-						messageTextField.setText("");
-					}
-					return true; //dont pass along the event
-				}
-				return false; //pass along the event
-			}
-		};
-		
-		messageTextField.addListener(inLobbyMessageTextFieldListener);
+		stage.setupLobby();
 	}
-	
-	private void addChatboxToStage() {
-		chatMessagesVGroup = new VerticalGroup();
-		chatMessagesVGroup.debugAll();
-		chatMessagesVGroup.setPosition(5, 35);
-		chatMessagesVGroup.setSize(400, CHAT_BOX_HEIGHT);
-		chatMessagesVGroup.left();
-		chatMessagesVGroup.reverse();
-		stage.addActor(chatMessagesVGroup);
-		
-		
-		messageTextField = new TextField("", skin);
-		messageTextField.setSize(400, 30);
-
-		
-		messageTextField.setPosition(5, 5);
-		stage.addActor(messageTextField);
-	}
-	
-	private void addMessageToChatbox(String message) {
-		Label messageLabel = new Label(message, skin);
-		while (messageLabel.getPrefWidth() > chatMessagesVGroup.getWidth()) {
-			message = message.substring(0, message.length() - 1);
-			messageLabel.setText(message);
-		}
-		chatMessagesVGroup.addActorAt(0, messageLabel);
-		///System.out.println("added: " + messageLabel);
-		numChatLines++;
-		BitmapFont font = messageLabel.getStyle().font;
-		int maxNumChatLines = (int) (CHAT_BOX_HEIGHT / (font.getCapHeight() + font.getAscent() + -font.getDescent()));
-		if (maxNumChatLines == numChatLines) {
-			numChatLines -= 1;
-			chatMessagesVGroup.getChildren().get(chatMessagesVGroup.getChildren().size - 1).remove(); //get rid of top chat line
-		}
-	}
-	
-	private void setEnabledAndHighlight(Button button, boolean enabled) {
-		Button.ButtonStyle buttonStyle = button.getStyle();
-		if (enabled) { //highlight connect button
-			buttonStyle.up = skin.newDrawable("white", Color.LIGHT_GRAY);
-			buttonStyle.down = skin.newDrawable("white", Color.LIGHT_GRAY);
-			buttonStyle.checked = skin.newDrawable("white", Color.LIGHT_GRAY);
-			buttonStyle.over = skin.newDrawable("white", Color.LIGHT_GRAY);
-		} else {
-			buttonStyle.up = skin.newDrawable("white", Color.DARK_GRAY);
-			buttonStyle.down = skin.newDrawable("white", Color.DARK_GRAY);
-			buttonStyle.checked = skin.newDrawable("white", Color.DARK_GRAY);
-			buttonStyle.over = skin.newDrawable("white", Color.DARK_GRAY);
-		}
-		button.setDisabled(!enabled);
-	}
-	
 	
 	//attempts to connect to server, returns true for success
-	private boolean connectToServer(String serverAddress, int port, String username) {
+	protected boolean connectToServer(String serverAddress, int port, String username) {
 		try {
 			socket = new Socket(serverAddress, port);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			
+			stage.out = out;
 			
 			
 			localPlayer = new LocalPlayer(playerShape, false);
@@ -594,20 +205,12 @@ public class TheGame extends ApplicationAdapter {
 			return true;
 			
 		} catch (Exception e) {
-			errorTextField = new TextField("could not connect", skin);
-			errorTextField.setAlignment(Align.center);
-			displayConnectError(errorTextField);
+			stage.displayError();
 			e.printStackTrace();
 			return false;
 		}
 	}
 	
-	private void displayConnectError(TextField error) {
-		error.setDisabled(true); //so it can't be edited
-		error.setPosition(0, 50);
-		stage.addActor(error);
-		//error.debug();
-	}
 	
 	/**
 	 * create player and map
@@ -658,9 +261,6 @@ public class TheGame extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if (GameState.GAME_STARTED == gameState) {
-			
-			
-			
 			batch.begin();
 			
 			currentMap.draw(batch);
@@ -698,16 +298,16 @@ public class TheGame extends ApplicationAdapter {
 	
 	private void doNetworking() {	
 		//*******Networking*****
-		if (GameState.SERVER_CONNECT_SCREEN != gameState) { 
+		if (GameState.SERVER_CONNECT_SCREEN != gameState) {
 			try {
 				if (in.ready()) {
 					String receivedStr = in.readLine();
 					JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
-					
+					Gdx.app.log(getClass().getSimpleName(), "received: " + receivedStr);
 					if (received.get("type").equals("chatMessage")) {
 						String message = (String) received.get("message");
 						System.out.println("message: " + message);
-						addMessageToChatbox(message);
+						stage.addMessageToChatbox(message);
 					}
 					
 					
@@ -724,15 +324,15 @@ public class TheGame extends ApplicationAdapter {
 							int uid = ((Number) received.get("uid")).intValue();
 							RemotePlayer remotePlayer = addRemotePlayerToList(playerName, uid);
 							/////System.out.println("remotePlayer info received: " + remotePlayer == null);
-							addPlayerToLobbyStage(remotePlayer);
-							lobbyTable.row();
+							stage.addPlayerToLobbyStage(remotePlayer);
+							System.out.println("added remotePlayer: " + remotePlayer);
 							
 						} else if (received.get("type").equals("readyStatus")) {
 							int uid = ((Number) received.get("uid")).intValue();
 							boolean isReady = (Boolean) received.get("readyStatus");
-							for (Player player: playerToCheckBoxMap.keySet()) {
+							for (Player player: stage.playerToCheckBoxMap.keySet()) {
 								if (player.uid == uid) {
-									playerToCheckBoxMap.get(player).setChecked(isReady);
+									stage.playerToCheckBoxMap.get(player).setChecked(isReady);
 								}
 							}
 							
@@ -821,75 +421,7 @@ public class TheGame extends ApplicationAdapter {
 				
 				
 	public void addInGameActors() {
-		addChatboxToStage();
-		messageTextField.setVisible(false);
-		messageTextField.removeListener(inLobbyMessageTextFieldListener);
-		inGameMessageTextFieldListener = new InputListener() {
-			@Override
-			public boolean keyDown(InputEvent event, int keycode) {
-				if (keycode == Input.Keys.ENTER) {
-					if (messageTextField.isVisible()) {
-						//send the text as a message
-						if (messageTextField.getText().length() > 0) {
-							JSONObject message = new JSONObject();
-							message.put("type", "chatMessage");
-							message.put("message", messageTextField.getText());
-							out.println(message);
-							addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
-							messageTextField.setText("");
-						}
-							
-						messageTextField.setVisible(false); //close the text field
-						messageTextField.setDisabled(true);
-						event.setBubbles(false); //stop the event from bubbling back up to the stage, which will handle ENTER again (we only want ENTER to be handled once)
-					}
-					return true; // the event is "handled" -- no propogation outside of this stage
-				}
-				return false; // the event is not "handled" -- propogates outside of stage
-			}
-		};
-		messageTextField.addListener(inGameMessageTextFieldListener);
-		
-		stage.addListener(new InputListener() {
-			@Override
-			public boolean keyDown(InputEvent event, int keycode) {
-				if (keycode == Input.Keys.ENTER && !messageTextField.isVisible() && !(stage.itemList != null)) {
-					messageTextField.setVisible(true); //open up text field for message entry
-					messageTextField.setDisabled(false);
-					stage.setKeyboardFocus(messageTextField);
-					localPlayer.directionStack.clear();
-					return true;
-				}
-				return false;
-			}
-		});
-		
-		
-		for (Player player: currentMap.players) {
-			if (player != this.localPlayer) {
-				labelStyle = new LabelStyle();
-				labelStyle.font = skin.getFont("default");
-				labelStyle.fontColor = Color.WHITE;
-				Label playerNameLabel = new Label(player.username, labelStyle);
-				/////System.out.println("position: " + player.getXPos());
-				playerNameLabel.setPosition((float) player.getXPos(), (float) player.getYPos());
-				((RemotePlayer) player).nameLabel = playerNameLabel;
-				stage.addActor(playerNameLabel);
-			}
-		}
-		
-		//setup horizontal portion of in-game gui
-		Table horizontalGuiTable = new Table();
-		horizontalGuiTable.padLeft(3);
-		horizontalGuiTable.align(Align.topLeft);
-		TextButton inventoryButton = new TextButton("inv", skin);
-		inventoryButton.align(Align.bottom);
-		inventoryButton.addListener(new InventoryButtonListener(stage, localPlayer, skin));
-		horizontalGuiTable.add(inventoryButton).width(50).height(30); //parents set the position and height of children
-		horizontalGuiTable.setPosition(chatMessagesVGroup.getX() + chatMessagesVGroup.getWidth(), chatMessagesVGroup.getHeight() + chatMessagesVGroup.getY());
-		
-		stage.addActor(horizontalGuiTable);
-		
+		stage.addInGameActors();
 		gameInputProcessor = new GameInputProcessor(localPlayer);
 		inputMultiplexer.addProcessor(gameInputProcessor);
 	}
@@ -901,15 +433,5 @@ public class TheGame extends ApplicationAdapter {
 		currentMap.players.add(remotePlayer);
 		remotePlayer.setPos(new Point(-100, -100));
 		return remotePlayer;
-	}
-	/** add player's info to lobby page**/
-	private void addPlayerToLobbyStage(Player player) {
-		Label playerNameLabel = new Label(player.username, labelStyle);
-		final CheckBox readyCheckBox = new CheckBox("", skin);
-		readyCheckBox.setDisabled(true);
-		playerToCheckBoxMap.put(player, readyCheckBox);
-		lobbyTable.add(playerNameLabel).padTop(15).padRight(20);
-		lobbyTable.add(readyCheckBox);
-		///System.out.println("added player to lobby stage: " + player.username);
 	}
 }

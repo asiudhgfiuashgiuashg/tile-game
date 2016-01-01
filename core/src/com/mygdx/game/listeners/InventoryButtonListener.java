@@ -35,6 +35,7 @@ public class InventoryButtonListener extends InputListener {
 	private static List<Texture> toDisposeOf;
 	private static List<Actor> toRemove;
 	
+	
 	public InventoryButtonListener(ExtendedStage stage, LocalPlayer player, Skin skin) {
 		this.stage = stage;
 		this.player = player;

@@ -9,7 +9,7 @@ import com.badlogic.gdx.Gdx;
 public class Item {
     private String name;
     private int id;
-    private Point pos;
+    public Point pos;
 
     public static final String classFileLocation = "../core/assets/Item.txt";
 

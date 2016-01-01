@@ -21,7 +21,7 @@ public class Player extends Entity
 {
 
     GameMap currentMap;
-    String username;
+    public String username;
     
     public int uid;
     

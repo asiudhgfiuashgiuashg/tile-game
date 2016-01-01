@@ -121,6 +121,7 @@ public class Server {
     * remember there is one socketChannel per client
     */
     public void sendJSONOnSocketChannel(JSONObject jsonObj, SocketChannel socketChannel) {
+    	Gdx.app.log(getClass().getSimpleName(), "sending " + jsonObj);
     	String stringToSend = jsonObj.toString() + '\n';
     	ByteBuffer toSend = ByteBuffer.allocate(stringToSend.length());	
 		toSend.clear();

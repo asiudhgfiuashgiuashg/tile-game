@@ -23,6 +23,7 @@ public class InventoryCloseButtonListener extends InputListener {
 	}
 	
 	private void closeInventoryOverlay() {
+		InventoryItemClickListener.removeAdditionalInfo();
 		for (Actor actor: toRemove) {
 			actor.remove(); //remove from parent (the stage)
 		}
