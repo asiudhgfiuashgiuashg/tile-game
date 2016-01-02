@@ -6,12 +6,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.utils.Disposable;
 
 public class InventoryCloseButtonListener extends InputListener {
-	List<Texture> toDisposeOf;
+	List<Disposable> toDisposeOf;
 	List<Actor> toRemove;
 	
-	public InventoryCloseButtonListener(List<Texture> toDisposeOf, List<Actor> toRemove) {
+	public InventoryCloseButtonListener(List<Disposable> toDisposeOf, List<Actor> toRemove) {
 		this.toDisposeOf = toDisposeOf;
 		this.toRemove = toRemove;
 	}
@@ -27,8 +28,8 @@ public class InventoryCloseButtonListener extends InputListener {
 		for (Actor actor: toRemove) {
 			actor.remove(); //remove from parent (the stage)
 		}
-		for (Texture texture: toDisposeOf) {
-			texture.dispose(); //free up memory used by the inventory screen textures
+		for (Disposable disposable: toDisposeOf) {
+			disposable.dispose(); //free up memory used by the inventory screen textures
 		}
 	}
 }

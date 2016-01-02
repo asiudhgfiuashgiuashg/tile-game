@@ -34,13 +34,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Scaling;
 import com.mygdx.game.TheGame.GameState;
 import com.mygdx.game.listeners.InLobbyMessageTextFieldListener;
 import com.mygdx.game.listeners.InventoryButtonListener;
+import com.mygdx.game.listeners.InventoryCloseButtonListener;
+import com.mygdx.game.listeners.InventoryItemClickListener;
 import com.mygdx.game.listeners.ItemListListener;
 
 public class ExtendedStage extends Stage {
@@ -66,6 +70,9 @@ public class ExtendedStage extends Stage {
 	private TextField errorTextField;
 	
 	private TheGame theGame;
+	
+
+	InventoryGroup inventoryGroup;
 	
 	public ExtendedStage(Skin skin, TheGame theGame) {
 		this.skin = skin;
@@ -579,5 +586,11 @@ public class ExtendedStage extends Stage {
 		horizontalGuiTable.setPosition(chatMessagesVGroup.getX() + chatMessagesVGroup.getWidth(), chatMessagesVGroup.getHeight() + chatMessagesVGroup.getY());
 		
 		this.addActor(horizontalGuiTable);
+	}
+	
+	
+	public void openInventoryOverlay() {
+		inventoryGroup = new InventoryGroup(skin, currentMap.player.inv.itemList);
+		this.addActor(inventoryGroup);
 	}
 }

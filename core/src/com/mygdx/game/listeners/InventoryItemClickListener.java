@@ -16,7 +16,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Scaling;
+import com.mygdx.game.InventoryGroup;
 import com.mygdx.game.Item;
 
 
@@ -25,8 +27,8 @@ public class InventoryItemClickListener extends InputListener {
 	private Item item;
 	private Skin skin;
 	private List<Actor> toRemove;
-	private List<Texture> toDisposeOf;
-	private Stage stage;
+	private List<Disposable> toDisposeOf;
+	private InventoryGroup inventoryGroup;
 	float moreInfoX;
 	float moreInfoY;
 	
@@ -39,12 +41,12 @@ public class InventoryItemClickListener extends InputListener {
 	protected static boolean additionalInfoDisplayed;
 	
 	public InventoryItemClickListener(Item item, Skin skin, List<Actor> toRemove,
-			List<Texture> toDisposeOf, Stage stage, float moreInfoX, float moreInfoY) {
+			List<Disposable> toDisposeOf, InventoryGroup inventoryGroup, float moreInfoX, float moreInfoY) {
 		this.item = item;
 		this.skin = skin;
 		this.toRemove = toRemove;
 		this.toDisposeOf = toDisposeOf;
-		this.stage = stage;
+		this.inventoryGroup = inventoryGroup;
 		this.moreInfoX = moreInfoX;
 		this.moreInfoY = moreInfoY;
 		
@@ -65,7 +67,7 @@ public class InventoryItemClickListener extends InputListener {
 		toDisposeOf.add(moreInfoBgTexture);
 		moreInfoBgImg = new Image(moreInfoBgTexture);
 		moreInfoBgImg.setPosition(moreInfoX, moreInfoY);
-		stage.addActor(moreInfoBgImg);
+		inventoryGroup.addActor(moreInfoBgImg);
 		//toRemove.add(moreInfoBgImg);
 		
 		//put image of item in the mouse over table
@@ -90,7 +92,7 @@ public class InventoryItemClickListener extends InputListener {
 		
 		moreInfoTable.setPosition(moreInfoBgImg.getX() + moreInfoBgImg.getWidth() / 2, moreInfoBgImg.getY() + 10);
 		
-		stage.addActor(moreInfoTable);
+		inventoryGroup.addActor(moreInfoTable);
 		
 		
 		additionalInfoDisplayed = true;
