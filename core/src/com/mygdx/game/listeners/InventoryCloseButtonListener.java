@@ -7,14 +7,17 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.InventoryGroup;
 
 public class InventoryCloseButtonListener extends InputListener {
 	List<Disposable> toDisposeOf;
 	List<Actor> toRemove;
+	InventoryGroup inventoryGroup;
 	
-	public InventoryCloseButtonListener(List<Disposable> toDisposeOf, List<Actor> toRemove) {
+	public InventoryCloseButtonListener(List<Disposable> toDisposeOf, List<Actor> toRemove, InventoryGroup inventoryGroup) {
 		this.toDisposeOf = toDisposeOf;
 		this.toRemove = toRemove;
+		this.inventoryGroup = inventoryGroup;
 	}
 
 	@Override
@@ -24,7 +27,7 @@ public class InventoryCloseButtonListener extends InputListener {
 	}
 	
 	private void closeInventoryOverlay() {
-		InventoryItemClickListener.removeAdditionalInfo();
+		inventoryGroup.removeAdditionalInfo();
 		for (Actor actor: toRemove) {
 			actor.remove(); //remove from parent (the stage)
 		}

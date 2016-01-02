@@ -12,16 +12,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.mygdx.game.GameMap;
+import com.mygdx.game.InventoryGroup;
 import com.mygdx.game.Item;
 import com.mygdx.game.TheGame;
 
 public class InventoryDropButtonListener extends InputListener {
 	private Item item;
 	private GameMap map;
+	private InventoryGroup inventoryGroup;
 	
-	public InventoryDropButtonListener(Item item) {
+	public InventoryDropButtonListener(Item item, InventoryGroup inventoryGroup) {
 		this.item = item;
 		this.map = TheGame.currentMap;
+		this.inventoryGroup = inventoryGroup;
 	}
 	
 	@Override
@@ -29,7 +32,7 @@ public class InventoryDropButtonListener extends InputListener {
 		item.pos = map.player.getPos().deepCopy();
 		map.player.inv.itemList.removeValue(item, true);
 		map.getItemList().addItem(item);
-		InventoryItemClickListener.removeAdditionalInfo();
+		inventoryGroup.removeAdditionalInfo();
 		return true;
 	}
 }
