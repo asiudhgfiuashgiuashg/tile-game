@@ -32,6 +32,7 @@ public class InventoryDropButtonListener extends InputListener {
 		item.pos = map.player.getPos().deepCopy();
 		map.player.inv.itemList.removeValue(item, true);
 		map.getItemList().addItem(item);
+		inventoryGroup.removeItem(item);
 		inventoryGroup.removeAdditionalInfo();
 		return true;
 	}

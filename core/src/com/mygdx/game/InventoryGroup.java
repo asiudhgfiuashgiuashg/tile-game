@@ -40,6 +40,10 @@ public class InventoryGroup extends Group {
 	private float moreInfoX;
 	private float moreInfoY;
 	
+	private Array<Item> itemList;
+	private Table invTable;
+	private Image inventoryBg;
+	
 	/**
 	 * construct an overlay which displays inventory items
 	 * @param skin
@@ -49,13 +53,14 @@ public class InventoryGroup extends Group {
 		this.skin = skin;
 		toDisposeOf = new ArrayList<Disposable>();
 		toRemove = new ArrayList<Actor>();
+		this.itemList = itemList;
 		
 		additionalInfoDisplayed = false;
 		
 		
 		//create background for inventory screen
 		Texture inventoryBgTexture = new Texture(Gdx.files.internal("art/inventory/inventoryBg.png"));
-		Image inventoryBg = new Image(inventoryBgTexture);
+		inventoryBg = new Image(inventoryBgTexture);
 		inventoryBg.setPosition(TheGame.SCREEN_WIDTH / 2 - inventoryBg.getWidth() / 2, (TheGame.SCREEN_HEIGHT - inventoryBg.getHeight()) / 2);
 		this.addActor(inventoryBg);
 		toRemove.add(inventoryBg);
@@ -65,31 +70,12 @@ public class InventoryGroup extends Group {
 		moreInfoY = inventoryBg.getY() + inventoryBg.getHeight() / 1.5f;
 		
 		//add pictures + text for all items in inventory
-		Table invTable = new Table(skin);
+		invTable = new Table(skin);
 		invTable.align(Align.topLeft);
 		invTable.padLeft(20).padTop(10);
 		invTable.setPosition(inventoryBg.getX(), inventoryBg.getY() + inventoryBg.getHeight());
 		
-		int itemWidth = 30;
-		for (int i = 0, j = 0; i < itemList.size; i++, j++) {
-			Item item = itemList.get(i);
-			if (null != item) {
-				Texture itemTexture = new Texture(Gdx.files.internal(item.getInventoryImage()));
-				toDisposeOf.add(itemTexture);
-				Image itemImage = new Image(itemTexture);
-				itemImage.setScaling(Scaling.fill);
-				invTable.add(itemImage).width(itemWidth).height(30).padRight(10);
-				toRemove.add(itemImage);
-				
-				itemImage.addListener(new InventoryItemClickListener(item, skin, toRemove,
-						toDisposeOf, this));
-				
-				if (itemWidth * (j + 1) > inventoryBg.getWidth()) {
-					j = 0;
-					invTable.row().padTop(11);
-				}
-			}
-		}
+		populateInvTable();
 		
 		this.addActor(invTable);
 		toRemove.add(invTable);
@@ -154,11 +140,42 @@ public class InventoryGroup extends Group {
 	}
 	
 	public void removeAdditionalInfo() {
-		moreInfoTable.remove();
-		moreInfoBgImg.remove();
-		itemNameLabel.remove();
-		dropButton.remove();
-		//consider also disposing of textures in this function instead of waiting for inventory screen to be closed to dispose of them
-		additionalInfoDisplayed = false;
+		if (additionalInfoDisplayed) {
+			moreInfoTable.remove();
+			moreInfoBgImg.remove();
+			itemNameLabel.remove();
+			dropButton.remove();
+			//consider also disposing of textures in this function instead of waiting for inventory screen to be closed to dispose of them
+			additionalInfoDisplayed = false;
+		}
+	}
+
+	public void removeItem(Item item) {
+		itemList.removeValue(item, true);
+		populateInvTable();
+	}
+	
+	public void populateInvTable() {
+		invTable.clear();
+		int itemWidth = 30;
+		for (int i = 0, j = 0; i < itemList.size; i++, j++) {
+			Item item = itemList.get(i);
+			if (null != item) {
+				Texture itemTexture = new Texture(Gdx.files.internal(item.getInventoryImage()));
+				toDisposeOf.add(itemTexture);
+				Image itemImage = new Image(itemTexture);
+				itemImage.setScaling(Scaling.fill);
+				invTable.add(itemImage).width(itemWidth).height(30).padRight(10);
+				toRemove.add(itemImage);
+				
+				itemImage.addListener(new InventoryItemClickListener(item, skin, toRemove,
+						toDisposeOf, this));
+				
+				if (itemWidth * (j + 1) > inventoryBg.getWidth()) {
+					j = 0;
+					invTable.row().padTop(11);
+				}
+			}
+		}
 	}
 }
