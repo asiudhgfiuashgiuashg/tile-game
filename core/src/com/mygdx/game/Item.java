@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import org.json.simple.JSONObject;
+
 import com.badlogic.gdx.Gdx;
 
 public class Item {
@@ -13,8 +15,8 @@ public class Item {
 
     public static final String classFileLocation = "../core/assets/Item.txt";
 
-    private String inventoryImageURI;
-    private String floorImageURI;
+    private String inventoryImageURI; //image used to display item in inventory
+    private String floorImageURI; //image used to display item on map
     
     private int width, height;
     private static int uidIncrementer = 0; //temporary
@@ -22,7 +24,7 @@ public class Item {
 
     public Item(int id, Point pos) throws FileNotFoundException
     {
-    	this.uid = uidIncrementer; //temporary until uids are specified by item file or server
+    	int uid = uidIncrementer; //temporary until uids are specified by item file or server
     	uidIncrementer++;
     	this.id = id;
     	this.pos = pos;
@@ -50,11 +52,38 @@ public class Item {
 		setFloorImageURI(currentAttributes[3]);
 		setWidth(Integer.parseInt(currentAttributes[4]));
 		setHeight(Integer.parseInt(currentAttributes[5]));
-		
     }
-    
 
-    public int getId() {
+
+    public Item(JSONObject received) {
+		setInventoryImage((String) received.get("inventoryImageURI"));
+		setFloorImageURI((String) received.get("floorImageURI"));
+		setWidth(((Number) received.get("width")).intValue());
+		setHeight(((Number) received.get("height")).intValue());
+		setName((String) received.get("name"));
+		uid = ((Number) received.get("uid")).intValue();
+		double xPos = ((Number) received.get("xPos")).doubleValue();
+		double yPos = ((Number) received.get("yPos")).doubleValue();
+		pos = new Point(xPos, yPos);
+	}
+    
+    public JSONObject toJSON() {
+    	JSONObject json = new JSONObject();
+    	json.put("inventoryImageURI", inventoryImageURI);
+    	json.put("floorImageURI", floorImageURI);
+    	json.put("width", width);
+    	json.put("height", height);
+    	json.put("name", name);
+    	json.put("uid", uid);
+    	json.put("xPos", pos.getX());
+    	json.put("yPos", pos.getY());
+    	
+    	
+    	return json;
+    }
+
+
+	public int getId() {
         return id;    
     }
     public int getWidth() {

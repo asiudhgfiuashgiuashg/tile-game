@@ -51,13 +51,12 @@ public class ItemCollector {
 	 * @return true if something was actually removed, false otherwise
 	 */
 	public Item removeByUid(int uid) {
-		int index = 0;
-		for (Item item: itemList) {
+		for (int i = 0; i < itemList.size; i++) {
+			Item item = itemList.get(i);
 			if (uid == item.uid) {
-				itemList.removeIndex(index);
+				itemList.removeIndex(i);
 				return item;
 			}
-			index++;
 		}
 		return null;
 	}

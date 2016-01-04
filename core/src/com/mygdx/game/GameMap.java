@@ -655,7 +655,7 @@ public class GameMap {
         return false;
     }
     
-    protected Player getPlayerByUid(int uid) {
+    public Player getPlayerByUid(int uid) {
         for (Player player: players) {
             if (player.uid == uid) {
                 return player;

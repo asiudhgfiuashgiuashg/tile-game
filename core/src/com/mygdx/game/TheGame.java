@@ -170,7 +170,7 @@ public class TheGame extends ApplicationAdapter {
 	}
 	
 	protected void setupLobbyAsHost(String username) {
-		server = new Server(8080);
+		server = new Server(8080, stage);
 		hosting = true;
 		gameState = GameState.IN_LOBBY;
 		connectToServer("localhost", 8080, username);
@@ -367,6 +367,12 @@ public class TheGame extends ApplicationAdapter {
 		        		} else if (messageType.equals("inventoryAddition")) { //arrives before the removedItem message
 		        			int uid = ((Number) received.get("uid")).intValue();
 		        			localPlayer.inv.addItem(currentMap.itemsOnField.getByUid(uid));
+		        			
+		        		} else if (messageType.equals("itemDrop")) {
+		        			
+		        			Item droppedItem = new Item(received); //create an item from the json
+		        			Gdx.app.log(getClass().getSimpleName(), "dropped item: " + droppedItem);
+		        			currentMap.getItemList().itemList.add(droppedItem);
 		        		}
 		                
 					}

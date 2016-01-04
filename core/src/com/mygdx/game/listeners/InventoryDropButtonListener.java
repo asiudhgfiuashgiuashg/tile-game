@@ -1,5 +1,9 @@
 package com.mygdx.game.listeners;
 
+import java.io.PrintWriter;
+
+import org.json.simple.JSONObject;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -31,7 +35,10 @@ public class InventoryDropButtonListener extends InputListener {
 	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
 		item.pos = map.player.getPos().deepCopy();
 		map.player.inv.itemList.removeValue(item, true);
-		map.getItemList().addItem(item);
+		JSONObject itemDropMessage = item.toJSON();
+		itemDropMessage.put("type", "itemDrop");
+		TheGame.out.println(itemDropMessage); //tell the server the item has been dropped on the ground
+		
 		inventoryGroup.removeItem(item);
 		inventoryGroup.removeAdditionalInfo();
 		return true;

@@ -7,9 +7,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.badlogic.gdx.Gdx;
+import com.mygdx.game.ExtendedStage;
 import com.mygdx.game.GameMap;
 import com.mygdx.game.Item;
+import com.mygdx.game.LocalPlayer;
 import com.mygdx.game.Player;
+import com.mygdx.game.RemotePlayer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +37,12 @@ public class Server {
 	private ServerSocketChannel serverSocketChannel;
 	int currentUID; //used to give each client a  unique id (an integer which is incremented for every new connection)
 	public GameMap gameMap;
+	ExtendedStage stage;
 	
-	public Server(int port) {
+	public Server(int port, ExtendedStage stage) {
 		setupServer(port);
 		currentUID = 0;
+		this.stage = stage;
 	}
 	
 	public void setupServer(int port) {
@@ -242,36 +247,40 @@ public class Server {
 			} else if (received.get("type").equals("itemPickupRequest")) { //client asks to pick up an item on the ground
 				int uid = ((Number) received.get("uid")).intValue();
 				
+				//remove item from game map
 				Item removed = gameMap.getItemList().removeByUid(uid);
+				stage.updateItemList(); //update host's item list
 				if (null != removed) { //remove item from server's/hosting client's version of map
-					//send message telling player who picked up item that it is in their inventory
-					JSONObject inventoryAdditionMessage = new JSONObject();
-					inventoryAdditionMessage.put("type", "inventoryAddition");
-					inventoryAdditionMessage.put("uid", uid);
-					sendJSONOnSocketChannel(inventoryAdditionMessage, receiveFromClient.socketChannel);
+					
 					
 					//make appropriate updates to Player's inventory in the host's version of the game
-					Player playerToUpdate = getPlayerByUid(receiveFromClient.uid);
+					Player playerToUpdate = gameMap.getPlayerByUid(receiveFromClient.uid);
 					playerToUpdate.inv.addItem(removed);
 					
-					//send message to everyone that the item is no longer on the ground
+					//send message telling player who picked up item that it is in their inventory
+					if (gameMap.player != playerToUpdate) {
+						JSONObject inventoryAdditionMessage = new JSONObject();
+						inventoryAdditionMessage.put("type", "inventoryAddition");
+						inventoryAdditionMessage.put("uid", uid);
+						sendJSONOnSocketChannel(inventoryAdditionMessage, receiveFromClient.socketChannel);
+					}
+					
+					//send message to everyone except host that the item is no longer on the ground
 					JSONObject removedItemMessage = new JSONObject();
 					removedItemMessage.put("type", "removedItem");
 					removedItemMessage.put("uid", uid);
-					sendToAll(removedItemMessage);
+					sendToAllExceptHost(removedItemMessage);
 				}
+				
+			} else if (received.get("type").equals("itemDrop")) {
+				//int itemUid = ((Number) received.get("uid")).intValue();
+				//Player playerWhoDroppedItem = gameMap.getPlayerByUid(receiveFromClient.uid);
+				//Item droppedItem = gameMap.getItemList().getByUid(itemUid);
+				sendToAll(received);
 			}
 		}
     }
 
-    private Player getPlayerByUid(int uid) {
-		for (Player player: gameMap.players) {
-			if (player.uid == uid) {
-				return player;
-			}
-		}
-		return null;
-	}
 
 	public boolean allAreReady() {
     	for (PlayerClient client: clients) {
@@ -294,6 +303,11 @@ public class Server {
     	}
     }
 
+    /**
+     * send a message to everyone except the from client
+     * @param toSend
+     * @param from
+     */
     public void sendToAllFrom(JSONObject toSend, PlayerClient from) {
     	for (PlayerClient client: clients) {
 			if (client != from) {
@@ -310,7 +324,7 @@ public class Server {
     
     public void sendToAllExceptHost(JSONObject toSend) {
     	for (PlayerClient client: clients) {
-    		if (getPlayerByUid(client.uid) != gameMap.player){
+    		if (gameMap.getPlayerByUid(client.uid) != gameMap.player){
     			sendJSONOnSocketChannel(toSend, client.socketChannel);
     		}
     	}
