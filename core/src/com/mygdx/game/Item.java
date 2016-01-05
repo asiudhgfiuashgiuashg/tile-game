@@ -25,6 +25,7 @@ public class Item {
     public Item(int id, Point pos) throws FileNotFoundException
     {
     	int uid = uidIncrementer; //temporary until uids are specified by item file or server
+    	this.uid = uid;
     	uidIncrementer++;
     	this.id = id;
     	this.pos = pos;
@@ -148,6 +149,7 @@ public class Item {
     
     @Override
     public boolean equals(Object other) {
+    	System.out.println("equals was called hehe");
     	if (this == other) {
     		return true;
     	}
