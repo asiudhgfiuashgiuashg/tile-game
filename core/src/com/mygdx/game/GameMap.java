@@ -67,10 +67,11 @@ public class GameMap {
     TextureRegion fov;
     ItemCollector itemsOnField;
     public ObjectCollector objectList;
+    HashMap<String, GameEvent[]> mapEvents; 
 
     //map for keeping track of textures to dispose of
     // thing = GameObject or Item
-    AbstractMap<Object, Texture> thingToTextureMap;
+    AbstractMap<String, Texture> thingToTextureMap;
     
     public DefaultIndexedGraphWithPublicNodes<PositionIndexedNode> nodeGraph;
 	private TextureRegion defaultNodeTextureRegion;
@@ -84,7 +85,7 @@ public class GameMap {
     	shapeRenderer = new ShapeRenderer();
     	defaultNodeTextureRegion = new TextureRegion(new Texture(Gdx.files.internal("art/node_circle_default.png")));
     	
-        thingToTextureMap = new HashMap < Object, Texture > ();
+        thingToTextureMap = new HashMap < String, Texture > ();
         players = new ArrayList<Player>();
         players.add(player);
         this.player = player;
@@ -163,7 +164,14 @@ public class GameMap {
                 className = currentAttributes[0];
                 id = Integer.parseInt(currentAttributes[1]);
                 pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
-                objectList.addObject(className, id, pos);
+                
+                if(currentAttributes.length > 4) {
+                	int eventID = Integer.parseInt(currentAttributes[5]);
+                	objectList.addObject(className, id, pos, eventID);
+                }
+                else {
+                	objectList.addObject(className, id, pos);
+                }
             }
 
         }
@@ -230,19 +238,19 @@ public class GameMap {
         batch.draw(fov, 0, 0);
         for (int x = 0; x < itemsOnField.getListSize(); x++) {
             Item item = itemsOnField.getItem(x);
-            Texture textureToUse = thingToTextureMap.get(item);
+            Texture textureToUse = thingToTextureMap.get(item.getName());
 
             //see if item should be drawn
             if ((itemsOnField.getXPos(x) + itemsOnField.getWidth(x) > mapPosX && itemsOnField.getXPos(x) < mapPosX + 2 * winX) && (itemsOnField.getYPos(x) + itemsOnField.getHeight(x) > mapPosY && itemsOnField.getYPos(x) < mapPosY + 2 * winX)) {
                 if (textureToUse == null) { //Item doesnt map to any texture, so make it one
                     textureToUse = new Texture(itemsOnField.getFloorImage(x));
-                    thingToTextureMap.put(item, textureToUse); // save texture to use later
+                    thingToTextureMap.put(item.getName(), textureToUse); // save texture to use later
                 }
                 batch.draw(textureToUse, (float) itemsOnField.getXPos(x) - mapPosX, (float) itemsOnField.getYPos(x) - mapPosY);
             } else { //item should not be drawn, so free up its texture
                 if (textureToUse != null) {
                     textureToUse.dispose();
-                    thingToTextureMap.remove(item);
+                    thingToTextureMap.remove(item.getName());
                 }
             }
         }
@@ -250,17 +258,17 @@ public class GameMap {
 
         for (int x = 0; x < objectList.getListSize(); x++) {
             GameObject object = objectList.getObject(x);
-            Texture textureToUse = thingToTextureMap.get(object);
+            Texture textureToUse = thingToTextureMap.get(object.getName());
             if ((objectList.getXPos(x) + objectList.getWidth(x) > mapPosX && objectList.getXPos(x) < mapPosX + 2 * winX) && (objectList.getYPos(x) + objectList.getHeight(x) > mapPosY && objectList.getYPos(x) < mapPosY + 2 * winX)) {
                 if (textureToUse == null) { //Item doesnt map to any texture, so make it one
                     textureToUse = new Texture(objectList.getImage(x));
-                    thingToTextureMap.put(object, textureToUse); // save texture to use later
+                    thingToTextureMap.put(object.getName(), textureToUse); // save texture to use later
                 }
                 batch.draw(textureToUse, (float) objectList.getXPos(x) - mapPosX, (float) objectList.getYPos(x) - mapPosY);
             } else {
                 if (textureToUse != null) {
                     textureToUse.dispose();
-                    thingToTextureMap.remove(object);
+                    thingToTextureMap.remove(object.getName());
                 }
             }
         }

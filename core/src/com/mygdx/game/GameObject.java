@@ -15,8 +15,9 @@ public class GameObject {
 	protected Point pos;
 
 	public static final String classFileLocation = "../core/assets/Object.txt";
-
-	String imageURI;
+	public GameEvent event = null; //Unimplemented, here in case we add an event trigger to objects in the future
+	
+	private String imageURI;
 
 	private float width, height;
 
@@ -113,6 +114,10 @@ public class GameObject {
 	public void setImage(String URI) {
 		this.imageURI = URI;
 	}
+	
+	public void triggerEvent() {
+		this.event.triggerEvent();
+	}
 
 
 	@Override
@@ -131,4 +136,5 @@ public class GameObject {
 	public boolean intersects(GameObject other) {
 		return this.getShape().intersects(other.getShape());
 	}
+	
 }

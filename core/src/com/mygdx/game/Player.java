@@ -28,6 +28,7 @@ public class Player extends Entity
     public ItemCollector inv;
     
     protected DirectionOfTravel direction;
+    protected Direction facing;
     
     public Player(Shape shape, boolean passable)
     {
@@ -35,8 +36,8 @@ public class Player extends Entity
     	username = "default username";
     	left = 15;
         right = 50;
-        up = 55;
-        down = 1;
+        up = 35;
+        down = 0;
     	
         pos = new Point(0, 0);
 

@@ -64,6 +64,7 @@ import com.mygdx.ai.TestAi;
 import com.mygdx.game.listeners.InLobbyMessageTextFieldListener;
 import com.mygdx.game.listeners.InventoryButtonListener;
 import com.mygdx.server.Server;
+import com.mygdx.game.GameEventHandler;
 
 
 public class TheGame extends ApplicationAdapter {
@@ -109,8 +110,7 @@ public class TheGame extends ApplicationAdapter {
     
 	@Override
 	public void create() {
-		debug = false;
-		
+		debug = true;
 		
 		//setup the skin (resources for gui)
 		skin = new Skin();
@@ -154,9 +154,9 @@ public class TheGame extends ApplicationAdapter {
 		Gdx.input.setInputProcessor(inputMultiplexer); //the stage which contains the gui/hud gets to handle inputs first, and then pass the ones it doesn't handle down to the game
 		
 		playerShape = new Shape(Arrays.asList(
-				new LineSeg(new Point(15, 0), new Point(15, 55)),
-				new LineSeg(new Point(15, 55), new Point(50, 55)),
-				new LineSeg(new Point(50, 55), new Point(50, 0)),
+				new LineSeg(new Point(15, 0), new Point(15, 35)),
+				new LineSeg(new Point(15, 35), new Point(50, 35)),
+				new LineSeg(new Point(50, 35), new Point(50, 0)),
 				new LineSeg(new Point(50, 0), new Point(15, 0))
 				),
 				new Point(0,0));
@@ -184,7 +184,9 @@ public class TheGame extends ApplicationAdapter {
 	
 	//attempts to connect to server, returns true for success
 	protected boolean connectToServer(String serverAddress, int port, String username) {
-		try {
+		try {			
+			GameEvent.handler();
+			
 			socket = new Socket(serverAddress, port);
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));

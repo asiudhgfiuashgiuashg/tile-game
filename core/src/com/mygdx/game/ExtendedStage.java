@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -64,12 +65,16 @@ public class ExtendedStage extends Stage {
 	private TheGame theGame;
 	
 
+	Map<Direction, Shape> interactionBox;
+	GameObject interactionObject;
+	
 	InventoryGroup inventoryGroup;
 	
 	public ExtendedStage(Skin skin, TheGame theGame) {
 		this.skin = skin;
 		numChatLines = 0;
 		this.theGame = theGame;
+		createInteractionBox();
 	}
 	
 	@Override
@@ -95,13 +100,89 @@ public class ExtendedStage extends Stage {
 				}
 				
 				return true; //handled
+				
+			} else if(currentMap != null && Input.Keys.Z == keycode) {
+				LocalPlayer player = currentMap.player;
+				interactionObject.setImage("bowling_ball.jpg");
+				interactionObject.setHeight(32);
+				interactionObject.setWidth(32);
+				if(player.facing == Direction.LEFT) {
+					interactionObject.pos = new Point(player.getXPos() + player.left - 35, player.getYPos());
+				}
+				if(player.facing == Direction.RIGHT) {
+					interactionObject.pos = new Point(player.getXPos() + player.right, player.getYPos());
+				}
+				if(player.facing == Direction.UP) {
+					interactionObject.pos = new Point(player.getXPos() + player.left, player.getYPos() + player.up);
+				}
+				if(player.facing == Direction.DOWN) {
+					interactionObject.pos = new Point(player.getXPos() + player.left, player.getYPos() - 35);
+				}
+				GameObject temp = currentMap.objectList.checkInteraction(interactionObject);
+				
+				
+				if(temp != null) {
+					temp.triggerEvent();
+				} else {
+					System.out.println("I dont see it");
+				}
+				
 			}
 		} else {
 			return true;
 		}
 		return false;//not handled
 	}
+	
 
+	//Only needed if the player's hitbox is not a square
+	public void createInteractionBox() {
+		interactionObject = new GameObject(new Shape(Arrays.asList(
+				new LineSeg(new Point(15, 0), new Point(15, 35)),
+				new LineSeg(new Point(15, 35), new Point(50, 35)),
+				new LineSeg(new Point(50, 35), new Point(50, 0)),
+				new LineSeg(new Point(50, 0), new Point(15, 0))
+				),
+				new Point(0,0)), true);
+		
+		/*if(currentMap.player.facing == Direction.LEFT) {
+		new Shape(Arrays.asList(
+				new LineSeg(new Point(15, 0), new Point(15, 55)),
+				new LineSeg(new Point(15, 55), new Point(50, 55)),
+				new LineSeg(new Point(50, 55), new Point(50, 0)),
+				new LineSeg(new Point(50, 0), new Point(15, 0))
+				),
+				new Point(0,0));
+		}
+		if(currentMap.player.facing == Direction.RIGHT) {
+			new Shape(Arrays.asList(
+					new LineSeg(new Point(15, 0), new Point(15, 55)),
+					new LineSeg(new Point(15, 55), new Point(50, 55)),
+					new LineSeg(new Point(50, 55), new Point(50, 0)),
+					new LineSeg(new Point(50, 0), new Point(15, 0))
+					),
+					new Point(0,0));
+			}
+		if(currentMap.player.facing == Direction.UP) {
+			new Shape(Arrays.asList(
+					new LineSeg(new Point(15, 0), new Point(15, 55)),
+					new LineSeg(new Point(15, 55), new Point(50, 55)),
+					new LineSeg(new Point(50, 55), new Point(50, 0)),
+					new LineSeg(new Point(50, 0), new Point(15, 0))
+					),
+					new Point(0,0));
+			}
+		if(currentMap.player.facing == Direction.DOWN) {
+			new Shape(Arrays.asList(
+					new LineSeg(new Point(15, 0), new Point(15, 55)),
+					new LineSeg(new Point(15, 55), new Point(50, 55)),
+					new LineSeg(new Point(50, 55), new Point(50, 0)),
+					new LineSeg(new Point(50, 0), new Point(15, 0))
+					),
+					new Point(0,0));
+			}*/
+	}
+		
 	public void updateItemList() {
 		if (null != itemList) {
 			itemList.setItems(currentMap.getNearbyItemList().itemList);

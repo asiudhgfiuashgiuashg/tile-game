@@ -82,12 +82,16 @@ public class LocalPlayer extends Player {
 	protected void handleKeyDown(int keycode) {
 		if ((Input.Keys.LEFT == keycode) || (Input.Keys.A == keycode)) {
 			directionStack.add(DirectionOfTravel.LEFT);
+			facing = Direction.LEFT;
 		} else if ((Input.Keys.RIGHT == keycode) || (Input.Keys.D == keycode)) {
 			directionStack.add(DirectionOfTravel.RIGHT);
+			facing = Direction.RIGHT;
 		} else if ((Input.Keys.UP == keycode) || (Input.Keys.W == keycode)) {
 			directionStack.add(DirectionOfTravel.UP);
+			facing = Direction.UP;
 		} else if ((Input.Keys.DOWN == keycode) || (Input.Keys.S == keycode)) {
 			directionStack.add(DirectionOfTravel.DOWN);
+			facing = Direction.DOWN;
 		}
 	}
 

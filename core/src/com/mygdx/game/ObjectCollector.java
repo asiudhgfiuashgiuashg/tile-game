@@ -88,6 +88,32 @@ public class ObjectCollector
 		}
 		
 	}
+	
+	public void addObject(String className, int id, Point pos, int eventID)
+	{
+		//
+		//System.out.println("adding object" + className + String.valueOf(id) + pos.toString());
+		try
+		{
+			if(className == "Weapon")
+			{
+				//not implemented
+			}
+			else
+			{
+				GameObject newObject = new GameObject(id, pos);
+				newObject.event = new GameEvent(eventID - 1);
+				objectList.add(newObject);
+				addObjectToGrid(newObject);
+			}
+		}
+		catch(FileNotFoundException e)
+		{
+			System.out.println("Why would this even!");
+		}
+		
+	}
+	
 	public void addObjectToGrid(GameObject object) {
 		// check every tile for intersection with object,
 		//  and if there is intersection, add the object to the list
@@ -113,12 +139,27 @@ public class ObjectCollector
 			}
 		}
 	}
-	public void deleteItem(int index)
+	
+	public GameObject checkInteraction(GameObject object) {
+		GameObject holding = null;
+		for (GameObject temp: objectList) {
+			System.out.println(temp.getName());
+			if(temp.event != null) {
+				if(temp.intersects(object)) {
+					System.out.println(temp.getName());
+					holding = temp;
+				}
+			}
+		}
+		return holding;
+	}
+	
+	public void deleteObject(int index)
 	{
 		objectList.remove(index);
 	}
 	
-	public void deleteItem(Item x)
+	public void deleteObject(Object x)
 	{
 		objectList.remove(x);
 	}

@@ -42,12 +42,12 @@ public class Item {
 			int idFromItemFile = Integer.parseInt(currentAttributes[1]);
 			if (idFromItemFile == this.id) { //id matches item we want
 				found = true;
+				setId(idFromItemFile);
 			}
 		}
 		itemFileScanner.close();
 		//now currentAttributes should correspond to the attributes of the item we want from the item file
 		setName(currentAttributes[0]);
-		setId(Integer.parseInt(currentAttributes[1]));
 		setInventoryImage(currentAttributes[2]);
 		setFloorImageURI(currentAttributes[3]);
 		setWidth(Integer.parseInt(currentAttributes[4]));
@@ -101,6 +101,7 @@ public class Item {
     }
     public String getFloorImage()
     {
+    	System.out.println(floorImageURI);
         return ("../core/assets/" + floorImageURI);
     }
     public double getXPos()
