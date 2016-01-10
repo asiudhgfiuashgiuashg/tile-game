@@ -466,6 +466,17 @@ public class ExtendedStage extends Stage {
 		hostServerButton.setPosition(this.getWidth() / 2 - hostServerButton.getWidth() / 2, table.getY() - 100);
 		
 		this.addActor(hostServerButton);
+		
+		TextButton backButton = new TextButton("Back", skin);
+		backButton.setPosition(700, 30);
+		backButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				setupMainMenu();
+			}
+		});
+		
+		this.addActor(backButton);
 	}
 	
 	private void setEnabledAndHighlight(Button button, boolean enabled) {
