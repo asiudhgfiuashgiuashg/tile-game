@@ -156,7 +156,6 @@ public class ExtendedStage extends Stage {
 		
 		readyCheckBox.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) { //notify server of readynes or unreadyness
-				if(readyCheckBox.isChecked()){
 				JSONObject readyMessage = new JSONObject();
 				readyMessage.put("type", "readyStatus");
 				readyMessage.put("readyStatus", readyCheckBox.isChecked());
@@ -164,7 +163,7 @@ public class ExtendedStage extends Stage {
 				
 				//check the box by name as well
 				playerToCheckBoxMap.get(localPlayer).setChecked(readyCheckBox.isChecked());
-				}}
+			}
 		});
 		final Label readyCheckBoxLabel = new Label("Ready?", skin);
 		readyCheckBoxLabel.setPosition(520,  70);

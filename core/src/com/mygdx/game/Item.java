@@ -149,7 +149,6 @@ public class Item {
     
     @Override
     public boolean equals(Object other) {
-    	System.out.println("equals was called hehe");
     	if (this == other) {
     		return true;
     	}

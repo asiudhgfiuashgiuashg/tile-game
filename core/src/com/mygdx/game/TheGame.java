@@ -146,7 +146,7 @@ public class TheGame extends ApplicationAdapter {
 		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
 		// stage should get events first and then possibly gameInputProcessor
 		stage = new ExtendedStage(skin, this); //the gui is laid out here
-		stage.setDebugAll(true);
+		stage.setDebugAll(debug);
 		stage.skin = skin;
 		inputMultiplexer = new InputMultiplexer();
 		inputMultiplexer.addProcessor(stage);

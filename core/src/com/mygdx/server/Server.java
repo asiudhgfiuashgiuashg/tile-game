@@ -5,6 +5,7 @@ import java.io.*;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.json.simple.JSONArray;
 
 import com.badlogic.gdx.Gdx;
 import com.mygdx.game.ExtendedStage;
