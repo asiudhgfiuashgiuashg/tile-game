@@ -23,6 +23,25 @@ import java.util.HashMap;
  *
  * a class for reading in spritesheet metadata and creating
  * appropriate animations for a spritesheet based on that metadata
+ * 
+ * ~~~~~~~~~~~~~~~~metadata specification~~~~~~~~~~~~~~~~~~~~`
+ *filename: image_name_data.json
+ *
+ *file format:
+ *{
+ *	width: number of frames spanning the sprite sheet
+ *  height: height of the spritesheet in frames
+ *
+ *  frame_sets: {
+ *		frame_set_name0: [$first_frame_num, $second_frame_num, …]
+ *      frame_set_name1: [$first_frame_num, $second_frame_num, …]
+ *         .
+ *         . 
+ *         .
+ *       }
+ *
+ *}
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 public class SpritesheetMetadataParser {
 	
@@ -50,10 +69,7 @@ public class SpritesheetMetadataParser {
 				int oneDimIndex = frameIndices[i];
 				int allFramesIndexX = oneDimIndex % metadata.width;
 				int allFramesIndexY = frameIndices[i] / metadata.width;
-				
-				System.out.println(oneDimIndex);
-				/*System.out.println(allFramesIndexX);
-				System.out.println(allFramesIndexY);*/
+
 				
 				frames[i] = allFrames[allFramesIndexY][allFramesIndexX];
 			}
