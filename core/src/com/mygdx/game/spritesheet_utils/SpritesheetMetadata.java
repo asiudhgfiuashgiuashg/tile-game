@@ -1,4 +1,4 @@
-package com.mygdx.game.cutscene_utils;
+package com.mygdx.game.spritesheet_utils;
 
 import java.util.List;
 import java.util.Map;
