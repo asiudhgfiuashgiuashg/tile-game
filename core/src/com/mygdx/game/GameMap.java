@@ -6,8 +6,13 @@
 package com.mygdx.game;
 
 import java.awt.Graphics;
+
+import org.json.simple.*;
+import org.json.simple.parser.JSONParser;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -51,6 +56,7 @@ public class GameMap {
     private boolean smallWidth;
     private boolean smallHeight;
     float stateTime;
+    private static final JSONParser parser = new JSONParser();
     
     public List<Player> players;
 
@@ -93,10 +99,10 @@ public class GameMap {
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
-        Scanner mapFileScanner = new Scanner(new File(mapFile));
-        title = mapFileScanner.nextLine();
-        numRows = Integer.parseInt(mapFileScanner.nextLine());
-        numCols = Integer.parseInt(mapFileScanner.nextLine());
+        JSONObject mapJSON = (JSONObject) parser.parse(new FileReader(mapFile));
+        title = "TITLE GOES HERE"; //TODO: map titles included in map json
+        numRows = (Integer) mapJSON.get("height");
+        numCols = (Integer) mapJSON.get("width");
         mapTiles = new Tile[numRows][numCols];
         stateTime = 0f;
 
