@@ -82,7 +82,8 @@ public class SpritesheetMetadataParser {
 	}
 
 	static FileHandle getMetadataFileHandle(FileHandle file) {
-		String name = file.file().getName().replace(".png", "_data.json");
+		String name = file.path().replace(".png", "_data.json");
+		System.out.println("fetching metadata with filename: " + name);
 		return Gdx.files.internal(name);
 	}
 }

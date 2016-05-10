@@ -15,9 +15,9 @@ public class RemotePlayer extends Player
 	
 	public RemotePlayer(Shape shape, boolean passable) {
 		super(shape, passable);
-		changeAppearance("Costume2.png");
+		changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.png"));
 		currentAnimation = moveLeft;
-		super.setWidth(idleLeft.getRegionWidth());
+		super.setWidth(idleLeft.getKeyFrame(0).getRegionWidth());
 	}
 	
 	@Override

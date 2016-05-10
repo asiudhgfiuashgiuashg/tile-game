@@ -18,7 +18,7 @@ public class LocalPlayer extends Player {
 
 	public LocalPlayer(Shape shape, boolean passable) {
 		super(shape, passable);
-		changeAppearance("Costume1.png");
+		changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.png"));
 		moveSpeed = 200;
 		canMove = true;
 

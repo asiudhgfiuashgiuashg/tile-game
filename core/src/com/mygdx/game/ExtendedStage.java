@@ -200,7 +200,7 @@ public class ExtendedStage extends Stage {
 			}
 			public void changed(ChangeEvent event, Actor actor){
 				if(checkBox.isChecked()) {
-					localPlayer.changeAppearance(sprite);
+					localPlayer.changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.png")); //FIX, appearance changing not properly tied to checkboxes atm
 					JSONObject spriteInfo = new JSONObject();
 					spriteInfo.put("type", "sprite");
 					spriteInfo.put("spriteID", sprite);

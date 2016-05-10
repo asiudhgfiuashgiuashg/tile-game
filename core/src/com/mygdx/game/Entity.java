@@ -8,11 +8,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.mygdx.game;
 
+import java.util.Map;
+
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.game.spritesheet_utils.SpritesheetMetadataParser;
 
 public abstract class Entity extends GameObject
 {
@@ -34,10 +38,10 @@ public abstract class Entity extends GameObject
     protected TextureRegion[] animationFrames;
     protected TextureRegion currentFrame;
     
-    protected TextureRegion idleRight;
-    protected TextureRegion idleLeft;
-    protected TextureRegion idleUp;
-    protected TextureRegion idleDown;
+    protected Animation idleRight;
+    protected Animation idleLeft;
+    protected Animation idleUp;
+    protected Animation idleDown;
     
     protected String spriteResourceIdentifier;
 
@@ -63,21 +67,20 @@ public abstract class Entity extends GameObject
     abstract public void setX(double newX);
     abstract public void setY(double newY);
     
-    protected void changeAppearance(String sprite)
+    protected void changeAppearance(FileHandle spritesheetFileHandle)
     {
-    	this.spriteResourceIdentifier = sprite;
-    	spriteSheet = new Texture(Gdx.files.internal(this.spriteResourceIdentifier));
-        tmp = TextureRegion.split(spriteSheet, spriteSheet.getWidth() / FRAME_COLS, spriteSheet.getHeight() / FRAME_ROWS);
+        SpritesheetMetadataParser ssParser = new SpritesheetMetadataParser();
+        Map<String, Animation> animations = ssParser.getAnimations(spritesheetFileHandle);
         
-        moveLeft = animate(9, 9);
-        idleLeft = tmp[9][0];
-        moveRight = animate(11, 9);
-        idleRight = tmp[11][0];
-        moveUp = animate(8, 9);
-        idleUp = tmp[8][0];
-        moveDown = animate(10, 9);
-        idleDown = tmp[10][0];
-        currentFrame = idleUp;
+        moveLeft = animations.get("move_left");
+        idleLeft = animations.get("idle_left");
+        moveRight = animations.get("move_right");
+        idleRight = animations.get("idle_right");
+        moveUp = animations.get("move_up");
+        idleUp = animations.get("idle_up");
+        moveDown = animations.get("move_down");
+        idleDown = animations.get("idle_down");
+        currentFrame = idleUp.getKeyFrame(0);
     }
     	
     protected Animation animate(int row, int length)

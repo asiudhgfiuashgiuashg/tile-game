@@ -341,7 +341,7 @@ public class TheGame extends ApplicationAdapter {
 							
 						} else if (received.get("type").equals("sprite")) { //updates sprites for remoteplayers
 		        			int uid = ((Number) received.get("uid")).intValue();
-		        			(currentMap.getPlayerByUid(uid)).changeAppearance((String) received.get("spriteID"));
+		        			(currentMap.getPlayerByUid(uid)).changeAppearance(Gdx.files.internal("character_art/ranger/" + received.get("spriteID")));
 		        			
 		        		}
 						
