@@ -1,0 +1,13 @@
+{
+	width: 4,
+	height: 3,
+
+	frame_sets: {
+		walk_left: [8, 4]
+		walk_right: [7, 3],
+		walk_up: [6, 2, 10],
+		walk_down: [9, 1, 5],
+
+	},
+
+}
