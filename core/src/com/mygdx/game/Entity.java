@@ -14,6 +14,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.spritesheet_utils.SpritesheetMetadataParser;
@@ -26,7 +27,9 @@ public abstract class Entity extends GameObject
 	
     protected int FRAME_COLS = 13;
     protected int FRAME_ROWS = 21;
-
+    
+    private static final float ANIMATION_DURATION = .1f;
+    private static final float SPRITE_SCALE = 3f;
     SpriteBatch batch;
 
     protected Animation moveRight;
@@ -71,6 +74,9 @@ public abstract class Entity extends GameObject
     {
         SpritesheetMetadataParser ssParser = new SpritesheetMetadataParser();
         Map<String, Animation> animations = ssParser.getAnimations(spritesheetFileHandle);
+        for (String animationName: animations.keySet()) {
+        	animations.get(animationName).setFrameDuration(ANIMATION_DURATION);
+        }
         
         moveLeft = animations.get("move_left");
         idleLeft = animations.get("idle_left");
@@ -83,18 +89,7 @@ public abstract class Entity extends GameObject
         currentFrame = idleUp.getKeyFrame(0);
     }
     	
-    protected Animation animate(int row, int length)
-    {
-        animationFrames = new TextureRegion[length];
-        int index = 0;
-        for (int j = 0; j < length; j++)
-        {
-            animationFrames[index++] = tmp[row][j];
-        }
-        Animation movement = new Animation(0.025f, animationFrames);
 
-        return movement;
-    }
     
     public void drawAtPos(SpriteBatch batch, float drawPosX, float drawPosY) {
         batch.draw(currentFrame, drawPosX, drawPosY);
@@ -103,7 +98,11 @@ public abstract class Entity extends GameObject
     }
     
     public void draw(SpriteBatch batch) {
-	    batch.draw(currentFrame, drawPosX, drawPosY);
+    	Sprite sprite = new Sprite(currentFrame);
+    	sprite.setScale(SPRITE_SCALE);
+    	sprite.setPosition(drawPosX, drawPosY);
+    	sprite.draw(batch);
+
 	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY);
 	    //batch.draw(new Texture(Gdx.files.internal("red.png")), drawPosX + getLeft(), drawPosY + getTop());
     }
