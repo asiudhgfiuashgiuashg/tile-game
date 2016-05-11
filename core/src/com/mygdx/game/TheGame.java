@@ -186,6 +186,7 @@ public class TheGame extends ApplicationAdapter {
 	protected boolean connectToServer(String serverAddress, int port, String username) {
 		try {
 			socket = new Socket(serverAddress, port);
+			socket.setTcpNoDelay(true); // turn off nagle's algorithm which will stop the tcp portion of the stack from buffering the server's messages and then delivering them all at once
 			out = new PrintWriter(socket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			stage.out = out;
