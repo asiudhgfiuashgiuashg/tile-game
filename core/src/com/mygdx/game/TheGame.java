@@ -56,7 +56,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.mygdx.ai.Agent;
 import com.mygdx.ai.PositionIndexedNode;
@@ -107,10 +109,19 @@ public class TheGame extends ApplicationAdapter {
     public static int SCREEN_WIDTH = 800;
     public static int SCREEN_HEIGHT = 480;
     
+    private ShaderProgram shaderProgram;
+    Texture testImg;
+    
 	@Override
 	public void create() {
 		debug = false;
+		testImg = new Texture("badlogic.jpg");
 		
+		//set up the shaders
+		shaderProgram = new ShaderProgram(Gdx.files.internal("data" + File.separator + "default.vert"), 
+				Gdx.files.internal("data" + File.separator + "grayscale.frag"));
+		if (!shaderProgram.isCompiled()) 
+			throw new GdxRuntimeException("Couldn't compile shader: " + shaderProgram.getLog());
 		
 		//setup the skin (resources for gui)
 		skin = new Skin();
@@ -228,7 +239,7 @@ public class TheGame extends ApplicationAdapter {
         
 		try {
             ///System.out.println("Working Directory = " + System.getProperty("user.dir"));
-            currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", localPlayer);
+            currentMap = new GameMap(mapName +".txt", "Tiles.txt", localPlayer, batch);
             if (hosting) {
             	currentMap.initializeGraph();
             	if (debug) {
@@ -245,6 +256,7 @@ public class TheGame extends ApplicationAdapter {
         catch(IOException e) {
         	System.out.println("Failed to create map object");
             System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 		
 		//player.create(); responsibilities for create() moved to constructor
@@ -263,12 +275,15 @@ public class TheGame extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if (GameState.GAME_STARTED == gameState) {
 			batch.begin();
+			//batch.setShader(shaderProgram);
+			currentMap.drawNonOccluders(batch); //draw things which don't cast shadows (tiles)
+			currentMap.drawOccluders(batch); //draw things which cast shadows
 			
-			currentMap.draw(batch);
-			currentMap.update(batch);
-			
-			
+			//batch.draw(testImg, 0, 0);
 			batch.end();
+			
+			currentMap.update();
+			
 			
 			if (debug) {
 				currentMap.debugGraph(); //MUST COME AFTER BATCH, batch and shaperenderer cannot mix

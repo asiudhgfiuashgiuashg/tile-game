@@ -22,10 +22,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.Array;
@@ -78,7 +81,7 @@ public class GameMap {
     
 	protected List<Agent> agents;
 	
-    public GameMap(String mapFile, String tileFile, LocalPlayer player) throws IOException {
+    public GameMap(String mapFile, String tileFile, LocalPlayer player, SpriteBatch batch) throws IOException {
     	agents = new ArrayList<Agent>();
     	
     	shapeRenderer = new ShapeRenderer();
@@ -93,7 +96,8 @@ public class GameMap {
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
-        Scanner mapFileScanner = new Scanner(new File(mapFile));
+        Scanner mapFileScanner = new Scanner(Gdx.files.internal(mapFile).reader());
+        
         title = mapFileScanner.nextLine();
         numRows = Integer.parseInt(mapFileScanner.nextLine());
         numCols = Integer.parseInt(mapFileScanner.nextLine());
@@ -101,7 +105,7 @@ public class GameMap {
         stateTime = 0f;
 
         System.out.println("numrows: " + numRows);
-        Scanner tileFileScanner = new Scanner(new File(tileFile));
+        Scanner tileFileScanner = new Scanner(Gdx.files.internal(tileFile).reader());
         for (int r = numRows - 1; r >= 0; r--) {
             String currentRow = mapFileScanner.nextLine();
             String[] individualIds = currentRow.split("\\s+");
@@ -127,7 +131,7 @@ public class GameMap {
                 //need to also get hazard once class Item is implemented
                 Tile newTile = new Tile(c * TILE_WIDTH, r * TILE_HEIGHT, imageURI, name, passable);
                 mapTiles[r][c] = newTile;
-                tileFileScanner = new Scanner(new File(tileFile));
+                tileFileScanner = new Scanner(Gdx.files.internal(tileFile).reader());
             }
         }
 
@@ -174,24 +178,36 @@ public class GameMap {
         // create and save png which is composite of tile images //
         ///////////////////////////////////////////////////////////
         System.out.println("CREATING COMPOSITE MAP IMAGE");
-        BufferedImage bigImage = new BufferedImage(TILE_WIDTH * numCols, TILE_HEIGHT * numRows, BufferedImage.TYPE_INT_ARGB); //made up of combined tiles
-        Graphics g = bigImage.getGraphics();
+        FrameBuffer mapFB = new FrameBuffer(Format.RGBA8888, TILE_HEIGHT * numRows, TILE_WIDTH * numCols, false);
+        
+        mapFB.begin();
+        batch.begin();
+        List<Texture> imageTexturesToDisposeOf = new ArrayList<Texture>();
         for (int r = 0; r < numRows; r++) {
             for (int c = 0; c < numCols; c++) {
-                BufferedImage currTileImg;
-                currTileImg = ImageIO.read(new File("../core/assets/" + mapTiles[numRows - 1 - r][c].imageURI));
-                g.drawImage(currTileImg, c * TILE_WIDTH, r * TILE_HEIGHT, null);
+
+                FileHandle imageFileHandle = Gdx.files.internal(mapTiles[numRows -1 -r][c].imageURI);
+                Texture imageTexture = new Texture(imageFileHandle);
+                imageTexturesToDisposeOf.add(imageTexture);
+
+                TextureRegion imageTextureRegion = new TextureRegion(imageTexture);
+                imageTextureRegion.flip(false, true);
+                batch.draw(imageTextureRegion, c *  TILE_WIDTH, r * TILE_HEIGHT);
             }
         }
+        batch.end();
+        mapFB.end();
 
-        try {
-            ImageIO.write(bigImage, "PNG", new File(title + ".png"));
-            System.out.println("))))))))))))))))))))))))");
-            mapImage = new Texture(Gdx.files.internal(title + ".png"));
-            System.out.println("((((((((((((((((((((((((");
-        } catch (IOException e) {
-            System.out.println(e);
+
+        System.out.println("))))))))))))))))))))))))");
+        mapImage = mapFB.getColorBufferTexture();
+        System.out.println("((((((((((((((((((((((((");
+        
+        //stop using memory for temporary tile textures
+        for (Texture texture: imageTexturesToDisposeOf) {
+        	texture.dispose();
         }
+
         mapWidth = TILE_WIDTH * numCols;
         mapHeight = TILE_HEIGHT * numRows;
 
@@ -210,7 +226,7 @@ public class GameMap {
     }
 
     //updating and drawing the visible part of the map
-    public void update(SpriteBatch batch) {
+    public void update() {
         //All numbers in the y direction go from bottom to top in all other functions, but the final value is inverted within the the below function for proper usage.
         //player.update() must come before fov.setRegion or item drawing will lag behind map and player drawing
         for (Player player: players) {
@@ -224,8 +240,12 @@ public class GameMap {
         }
 
     }
+    
+    public void drawOccluders(SpriteBatch batch) {
+    	player.draw(batch);
+    }
 
-    public void draw(SpriteBatch batch) {
+    public void drawNonOccluders(SpriteBatch batch) {
 
         batch.draw(fov, 0, 0);
         for (int x = 0; x < itemsOnField.getListSize(); x++) {
@@ -271,7 +291,7 @@ public class GameMap {
                 }
             }
         }
-        player.draw(batch);
+        
         
         for (Agent agent: agents) {
         	agent.drawAtPos(batch, (float) agent.getPos().getX() - mapPosX, (float) agent.getPos().getY() - mapPosY);

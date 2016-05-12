@@ -29,7 +29,7 @@ public abstract class Entity extends GameObject
     protected int FRAME_ROWS = 21;
     
     private static final float ANIMATION_DURATION = .125f;
-    private static final float SPRITE_SCALE = 2.7f;
+    private static final float SPRITE_SCALE = 5f;
     SpriteBatch batch;
 
     protected Animation moveRight;
