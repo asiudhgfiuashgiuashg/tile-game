@@ -6,8 +6,15 @@
 package com.mygdx.game;
 
 import java.awt.Graphics;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -54,6 +61,7 @@ public class GameMap {
     private boolean smallWidth;
     private boolean smallHeight;
     float stateTime;
+    private static final JSONParser parser = new JSONParser();
     
     public List<Player> players;
 
@@ -80,8 +88,9 @@ public class GameMap {
 	private ShapeRenderer shapeRenderer;
     
 	protected List<Agent> agents;
+	private static final String TILEART_DIRECTORY = "tileart";
 	
-    public GameMap(String mapFile, String tileFile, LocalPlayer player, SpriteBatch batch) throws IOException {
+    public GameMap(FileHandle mapFile, LocalPlayer player, SpriteBatch batch) throws IOException {
     	agents = new ArrayList<Agent>();
     	
     	shapeRenderer = new ShapeRenderer();
@@ -96,84 +105,68 @@ public class GameMap {
         ///////////////////////////////////
         // convert mapFile into Tile[][] //
         ///////////////////////////////////
-        Scanner mapFileScanner = new Scanner(Gdx.files.internal(mapFile).reader());
-        
-        title = mapFileScanner.nextLine();
-        numRows = Integer.parseInt(mapFileScanner.nextLine());
-        numCols = Integer.parseInt(mapFileScanner.nextLine());
+
+        JSONObject mapJSON = null;
+		try {
+			mapJSON = (JSONObject) parser.parse(mapFile.reader());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+        title = "TITLE GOES HERE"; //TODO: map titles included in map json
+        numRows = ((Number) mapJSON.get("height")).intValue();
+        numCols = ((Number) mapJSON.get("width")).intValue();
+
         mapTiles = new Tile[numRows][numCols];
         stateTime = 0f;
-
+        JSONArray tiles = (JSONArray) mapJSON.get("tiles");
+        
         System.out.println("numrows: " + numRows);
-        Scanner tileFileScanner = new Scanner(Gdx.files.internal(tileFile).reader());
-        for (int r = numRows - 1; r >= 0; r--) {
-            String currentRow = mapFileScanner.nextLine();
-            String[] individualIds = currentRow.split("\\s+");
+
+        for (int r = 0; r < numRows; r++) {
+        	JSONArray row = (JSONArray) tiles.get(r);
             for (int c = 0; c < numCols; c++ /*ha*/ ) {
-                String individualTileId = individualIds[c];
-                //find corresponding line in tileFile
-                String currentTilesLine = null;
-                String[] currentAttributes = null;
-                boolean found = false;
-                while (!found) {
-                    currentTilesLine = tileFileScanner.nextLine();
-                    currentAttributes = currentTilesLine.split(", ");
-                    if (currentAttributes[1].equals(individualTileId)) { //id matches tile we want
-                        found = true;
-                    }
-                }
-                //now currentAttributes should have all the attributes needed to create our tile object
-                //name, id, imageURI, left, right, top, bottom <--- order in Tiles.txt
-                //String imageURI, String name, boolean leftWall, boolean rightWall, boolean topWall, boolean bottomWall <----- order in Tile()
-                String imageURI = currentAttributes[2];
-                String name = currentAttributes[0];
-                boolean passable = Boolean.parseBoolean(currentAttributes[3]);
-                //need to also get hazard once class Item is implemented
+            	String currTileArtURI = (String) row.get(c);
+                String imageURI = currTileArtURI;
+                String name = currTileArtURI.substring(0, currTileArtURI.indexOf('.')); //for now, the tile's name can be its URI without the extension
+                boolean passable = true; //all tiles are passable for now
+
                 Tile newTile = new Tile(c * TILE_WIDTH, r * TILE_HEIGHT, imageURI, name, passable);
-                mapTiles[r][c] = newTile;
-                tileFileScanner = new Scanner(Gdx.files.internal(tileFile).reader());
+
+                mapTiles[numRows - 1 - r][c] = newTile;
+
             }
         }
 
-        tileFileScanner.close();
+
 
         //Initializes the ItemCollector object before giving it the information to create an array list of items.
         itemsOnField = new ItemCollector();
-        int itemIndex = Integer.parseInt(mapFileScanner.nextLine());
-        String[] currentAttributes = null;
-        String className;
+
+        //FIX adding items to a map is not currently supported by map-maker
+/*        String className;
         int id;
         Point pos;
-        if (itemIndex > 0) {
-            for (int x = 0; x < itemIndex; x++) {
-                String currentLine = mapFileScanner.nextLine();
-                currentAttributes = currentLine.split(", ");
-                className = currentAttributes[0];
-                id = Integer.parseInt(currentAttributes[1]);
-                pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
-                itemsOnField.addItem(className, id, pos);
-            }
-
+        
+        
+        for (int x = 0; x < itemIndex; x++) {
+            className = currentAttributes[0];
+            id = Integer.parseInt(currentAttributes[1]);
+            pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
+            itemsOnField.addItem(className, id, pos);
         }
 
+*/
         //Creates the ObjectCollector...object (kek) before giving it the information to create an array list of objects
-
+        JSONArray objects = (JSONArray) mapJSON.get("objects");
         objectList = new ObjectCollector(TILE_WIDTH, TILE_HEIGHT, numCols, numRows, mapTiles);
-        int objectIndex = Integer.parseInt(mapFileScanner.nextLine());
-        if (objectIndex > 0) {
-            for (int x = 0; x < objectIndex; x++) {
-                String currentLine = mapFileScanner.nextLine();
-                currentAttributes = currentLine.split(", ");
-                className = currentAttributes[0];
-                id = Integer.parseInt(currentAttributes[1]);
-                pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
-                objectList.addObject(className, id, pos);
-            }
-
+        for (Object object: objects) {
+        	JSONObject objectMap = (JSONObject) object;
+            objectList.addObject(objectMap);
         }
 
 
-        mapFileScanner.close();
         ///////////////////////////////////////////////////////////
         // create and save png which is composite of tile images //
         ///////////////////////////////////////////////////////////
@@ -186,13 +179,14 @@ public class GameMap {
         for (int r = 0; r < numRows; r++) {
             for (int c = 0; c < numCols; c++) {
 
-                FileHandle imageFileHandle = Gdx.files.internal(mapTiles[numRows -1 -r][c].imageURI);
+                FileHandle imageFileHandle = Gdx.files.internal(TILEART_DIRECTORY  + File.separator + mapTiles[numRows -1 -r][c].imageURI);
                 Texture imageTexture = new Texture(imageFileHandle);
                 imageTexturesToDisposeOf.add(imageTexture);
 
                 TextureRegion imageTextureRegion = new TextureRegion(imageTexture);
                 imageTextureRegion.flip(false, true);
                 batch.draw(imageTextureRegion, c *  TILE_WIDTH, r * TILE_HEIGHT);
+
             }
         }
         batch.end();
@@ -273,7 +267,7 @@ public class GameMap {
             Texture textureToUse = thingToTextureMap.get(object);
             if ((objectList.getXPos(x) + objectList.getWidth(x) > mapPosX && objectList.getXPos(x) < mapPosX + 2 * winX) && (objectList.getYPos(x) + objectList.getHeight(x) > mapPosY && objectList.getYPos(x) < mapPosY + 2 * winX)) {
                 if (textureToUse == null) { //Item doesnt map to any texture, so make it one
-                    textureToUse = new Texture(objectList.getImage(x));
+                    textureToUse = new Texture(Gdx.files.internal("objectart" + File.separator + objectList.getImage(x)));
                     thingToTextureMap.put(object, textureToUse); // save texture to use later
                 }
                 batch.draw(textureToUse, (float) objectList.getXPos(x) - mapPosX, (float) objectList.getYPos(x) - mapPosY);
