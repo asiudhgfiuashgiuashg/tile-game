@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONObject;
+
 /**
  * (Insert a comment that briefly describes the purpose of this class definition.)
  *
@@ -30,7 +32,7 @@ public class ObjectCollector
 	//  for each tile in the map grid there is exactly one tile in the objectGrid
 	// Each tile in the objectGrid will contain a List<GameObject> of the GameObjects which
 	//  exist at least partially in that tile
-	protected Object[][] objectGrid;
+	protected Object[][] objectGrid; //organize the objects by the what tile they're on. That way the game has a fast way of knowing what objects are on the floor that the player can reach
 	private final int TILE_HEIGHT;
 	private final int TILE_WIDTH;
 	private int numMapCols;
@@ -65,27 +67,22 @@ public class ObjectCollector
 		TILE_WIDTH = tileWidth;
 	}
 	
-	public void addObject(String className, int id, Point pos)
+	public void addObject(JSONObject objJSON)
 	{
-		//
-		//System.out.println("adding object" + className + String.valueOf(id) + pos.toString());
-		try
-		{
-			if(className == "Weapon")
-			{
-				//not implemented
-			}
-			else
-			{
-				GameObject newObject = new GameObject(id, pos);
-				objectList.add(newObject);
-				addObjectToGrid(newObject);
-			}
-		}
-		catch(FileNotFoundException e)
-		{
-			System.out.println("Why would this even!");
-		}
+		JSONObject baseProperties = (JSONObject) objJSON.get("baseProperties");
+		boolean passable = !((Boolean) baseProperties.get("collision"));
+		int visLayer = ((Number) baseProperties.get("visLayer")).intValue();
+		double xPos = ((Number) baseProperties.get("x")).doubleValue();
+		double yPos = ((Number) baseProperties.get("y")).doubleValue();
+		String fileName = (String) baseProperties.get("fileName");
+		Point pos = new Point(xPos, yPos);
+		
+		List<LineSeg> shapeLineSegs = new ArrayList<LineSeg>();
+		Shape shape = new Shape(shapeLineSegs, pos);
+		
+		GameObject newObject = new GameObject(passable, visLayer, pos, fileName, shape);
+		objectList.add(newObject);
+		addObjectToGrid(newObject);
 		
 	}
 	public void addObjectToGrid(GameObject object) {

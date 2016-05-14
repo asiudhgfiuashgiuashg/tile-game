@@ -221,13 +221,13 @@ public class TheGame extends ApplicationAdapter {
 		
 		Scanner sc = new Scanner(System.in);
         ///System.out.println("Which map would you like to test?");
-        String mapName = "1Square";//sc.nextLine();
+        String mapName = "test";//sc.nextLine();
         
         sc.close();
         
 		try {
             ///System.out.println("Working Directory = " + System.getProperty("user.dir"));
-            currentMap = new GameMap("../core/assets/" + mapName +".txt", "../core/assets/Tiles.txt", localPlayer);
+            currentMap = new GameMap(Gdx.files.internal(mapName +".json"), localPlayer);
             if (hosting) {
             	currentMap.initializeGraph();
             	if (debug) {
@@ -243,7 +243,7 @@ public class TheGame extends ApplicationAdapter {
         }
         catch(IOException e) {
         	System.out.println("Failed to create map object");
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 		
 		//player.create(); responsibilities for create() moved to constructor
