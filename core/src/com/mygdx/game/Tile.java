@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 public class Tile extends GameObject
 {
-    private static final int TILE_WIDTH = 64;
-    private static final int TILE_HEIGHT = 64;
+    private static final int TILE_WIDTH = 80;
+    private static final int TILE_HEIGHT = 80;
 
     public String imageURI;
     private String name;

@@ -38,6 +38,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.ai.Agent;
 import com.mygdx.ai.DefaultIndexedGraphWithPublicNodes;
@@ -171,7 +172,12 @@ public class GameMap {
         // create and save png which is composite of tile images //
         ///////////////////////////////////////////////////////////
         System.out.println("CREATING COMPOSITE MAP IMAGE");
-        FrameBuffer mapFB = new FrameBuffer(Format.RGBA8888, TILE_HEIGHT * numRows, TILE_WIDTH * numCols, false);
+        FrameBuffer mapFB = new FrameBuffer(Format.RGBA8888, TILE_WIDTH * numCols, TILE_HEIGHT * numRows, false);
+        
+        //http://stackoverflow.com/questions/14729961/ambiguous-results-with-frame-buffers-in-libgdx
+        Matrix4 projectionMatrix = new Matrix4();
+        projectionMatrix.setToOrtho2D(0, 0, TILE_WIDTH * numCols, TILE_HEIGHT * numRows);
+        batch.setProjectionMatrix(projectionMatrix);
         
         mapFB.begin();
         batch.begin();
@@ -191,6 +197,9 @@ public class GameMap {
         }
         batch.end();
         mapFB.end();
+        
+        projectionMatrix.setToOrtho2D(0, 0, TheGame.SCREEN_WIDTH, TheGame.SCREEN_HEIGHT);
+        batch.setProjectionMatrix(projectionMatrix);
 
 
         System.out.println("))))))))))))))))))))))))");
