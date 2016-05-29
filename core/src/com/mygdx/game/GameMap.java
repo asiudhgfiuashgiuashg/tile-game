@@ -244,12 +244,9 @@ public class GameMap {
 
     }
     
-    public void drawOccluders(SpriteBatch batch) {
-    	player.draw(batch);
-    }
 
-    public void drawNonOccluders(SpriteBatch batch) {
-
+    public void draw(SpriteBatch batch) {
+    	
         batch.draw(fov, 0, 0);
         for (int x = 0; x < itemsOnField.getListSize(); x++) {
             Item item = itemsOnField.getItem(x);
@@ -300,6 +297,8 @@ public class GameMap {
         	agent.drawAtPos(batch, (float) agent.getPos().getX() - mapPosX, (float) agent.getPos().getY() - mapPosY);
         	agent.update(stateTime);
         }
+        
+        player.draw(batch);
     }
 
     //////////////////////////

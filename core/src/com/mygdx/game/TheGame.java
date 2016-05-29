@@ -277,8 +277,7 @@ public class TheGame extends ApplicationAdapter {
 		if (GameState.GAME_STARTED == gameState) {
 			batch.begin();
 			//batch.setShader(shaderProgram);
-			currentMap.drawNonOccluders(batch); //draw things which don't cast shadows (tiles)
-			currentMap.drawOccluders(batch); //draw things which cast shadows
+			currentMap.draw(batch); //draw things which don't cast shadows (tiles)
 			
 			//batch.draw(testImg, 0, 0);
 			batch.end();
