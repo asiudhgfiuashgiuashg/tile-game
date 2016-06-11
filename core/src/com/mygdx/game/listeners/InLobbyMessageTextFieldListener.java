@@ -8,17 +8,18 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.mygdx.game.Communicator;
 import com.mygdx.game.ExtendedStage;
 import com.mygdx.game.LocalPlayer;
 
 public class InLobbyMessageTextFieldListener extends InputListener {
 	private TextField messageTextField;
-	private PrintWriter out;
+	private Communicator communicator;
 	private LocalPlayer localPlayer;
 	private ExtendedStage stage;
 	
-	public InLobbyMessageTextFieldListener(TextField messageTextField, PrintWriter out, LocalPlayer player, ExtendedStage stage) {
-		this.out = out;
+	public InLobbyMessageTextFieldListener(TextField messageTextField, Communicator communicator, LocalPlayer player, ExtendedStage stage) {
+		this.communicator = communicator;
 		this.messageTextField = messageTextField;
 		this.localPlayer = player;
 		this.stage = stage;
@@ -27,11 +28,9 @@ public class InLobbyMessageTextFieldListener extends InputListener {
 	@Override
 	public boolean keyDown(InputEvent event, int keycode) {
 		if (keycode == Input.Keys.ENTER) {
-			JSONObject message = new JSONObject();
 			if (messageTextField.getText().length() > 0) {
-				message.put("type", "chatMessage");
-				message.put("message", messageTextField.getText());
-				out.println(message);
+				String message =  messageTextField.getText();
+				communicator.sendChatMessage(message);
 				stage.addMessageToChatbox(localPlayer.username + ": " + messageTextField.getText());
 				messageTextField.setText("");
 			}

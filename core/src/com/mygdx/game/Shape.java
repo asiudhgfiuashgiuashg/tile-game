@@ -29,7 +29,7 @@ public class Shape {
 		this.lineSegs = lineSegs;
 		this.pos = pos;
 
-		cutoffY = findCutoffY(lineSegs);
+		cutoffY = 0;//findCutoffY(lineSegs);
 
 		//conceptually, the Shape is created with its position at 0, 0 and then translated to its intended position
 		updateCoordinates(new Point(0, 0));

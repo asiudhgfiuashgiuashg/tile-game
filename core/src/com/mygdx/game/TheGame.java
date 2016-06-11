@@ -72,14 +72,12 @@ public class TheGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	
 	public static GameMap currentMap;
-	public static PrintWriter out;
-    public static BufferedReader in;
     private long time;
     private final int SEND_SPACING = 50;
     private DirectionOfTravel playerOldDirection;
     private Skin skin;
     private ExtendedStage stage;
-    private Socket socket;
+
     
     
     
@@ -90,7 +88,6 @@ public class TheGame extends ApplicationAdapter {
     
     protected LocalPlayer localPlayer;
     
-    
     protected static enum GameState {
     	MAIN_MENU,
         SERVER_CONNECT_SCREEN,
@@ -98,7 +95,12 @@ public class TheGame extends ApplicationAdapter {
         IN_LOBBY,
         GAME_STARTED,
     }
+    
+    /**
+     * represents the screen that the game is in (main menu, connecting to server screen, lobby screen, in game, etc ..)
+     */
     static GameState gameState;
+    
     private InputMultiplexer inputMultiplexer; //will delegate events tos the game inputprocessor and the gui inputprocessor (the stage)
     private GameInputProcessor gameInputProcessor;
     
@@ -111,6 +113,11 @@ public class TheGame extends ApplicationAdapter {
     
     private ShaderProgram shaderProgram;
     Texture testImg;
+
+    /**
+     * used to communicate with the server
+     */
+	private final Communicator communicator = new Communicator(this);
     
 	@Override
 	public void create() {
@@ -156,7 +163,8 @@ public class TheGame extends ApplicationAdapter {
 		
 		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
 		// stage should get events first and then possibly gameInputProcessor
-		stage = new ExtendedStage(skin, this); //the gui is laid out here
+		stage = new ExtendedStage(skin, this, communicator ); //the gui is laid out here
+		communicator.setStage(stage);
 		stage.setDebugAll(debug);
 		stage.skin = skin;
 		inputMultiplexer = new InputMultiplexer();
@@ -195,32 +203,20 @@ public class TheGame extends ApplicationAdapter {
 	
 	//attempts to connect to server, returns true for success
 	protected boolean connectToServer(String serverAddress, int port, String username) {
+
 		try {
-			socket = new Socket(serverAddress, port);
-			socket.setTcpNoDelay(true); // turn off nagle's algorithm which will stop the tcp portion of the stack from buffering the server's messages and then delivering them all at once
-			out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			stage.out = out;
-			
-			
-			localPlayer = new LocalPlayer(playerShape, false);
-			localPlayer.username = username;
-			setupForInGame();
-			
-			
-			
-			//send server player info, such as username
-			JSONObject outObj = new JSONObject();
-			outObj.put("type", "playerInfo");
-			outObj.put("username", localPlayer.username);
-			out.println(outObj);
-			return true;
-			
-		} catch (Exception e) {
+			communicator.connectToServer(InetAddress.getByName(serverAddress), port, username);
+		} catch (UnknownHostException e) {
 			stage.displayError();
 			e.printStackTrace();
-			return false;
 		}
+		
+		
+		localPlayer = new LocalPlayer(playerShape, false, communicator);
+		localPlayer.username = username;
+		setupForInGame();
+		
+		return true;
 	}
 	
 	
@@ -308,130 +304,11 @@ public class TheGame extends ApplicationAdapter {
 		stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 		stage.draw();
 		
-		
 		doNetworking();
 	}
 	
 	private void doNetworking() {	
-		//*******Networking*****
-		if (GameState.SERVER_CONNECT_SCREEN != gameState) {
-			try {
-				if (in.ready()) {
-					String receivedStr = in.readLine();
-					JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
-					Gdx.app.log(getClass().getSimpleName(), "received: " + receivedStr);
-					if (received.get("type").equals("chatMessage")) {
-						String message = (String) received.get("message");
-						System.out.println("message: " + message);
-						stage.addMessageToChatbox(message);
-					}
-					
-					
-					//spin until receive message from server to start game (signaling that other client has connected, etc)
-					if (GameState.IN_LOBBY == gameState) {
-
-						if (received.get("type").equals("gameStartSignal")) {
-							gameState = GameState.GAME_STARTED;
-							stage.clear();
-							addInGameActors();
-							
-						} else if (received.get("type").equals("playerInfo")) {
-							String playerName = (String) received.get("username");
-							int uid = ((Number) received.get("uid")).intValue();
-							RemotePlayer remotePlayer = addRemotePlayerToList(playerName, uid);
-							/////System.out.println("remotePlayer info received: " + remotePlayer == null);
-							stage.addPlayerToLobbyStage(remotePlayer);
-							System.out.println("added remotePlayer: " + remotePlayer);
-							
-						} else if (received.get("type").equals("readyStatus")) {
-							int uid = ((Number) received.get("uid")).intValue();
-							boolean isReady = (Boolean) received.get("readyStatus");
-							for (Player player: stage.playerToCheckBoxMap.keySet()) {
-								if (player.uid == uid) {
-									stage.playerToCheckBoxMap.get(player).setChecked(isReady);
-								}
-							}
-							
-						} else if (received.get("type").equals("uidUpdate")) {
-							localPlayer.uid = ((Number) received.get("uid")).intValue();
-							
-						} else if (received.get("type").equals("sprite")) { //updates sprites for remoteplayers
-		        			int uid = ((Number) received.get("uid")).intValue();
-		        			(currentMap.getPlayerByUid(uid)).changeAppearance(Gdx.files.internal("character_art/ranger/" + received.get("spriteID")));
-		        			
-		        		}
-						
-					} else if (GameState.GAME_STARTED == gameState) { //handle messages that come during game play, after the game has started
-		        		String messageType = (String) received.get("type");
-		        		//position updates
-		        		if (messageType.equals("position")) {
-			        		double otherPlayerX = ((Number) received.get("charX")).floatValue();
-			        		double otherPlayerY = ((Number) received.get("charY")).floatValue();
-			        		int uid = ((Number) received.get("uid")).intValue();
-			        		currentMap.getPlayerByUid(uid).setPos(new Point(otherPlayerX, otherPlayerY));
-			        		
-		        		} else if (messageType.equals("animation")) { //animation updates
-		        			//System.out.println("animation: " + received);
-		        			int uid = ((Number) received.get("uid")).intValue();
-		        			((RemotePlayer) currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));
-		        			
-		        		} else if (messageType.equals("removedItem")) { //item removed from ground
-		        			int uid = ((Number) received.get("uid")).intValue(); //unique identifier of item which was removed
-		        			currentMap.itemsOnField.removeByUid(uid);
-		        			stage.updateItemList(); //repopulate itemList to get rid of the listing for the removed item
-		        			
-		        		} else if (messageType.equals("inventoryAddition")) { //arrives before the removedItem message
-		        			int uid = ((Number) received.get("uid")).intValue();
-		        			localPlayer.inv.addItem(currentMap.itemsOnField.getByUid(uid));
-		        			
-		        		} else if (messageType.equals("itemDrop")) {
-		        			
-		        			Item droppedItem = new Item(received); //create an item from the json
-		        			Gdx.app.log(getClass().getSimpleName(), "dropped item: " + droppedItem);
-		        			currentMap.getItemList().itemList.add(droppedItem);
-		        		}
-		                
-					}
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			//sending messagse to server
-			//TODO maybe need a more advanced queue so we arent sending every message type at the same time
-			// maybe not, maybe tcp already handles queues of messages pretty well
-			if (GameState.GAME_STARTED == gameState) {
-		    	JSONObject obj = new JSONObject();
-		        if (System.currentTimeMillis() - time >= SEND_SPACING) {
-		        	//sending position
-		        	obj.clear();
-		        	if (!localPlayer.getPos().equals(oldPos)) { //don't send unnecessary updates
-			        	float charX = (float) localPlayer.getPos().getX();
-			        	float charY = (float) localPlayer.getPos().getY();
-			        	obj.put("type", "position"); //let server know that this message specifies a position update
-			            obj.put("charX", charX);
-			            obj.put("charY", charY);
-			            obj.put("uid", localPlayer.uid);
-			        	out.println(obj.toString());
-			        	oldPos = localPlayer.getPos();
-		        	}
-		        	//sending direction
-		        	if (localPlayer.direction != playerOldDirection) {
-
-		        		//System.out.println(localPlayer.direction.toString());
-
-			        	obj.clear();
-			        	obj.put("type", "direction");
-			        	obj.put("direction", localPlayer.direction.toString());
-			        	out.println(obj.toString());
-		        	}
-		        	playerOldDirection = localPlayer.direction;
-		        	
-		        	//update time
-		        	time = System.currentTimeMillis();
-		        }
-			}
-		}
+		communicator.receiveMessage();
 		if (hosting) {
 			if (GameState.IN_LOBBY == gameState) {
 				server.checkForConnections();
@@ -448,7 +325,7 @@ public class TheGame extends ApplicationAdapter {
 		inputMultiplexer.addProcessor(gameInputProcessor);
 	}
 	
-	private RemotePlayer addRemotePlayerToList(String playerName, int uid) {
+	RemotePlayer addRemotePlayerToList(String playerName, int uid) {
 		RemotePlayer remotePlayer = new RemotePlayer(playerShape, true);
 		remotePlayer.uid = uid;
 		remotePlayer.username = playerName;

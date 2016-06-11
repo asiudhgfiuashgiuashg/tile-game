@@ -15,14 +15,20 @@ public class LocalPlayer extends Player {
 
 	private boolean canMove;
 	protected Stack<DirectionOfTravel> directionStack; //used to figure out which way to move based on keypresses
+	private Communicator communicator;
 
-	public LocalPlayer(Shape shape, boolean passable) {
+	/**
+	 * 
+	 * @param shape the shape of the local player's hitbox
+	 * @param passable whether the local player can be walked through by other players
+	 * @param communicator what the local player uses to send updates to the server about its actions
+	 */
+	public LocalPlayer(Shape shape, boolean passable, Communicator communicator) {
 		super(shape, passable);
 		changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.png"));
 		moveSpeed = 200;
 		canMove = true;
-
-		// TODO Auto-generated constructor stub
+		this.communicator = communicator;
 	}
 
 	public void setCurrentMap(GameMap currentMap) {
@@ -62,22 +68,44 @@ public class LocalPlayer extends Player {
 					System.out.println(e);
 					e.printStackTrace();
 				}
+				
+				/*
+				 * send information about actions to server through the connector
+				 */
+				communicator.sendLocalPlayerPosition();
+				communicator.sendLocalPlayerDirection();
 			}
 		}
+		
+		
+		
 	}
+	
+	
+	
 	public void setFOV(int x, int y) {
 		sightX = x;
 		sightY = y;
 	}
+	
+	
 	public void setCanMove(boolean canMove) {
 		this.canMove = canMove;
 	}
+	
+	
+	
 	public boolean canMove() {
 		return canMove;
 	}
+	
+	
+	
 	public float getMoveDist() {
 		return moveSpeed * Gdx.graphics.getDeltaTime();
 	}
+	
+	
 	
 	protected void handleKeyDown(int keycode) {
 		if ((Input.Keys.LEFT == keycode) || (Input.Keys.A == keycode)) {
@@ -90,6 +118,8 @@ public class LocalPlayer extends Player {
 			directionStack.add(DirectionOfTravel.DOWN);
 		}
 	}
+	
+	
 
 	public void handleKeyUp(int keycode) {
 		if ((Input.Keys.LEFT == keycode) || (Input.Keys.A == keycode)) {
@@ -105,4 +135,6 @@ public class LocalPlayer extends Player {
 			direction = direction.IDLE;
 		}
 	}
+	
+	
 }
