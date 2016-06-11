@@ -72,17 +72,21 @@ public class TheGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	
 	public static GameMap currentMap;
-    private long time;
-    private final int SEND_SPACING = 50;
-    private DirectionOfTravel playerOldDirection;
+
+	/**
+	 * contains UI resources such as textures, colors, fonts
+	 */
     private Skin skin;
+    /**
+     * responsible for laying out and displaying the GUI
+     */
     private ExtendedStage stage;
 
     
     
     
     private ObjectShape playerShape;
-    private Point oldPos;
+
     
     
     
@@ -106,13 +110,15 @@ public class TheGame extends ApplicationAdapter {
     
     private Server server;
     private boolean hosting;
+    /**
+     * if true, lines are drawn to debug various things like hitboxes and pathfinding graphs
+     */
     public static boolean debug;
     
     public static int SCREEN_WIDTH = 800;
     public static int SCREEN_HEIGHT = 480;
     
-    private ShaderProgram shaderProgram;
-    Texture testImg;
+
 
     /**
      * used to communicate with the server
@@ -122,14 +128,83 @@ public class TheGame extends ApplicationAdapter {
 	@Override
 	public void create() {
 		debug = false;
-		testImg = new Texture("badlogic.jpg");
 		
-		//set up the shaders
-		shaderProgram = new ShaderProgram(Gdx.files.internal("data" + File.separator + "default.vert"), 
-				Gdx.files.internal("data" + File.separator + "grayscale.frag"));
-		if (!shaderProgram.isCompiled()) 
-			throw new GdxRuntimeException("Couldn't compile shader: " + shaderProgram.getLog());
+		setupSkin();
 		
+		
+		gameState = GameState.SERVER_CONNECT_SCREEN;
+		batch = new SpriteBatch();
+		
+		setupStage();
+		
+		setupMultiplexer();
+		
+
+		/*
+		 * the hitbox of the player - in the future this will need to be moved elsewhere
+		 */
+		playerShape = new ObjectShape(Arrays.asList(
+				new LineSeg(new Point(15, 0), new Point(15, 55)),
+				new LineSeg(new Point(15, 55), new Point(50, 55)),
+				new LineSeg(new Point(50, 55), new Point(50, 0)),
+				new LineSeg(new Point(50, 0), new Point(15, 0))
+				),
+				new Point(0,0));
+		
+		
+		setupMainMenu();
+	}
+	
+	/**
+	 * set up the input classes for the game
+	 * the two input processors are the stage and then the gameInputProcessor
+	 * the stage receives input first and decides whether it should be passed on to the gameInputProcessor
+	 * input to the stage is for the gui and input to the gameInputProcessor is to control the character
+	 */
+	private void setupMultiplexer() {
+		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
+		// stage should get events first and then possibly gameInputProcessor
+		inputMultiplexer = new InputMultiplexer();
+		inputMultiplexer.addProcessor(stage);
+		
+		/*
+		 * the inputMultiplexer will pass unhandled events along to the next inputprocessor
+		 *  event ----given to -----> stage ---- event was unhandled ----- given to -----> gameInputProcessor
+		 */
+		Gdx.input.setInputProcessor(inputMultiplexer);
+	}
+	
+	/**
+	 * create the stage upon which GUI elements will be drawn
+	 */
+	private void setupStage() {
+		
+		/*
+		 * the stage is given the communicator so that changes that the server needs to know about 
+		 *  can be encoded by the communicator and sent
+		 */
+		stage = new ExtendedStage(skin, this, communicator ); //the gui is laid out here
+		
+		/*
+		 * give the communicator the stage so that the communicator can modify the stage according to network messages from the server
+		 *  (translate network messages to changes in the view)
+		 */
+		communicator.setStage(stage);
+		stage.setDebugAll(debug);
+		/*
+		 * give the stage access to the resources contained within the skin
+		 */
+		stage.skin = skin;
+	}
+	
+	/**
+	 * sets up a skin
+	 * a skin stores resources for the UI widgets to use (texture regions, fonts, colors, etc)
+	 * resources are named and can be looked up by name and type
+	 * 
+	 * more here: https://libgdx.badlogicgames.com/nightlies/docs/api/com/badlogic/gdx/scenes/scene2d/ui/Skin.html
+	 */
+	private void setupSkin() {
 		//setup the skin (resources for gui)
 		skin = new Skin();
 		// Generate a 1x1 white texture and store it in the skin named "white".
@@ -155,33 +230,6 @@ public class TheGame extends ApplicationAdapter {
 		LabelStyle smallLabel = new LabelStyle();
 		smallLabel.font = smallFont;
 		skin.add("small", smallLabel);
-		
-		
-		oldPos = new Point(0, 0);
-		gameState = GameState.SERVER_CONNECT_SCREEN;
-		batch = new SpriteBatch();
-		
-		//set up input processors (stage and gameInputProcessor) and add them to the multiplexer
-		// stage should get events first and then possibly gameInputProcessor
-		stage = new ExtendedStage(skin, this, communicator ); //the gui is laid out here
-		communicator.setStage(stage);
-		stage.setDebugAll(debug);
-		stage.skin = skin;
-		inputMultiplexer = new InputMultiplexer();
-		inputMultiplexer.addProcessor(stage);
-		
-		Gdx.input.setInputProcessor(inputMultiplexer); //the stage which contains the gui/hud gets to handle inputs first, and then pass the ones it doesn't handle down to the game
-		
-		playerShape = new ObjectShape(Arrays.asList(
-				new LineSeg(new Point(15, 0), new Point(15, 55)),
-				new LineSeg(new Point(15, 55), new Point(50, 55)),
-				new LineSeg(new Point(50, 55), new Point(50, 0)),
-				new LineSeg(new Point(50, 0), new Point(15, 0))
-				),
-				new Point(0,0));
-		
-		
-		setupMainMenu();
 	}
 	
 	private void setupMainMenu() {
@@ -210,6 +258,7 @@ public class TheGame extends ApplicationAdapter {
 			stage.displayError();
 			e.printStackTrace();
 		}
+		
 		
 		
 		localPlayer = new LocalPlayer(playerShape, false, communicator);
@@ -261,7 +310,7 @@ public class TheGame extends ApplicationAdapter {
 		
 		//initialize various GuiManagers, giving them appropriate GuiElements
 		
-		time = System.currentTimeMillis();
+
 	}
 
 	@Override
@@ -272,10 +321,10 @@ public class TheGame extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if (GameState.GAME_STARTED == gameState) {
 			batch.begin();
-			//batch.setShader(shaderProgram);
+
 			currentMap.draw(batch); //draw things which don't cast shadows (tiles)
 			
-			//batch.draw(testImg, 0, 0);
+
 			batch.end();
 			
 			currentMap.update();
@@ -294,7 +343,6 @@ public class TheGame extends ApplicationAdapter {
 					//adjust label position for remote players
 					float xOffset = player.getWidth() / 2 - ((RemotePlayer) player).nameLabel.getWidth() / 2;
 
-					//System.out.println(xOffset);
 
 					((RemotePlayer) player).nameLabel.setPosition((float) (player.getPos().getX() - currentMap.mapPosX) + xOffset, (float) (player.getPos().getY() - currentMap.mapPosY) - 18);
 				}
@@ -307,6 +355,10 @@ public class TheGame extends ApplicationAdapter {
 		doNetworking();
 	}
 	
+	/**
+	 * communicate with the server and if hosting.
+	 * have the server do communication if you are hosting a server.
+	 */
 	private void doNetworking() {	
 		communicator.receiveMessage();
 		if (hosting) {

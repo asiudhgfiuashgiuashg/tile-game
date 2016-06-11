@@ -49,7 +49,7 @@ public class Shape {
 
 	/**
 	 * 
-	 * @param oldPos
+	 * @param oldPos the position that the shape was at before its position was changed
 	 * @return the yDistDiff (used by children which override this method)
 	 */
 	protected double updateCoordinates(Point oldPos) {
@@ -70,6 +70,11 @@ public class Shape {
 		return yDistDiff;
 	}
 
+	/**
+	 * 
+	 * @param other the shape to check for intersection with
+	 * @return whether this and other intersect (any of their line segments intersect)
+	 */
 	public boolean intersects(Shape other) {
 
 		//check if lineSegs intersect
@@ -176,6 +181,10 @@ public class Shape {
 		}
 	}
 
+	/**
+	 * 
+	 * @return the width of the shape between the furthhhest left point and thhe furthest right point
+	 */
 	protected double getWidth() {
 		double smallestX = getSmallestXOfTwoPoints(lineSegs.get(0).p1, lineSegs.get(0).p2);
 		double largestX = getLargestXOfTwoPoints(lineSegs.get(0).p1, lineSegs.get(0).p2);
