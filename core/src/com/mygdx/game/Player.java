@@ -29,7 +29,7 @@ public class Player extends Entity
     
     protected DirectionOfTravel direction;
     
-    public Player(Shape shape, boolean passable)
+    public Player(ObjectShape shape, boolean passable)
     {
     	super(shape, passable);
     	username = "default username";

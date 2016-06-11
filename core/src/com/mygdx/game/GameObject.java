@@ -20,7 +20,7 @@ public class GameObject implements JSONable {
 	private static final GameObject CREATOR = new GameObject();
 	
 	protected boolean passable;
-	protected Shape shape;
+	protected ObjectShape shape;
 
 	private String name;
 	private int id;
@@ -32,7 +32,7 @@ public class GameObject implements JSONable {
 
 	private float width, height;
 
-	public GameObject(Shape shape, boolean passable) {
+	public GameObject(ObjectShape shape, boolean passable) {
 		this.shape = shape;
 		this.passable = passable;
 	}
@@ -47,7 +47,7 @@ public class GameObject implements JSONable {
 
 	
 
-	public GameObject(boolean passable, int visLayer, Point pos, String imageURI, Shape shape) {
+	public GameObject(boolean passable, int visLayer, Point pos, String imageURI, ObjectShape shape) {
 		this.passable = passable;
 		this.visLayer = visLayer;
 		this.pos = pos;

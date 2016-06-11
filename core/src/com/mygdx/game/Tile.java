@@ -20,15 +20,15 @@ public class Tile extends GameObject
         this(makeShape(xPos, yPos), imageURI, name, passable);
     }
     
-    public Tile(Shape tileShape, String imageURI, String name, boolean passable)
+    public Tile(ObjectShape tileShape, String imageURI, String name, boolean passable)
     {
         super(tileShape, passable);
         this.imageURI = imageURI;
         this.name = name;
         this.passable = passable;
     }
-    private static Shape makeShape(int xPos, int yPos) {
-    	Shape tileShape = new Shape(Arrays.asList(
+    private static ObjectShape makeShape(int xPos, int yPos) {
+    	ObjectShape tileShape = new ObjectShape(Arrays.asList(
                 new LineSeg(new Point(0,0), new Point(0, TILE_HEIGHT)),
                 new LineSeg(new Point(0, TILE_HEIGHT), new Point(TILE_WIDTH, TILE_HEIGHT)),
                 new LineSeg(new Point(TILE_WIDTH, TILE_HEIGHT), new Point(TILE_WIDTH, 0)),

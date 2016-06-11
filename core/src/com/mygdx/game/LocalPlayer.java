@@ -23,7 +23,7 @@ public class LocalPlayer extends Player {
 	 * @param passable whether the local player can be walked through by other players
 	 * @param communicator what the local player uses to send updates to the server about its actions
 	 */
-	public LocalPlayer(Shape shape, boolean passable, Communicator communicator) {
+	public LocalPlayer(ObjectShape shape, boolean passable, Communicator communicator) {
 		super(shape, passable);
 		changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.png"));
 		moveSpeed = 200;

@@ -81,7 +81,7 @@ public class TheGame extends ApplicationAdapter {
     
     
     
-    private Shape playerShape;
+    private ObjectShape playerShape;
     private Point oldPos;
     
     
@@ -172,7 +172,7 @@ public class TheGame extends ApplicationAdapter {
 		
 		Gdx.input.setInputProcessor(inputMultiplexer); //the stage which contains the gui/hud gets to handle inputs first, and then pass the ones it doesn't handle down to the game
 		
-		playerShape = new Shape(Arrays.asList(
+		playerShape = new ObjectShape(Arrays.asList(
 				new LineSeg(new Point(15, 0), new Point(15, 55)),
 				new LineSeg(new Point(15, 55), new Point(50, 55)),
 				new LineSeg(new Point(50, 55), new Point(50, 0)),

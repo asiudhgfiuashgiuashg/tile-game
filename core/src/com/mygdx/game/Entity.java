@@ -21,7 +21,7 @@ import com.mygdx.game.spritesheet_utils.SpritesheetMetadataParser;
 
 public abstract class Entity extends GameObject
 {
-	public Entity(Shape shape, boolean passable) {
+	public Entity(ObjectShape shape, boolean passable) {
 		super(shape, passable);
 	}
 	
