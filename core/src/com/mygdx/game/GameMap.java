@@ -46,7 +46,15 @@ import com.mygdx.ai.GraphCreator;
 import com.mygdx.ai.PositionIndexedNode;
 
 
-public class GameMap {
+public class GameMap implements JSONable {
+	
+	/**
+	 * a dummy instance from which fromJSON() may be called
+	 * @see com.mygdx.game.JSONable#fromJSON()
+	 * 
+	 */
+	private static final GameMap CREATOR = new GameMap();
+
     private String title;
     public int numRows;
     public int numCols;
@@ -92,6 +100,7 @@ public class GameMap {
 	private static final String TILEART_DIRECTORY = "tileart";
 	
     public GameMap(FileHandle mapFile, LocalPlayer player, SpriteBatch batch) throws IOException {
+    	
     	agents = new ArrayList<Agent>();
     	
     	shapeRenderer = new ShapeRenderer();
@@ -223,7 +232,11 @@ public class GameMap {
 
     }
     
-    public void initializeGraph() {
+    public GameMap() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public void initializeGraph() {
         nodeGraph = GraphCreator.graphFromMap(this);
         System.out.println("initialized graph: " + nodeGraph);
     }
@@ -727,5 +740,17 @@ public class GameMap {
     	}
     	shapeRenderer.end();
     	
+	}
+
+	@Override
+	public JSONObject toJSON() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public JSONable fromJSON(JSONObject json) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

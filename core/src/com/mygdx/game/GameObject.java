@@ -6,10 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.json.simple.JSONObject;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
-public class GameObject {
+public class GameObject implements JSONable {
+	/**
+	 * a dummy instance from which fromJSON() may be called
+	 * @see com.mygdx.game.JSONable#fromJSON()
+	 * 
+	 */
+	private static final GameObject CREATOR = new GameObject();
+	
 	protected boolean passable;
 	protected Shape shape;
 
@@ -103,5 +112,17 @@ public class GameObject {
 	//like the middle of a venn diagram
 	public boolean intersects(GameObject other) {
 		return this.getShape().intersects(other.getShape());
+	}
+
+	@Override
+	public JSONObject toJSON() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public JSONable fromJSON(JSONObject json) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
