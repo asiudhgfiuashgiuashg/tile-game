@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Entity;
 import com.mygdx.game.GameMap;
+import com.mygdx.game.ObjectShape;
 import com.mygdx.game.Point;
 import com.mygdx.game.Shape;
 
@@ -27,7 +28,7 @@ public abstract class Agent extends Entity {
 	State movementState;
 	Point goal;
 	
-	public Agent(Shape shape, boolean passable) {
+	public Agent(ObjectShape shape, boolean passable) {
 		super(shape, passable);
 		// TODO Auto-generated constructor stub
 		heuristic = new PositionalHeuristic();

@@ -13,7 +13,7 @@ public class RemotePlayer extends Player
 	boolean idle;
 	protected Label nameLabel;
 	
-	public RemotePlayer(Shape shape, boolean passable) {
+	public RemotePlayer(ObjectShape shape, boolean passable) {
 		super(shape, passable);
 		changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.png"));
 		currentAnimation = moveLeft;

@@ -20,9 +20,18 @@ public class ItemListListener extends InputListener {
 		this.currentMap = map;
 	}
 	
+	
+	/**
+	 * not supported until we get a better idea of what items are for
+	 */
 	@Override
 	public boolean keyDown(InputEvent event, int keycode) {
-		if (Input.Keys.S == keycode 
+		throw new UnsupportedOperationException();
+		
+		
+		
+		
+		/*if (Input.Keys.S == keycode 
 				|| Input.Keys.W == keycode
 				|| Input.Keys.A == keycode 
 				|| Input.Keys.D == keycode
@@ -50,5 +59,5 @@ public class ItemListListener extends InputListener {
 			return true;
 		}
 		return false; //not handled
-	}
+*/	}
 }

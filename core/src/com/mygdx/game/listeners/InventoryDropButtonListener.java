@@ -31,16 +31,20 @@ public class InventoryDropButtonListener extends InputListener {
 		this.inventoryGroup = inventoryGroup;
 	}
 	
+	/**
+	 * not supported until we get a better idea of what items are for
+	 */
 	@Override
 	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-		item.pos = map.player.getPos().deepCopy();
+		/*item.pos = map.player.getPos().deepCopy();
 		map.player.inv.itemList.removeValue(item, true);
 		JSONObject itemDropMessage = item.toJSON();
 		itemDropMessage.put("type", "itemDrop");
 		TheGame.out.println(itemDropMessage); //tell the server the item has been dropped on the ground
 		
 		inventoryGroup.removeItem(item);
-		inventoryGroup.removeAdditionalInfo();
-		return true;
+		inventoryGroup.removeAdditionalInfo();*/
+		throw new UnsupportedOperationException();
+		//return true;
 	}
 }

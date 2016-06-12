@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.DirectionOfTravel;
 import com.mygdx.game.GameMap;
+import com.mygdx.game.ObjectShape;
 import com.mygdx.game.Player;
 import com.mygdx.game.Point;
 import com.mygdx.game.Shape;
@@ -28,7 +29,7 @@ public class TestAi extends Agent {
 	Player player;
 	Point playerOldPos;
 	
-	public TestAi(Shape shape, boolean passable, GameMap map) {
+	public TestAi(ObjectShape shape, boolean passable, GameMap map) {
 		super(shape, passable);
 		changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.json"));
 		currentAnimation = moveLeft;

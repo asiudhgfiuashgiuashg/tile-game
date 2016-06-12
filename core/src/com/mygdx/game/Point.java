@@ -43,6 +43,9 @@ public class Point {
     	return new Point(getX(), getY());
     }
     //http://www.ideyatech.com/effective-java-equals-and-hashcode/
+    /**
+     * equality is approximate (see EPSILON)
+     */
     @Override
     public boolean equals(Object other) {
 		if (this == other) {

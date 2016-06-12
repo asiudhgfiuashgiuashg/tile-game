@@ -55,16 +55,16 @@ public class GraphCreator {
         return graph;
     }
     
-    //creates a GameObject using the two node points given, and then sees if it intersects with any of the objects on the map
+    //creates a shape using the two node points given, and then sees if it intersects with any of the objects on the map
     public static boolean canDrawNonDiagonalLineBetween(PositionIndexedNode firstNode, PositionIndexedNode secondNode, GameMap map) {
         List<LineSeg> list = new ArrayList<LineSeg>();
         list.add(new LineSeg(new Point(firstNode.x, firstNode.y), new Point(secondNode.x, secondNode.y)));
         
-        GameObject line = new GameObject(new Shape(list, new Point(0, 0)), false); //Not sure how to get the node position
+        Shape line = new Shape(list, new Point(0, 0)); //Not sure how to get the node position
         boolean valid = true;
         
         for (int x = 0; x < map.objectList.getListSize(); x++) {
-            if(line.intersects(map.objectList.getObject(x))) {
+            if(line.intersects(map.objectList.getObject(x).getShape())) {
                 valid = false;
             }
         }

@@ -41,6 +41,12 @@ import com.mygdx.game.listeners.ItemListListener;
 
 public class ExtendedStage extends Stage {
 	
+	/**
+	 * used to communicate stage change events that the player makes to the server
+	 * for example, the server should know any messages the player types into the chatbox
+	 */
+	private Communicator communicator;
+	
 	protected GameMap currentMap;
 	protected Skin skin;
 	public List<Item> itemList;
@@ -53,7 +59,7 @@ public class ExtendedStage extends Stage {
     private InputListener inGameMessageTextFieldListener;
 	private Table lobbyTable;
 	Map<Player, CheckBox> playerToCheckBoxMap;
-	PrintWriter out;
+
 	
 	private Preferences preferences;
 	private Table serverConnectTable;
@@ -66,10 +72,11 @@ public class ExtendedStage extends Stage {
 
 	InventoryGroup inventoryGroup;
 	
-	public ExtendedStage(Skin skin, TheGame theGame) {
+	public ExtendedStage(Skin skin, TheGame theGame, Communicator communicator) {
 		this.skin = skin;
 		numChatLines = 0;
 		this.theGame = theGame;
+		this.communicator = communicator;
 	}
 	
 	@Override
@@ -156,11 +163,8 @@ public class ExtendedStage extends Stage {
 		
 		readyCheckBox.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) { //notify server of readynes or unreadyness
-				JSONObject readyMessage = new JSONObject();
-				readyMessage.put("type", "readyStatus");
-				readyMessage.put("readyStatus", readyCheckBox.isChecked());
-				out.println(readyMessage);
-				
+				boolean ready = readyCheckBox.isChecked();
+				communicator.setReady(ready);
 				//check the box by name as well
 				playerToCheckBoxMap.get(localPlayer).setChecked(readyCheckBox.isChecked());
 			}
@@ -188,32 +192,7 @@ public class ExtendedStage extends Stage {
 		costumeCheckBox1.setChecked(true);
 
 			
-		//applies costume change for localplayer. Might need to move this to another location.
-		class CostumeChangeListener extends ChangeListener {
-			String sprite;
-			CheckBox checkBox;
-			ButtonGroup<CheckBox> costumeButtons;
-			public CostumeChangeListener(CheckBox checkBox, String sprite){
-				this.checkBox = checkBox;
-				this.sprite = sprite;
-				this.costumeButtons = costumeButtons;
-			}
-			public void changed(ChangeEvent event, Actor actor){
-				if(checkBox.isChecked()) {
-					localPlayer.changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.png")); //FIX, appearance changing not properly tied to checkboxes atm
-					JSONObject spriteInfo = new JSONObject();
-					spriteInfo.put("type", "sprite");
-					spriteInfo.put("spriteID", sprite);
-					out.println(spriteInfo);
-				}			
-			}
-			
-		}
-		
-		costumeCheckBox1.addListener(new CostumeChangeListener(costumeCheckBox1, "Costume1.png"));
-		costumeCheckBox2.addListener(new CostumeChangeListener(costumeCheckBox2, "Costume2.png"));
-		costumeCheckBox3.addListener(new CostumeChangeListener(costumeCheckBox3, "Costume3.png"));
-		costumeCheckBox4.addListener(new CostumeChangeListener(costumeCheckBox4, "Costume4.png"));
+
 		
 		
 		this.clear();
@@ -236,7 +215,7 @@ public class ExtendedStage extends Stage {
 		
 		addChatBox();
 		
-		inLobbyMessageTextFieldListener  = new InLobbyMessageTextFieldListener(messageTextField, out, localPlayer, this);
+		inLobbyMessageTextFieldListener  = new InLobbyMessageTextFieldListener(messageTextField, communicator, localPlayer, this);
 		
 		messageTextField.addListener(inLobbyMessageTextFieldListener);
 	}
@@ -457,7 +436,7 @@ public class ExtendedStage extends Stage {
 		hostServerButton.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				preferences.put("username", userNameTextField.getText());
+				preferences.put("username", userNameTextField.getText()); //save the username for next time the game starts
 				theGame.setupLobbyAsHost(userNameTextField.getText());
 			}
 		});
@@ -530,11 +509,9 @@ public class ExtendedStage extends Stage {
 					if (messageTextField.isVisible()) {
 						//send the text as a message
 						if (messageTextField.getText().length() > 0) {
-							JSONObject message = new JSONObject();
-							message.put("type", "chatMessage");
-							message.put("message", messageTextField.getText());
-							out.println(message);
+							String message = messageTextField.getText();
 							addMessageToChatbox(currentMap.player.username + ": " + messageTextField.getText());
+							communicator.sendChatMessage(message);
 							messageTextField.setText("");
 						}
 							

@@ -78,7 +78,7 @@ public class ObjectCollector
 		Point pos = new Point(xPos, yPos);
 		
 		List<LineSeg> shapeLineSegs = new ArrayList<LineSeg>();
-		Shape shape = new Shape(shapeLineSegs, pos);
+		ObjectShape shape = new ObjectShape(shapeLineSegs, pos);
 		
 		GameObject newObject = new GameObject(passable, visLayer, pos, fileName, shape);
 		objectList.add(newObject);
