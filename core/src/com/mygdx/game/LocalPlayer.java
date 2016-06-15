@@ -1,10 +1,11 @@
-package com.mygdx.game;
+/*package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.game.player.Player;
 
 import java.util.Stack;
 
@@ -17,12 +18,12 @@ public class LocalPlayer extends Player {
 	protected Stack<DirectionOfTravel> directionStack; //used to figure out which way to move based on keypresses
 	private Communicator communicator;
 
-	/**
+	*//**
 	 * 
 	 * @param shape the shape of the local player's hitbox
 	 * @param passable whether the local player can be walked through by other players
 	 * @param communicator what the local player uses to send updates to the server about its actions
-	 */
+	 *//*
 	public LocalPlayer(ObjectShape shape, boolean passable, Communicator communicator) {
 		super(shape, passable);
 		changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.png"));
@@ -43,7 +44,7 @@ public class LocalPlayer extends Player {
 	public void update(float stateTime) {
 		if (canMove()) {
 			if (!directionStack.isEmpty()) {
-				direction = directionStack.peek();
+				setDirection(directionStack.peek());
 				try {
 					//Each direction has preset limits for the character pos to help prevent outofbounds errors and to smoothen movement along the edges. Once collision is perfected, these should'nt be necessary
 					if (DirectionOfTravel.LEFT == directionStack.peek()) {
@@ -69,9 +70,9 @@ public class LocalPlayer extends Player {
 					e.printStackTrace();
 				}
 				
-				/*
+				
 				 * send information about actions to server through the connector
-				 */
+				 
 				communicator.sendLocalPlayerPosition();
 				communicator.sendLocalPlayerDirection();
 			}
@@ -132,9 +133,9 @@ public class LocalPlayer extends Player {
 			directionStack.remove(DirectionOfTravel.DOWN);
 		}
 		if (directionStack.isEmpty()) {
-			direction = direction.IDLE;
+			setDirection(getDirection().IDLE);
 		}
 	}
 	
 	
-}
+}*/

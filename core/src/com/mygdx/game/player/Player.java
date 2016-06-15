@@ -6,7 +6,7 @@
 //  Name:     Bhavishya Shah
 //  Email:    bhshah1@my.waketech.edu
 ////////////////////////////////////////////////////////////////////////////////
-package com.mygdx.game;
+package com.mygdx.game.player;
 
 import java.util.Arrays;
 
@@ -16,9 +16,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.mygdx.game.DirectionOfTravel;
+import com.mygdx.game.Entity;
+import com.mygdx.game.GameMap;
+import com.mygdx.game.ItemCollector;
+import com.mygdx.game.Point;
 
-public class Player extends Entity
-{
+public abstract class Player extends Entity {
 
     GameMap currentMap;
     public String username;
@@ -27,31 +32,9 @@ public class Player extends Entity
     
     public ItemCollector inv;
     
-    protected DirectionOfTravel direction;
-    
-    public Player(ObjectShape shape, boolean passable)
-    {
-    	super(shape, passable);
-    	username = "default username";
-    	left = 15;
-        right = 50;
-        up = 55;
-        down = 1;
-    	
-        pos = new Point(0, 0);
+    private DirectionOfTravel direction;
+	public Label nameLabel;
 
-        inv = new ItemCollector();
-        direction = DirectionOfTravel.IDLE;
-    }
-
-	
-    
-    
-    
-    @Override
-    public void update(float stateTime) {
-    	
-    }
 
     @Override
     public float getRight() {
@@ -94,4 +77,21 @@ public class Player extends Entity
     public String toString() {
     	return username;
     }
+
+	public DirectionOfTravel getDirection() {
+		return direction;
+	}
+
+	public void setDirection(DirectionOfTravel direction) {
+		this.direction = direction;
+	}
+
+	/**
+	 * TODO
+	 * make this per class (mage, ranger, shield)
+	 * @return
+	 */
+	public float getMoveDist() {
+		return 7;
+	}
 }

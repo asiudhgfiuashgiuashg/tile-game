@@ -29,7 +29,7 @@ public abstract class Agent extends Entity {
 	Point goal;
 	
 	public Agent(ObjectShape shape, boolean passable) {
-		super(shape, passable);
+		super();
 		// TODO Auto-generated constructor stub
 		heuristic = new PositionalHeuristic();
 		graphPath = null;

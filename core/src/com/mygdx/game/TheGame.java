@@ -65,6 +65,8 @@ import com.mygdx.ai.PositionIndexedNode;
 import com.mygdx.ai.TestAi;
 import com.mygdx.game.listeners.InLobbyMessageTextFieldListener;
 import com.mygdx.game.listeners.InventoryButtonListener;
+import com.mygdx.game.lobby.LobbyManager;
+import com.mygdx.game.player.Player;
 import com.mygdx.server.Server;
 
 
@@ -89,8 +91,10 @@ public class TheGame extends ApplicationAdapter {
 
     
     
-    
-    protected LocalPlayer localPlayer;
+    /**
+     * the local player who is controlled by the keyboard and whose actions are sent to the server
+     */
+    protected Player localPlayer;
     
     protected static enum GameState {
     	MAIN_MENU,
@@ -105,10 +109,21 @@ public class TheGame extends ApplicationAdapter {
      */
     static GameState gameState;
     
-    private InputMultiplexer inputMultiplexer; //will delegate events tos the game inputprocessor and the gui inputprocessor (the stage)
+    /**
+     * will first give events to the gui input processor
+     * Events which are unprocessed by the gui input processor will be given to the gameInputProcessor.
+     * Events which are unprocessed by the gameInputProcessor will be
+     */
+    private InputMultiplexer inputMultiplexer;
     private GameInputProcessor gameInputProcessor;
     
+    /**
+     * if this client is also hosting, this field will be used to refer to the server
+     */
     private Server server;
+    /**
+     * whethhr thhis client is also hosting or not
+     */
     private boolean hosting;
     /**
      * if true, lines are drawn to debug various things like hitboxes and pathfinding graphs
@@ -118,12 +133,23 @@ public class TheGame extends ApplicationAdapter {
     public static int SCREEN_WIDTH = 800;
     public static int SCREEN_HEIGHT = 480;
     
+    /**
+     * manages the information in the lobby
+     */
+    private LobbyManager lobbyManager;
 
 
     /**
      * used to communicate with the server
      */
 	private final Communicator communicator = new Communicator(this);
+
+	/**
+	 * contains the username of the player starting when the player hits the connect button
+	 * we need to keep this around so that the stage can reference it
+	 */
+	private String username;
+	
     
 	@Override
 	public void create() {
@@ -244,14 +270,17 @@ public class TheGame extends ApplicationAdapter {
 		setupLobby();
 	}
 
-
-	private void setupLobby() {
+	/**
+	 * set up the stage for the lobby and spawn a lobby manager to help manage the lobby information (players connected and stuff)
+	 */
+	void setupLobby() {
+		this.lobbyManager = new LobbyManager();
 		stage.setupLobby();
 	}
 	
 	//attempts to connect to server, returns true for success
 	protected boolean connectToServer(String serverAddress, int port, String username) {
-
+		this.setUsername(username);
 		try {
 			communicator.connectToServer(InetAddress.getByName(serverAddress), port, username);
 		} catch (UnknownHostException e) {
@@ -259,18 +288,12 @@ public class TheGame extends ApplicationAdapter {
 			e.printStackTrace();
 		}
 		
-		
-		
-		localPlayer = new LocalPlayer(playerShape, false, communicator);
-		localPlayer.username = username;
-		setupForInGame();
-		
 		return true;
 	}
 	
 	
 	/**
-	 * create player and map
+	 * create players and map
 	 */
 	private void setupForInGame() {
 		batch = new SpriteBatch();
@@ -285,7 +308,7 @@ public class TheGame extends ApplicationAdapter {
 		try {
             ///System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
-            currentMap = new GameMap(Gdx.files.internal(mapName + ".json"), localPlayer, batch);
+            currentMap = new GameMap(Gdx.files.internal(mapName + ".json"), batch);
 
             if (hosting) {
             	currentMap.initializeGraph();
@@ -295,7 +318,7 @@ public class TheGame extends ApplicationAdapter {
 	                currentMap.agents.add(testAi);
             	}
                  
-                 server.gameMap = currentMap;
+                 //server.gameMap = currentMap;
             }
             stage.currentMap = currentMap;
             
@@ -306,7 +329,7 @@ public class TheGame extends ApplicationAdapter {
         }
 		
 		//player.create(); responsibilities for create() moved to constructor
-		localPlayer.setFOV(localPlayer.sightX, localPlayer.sightY);
+		//localPlayer.setFOV(localPlayer.sightX, localPlayer.sightY);
 		
 		//initialize various GuiManagers, giving them appropriate GuiElements
 		
@@ -339,12 +362,12 @@ public class TheGame extends ApplicationAdapter {
 			
 			
 			for (Player player: currentMap.players) {
-				if (player != currentMap.player) { //currentMap.player = this.player btw
+				if (player != currentMap.localPlayer) { //currentMap.player = this.player btw
 					//adjust label position for remote players
-					float xOffset = player.getWidth() / 2 - ((RemotePlayer) player).nameLabel.getWidth() / 2;
+					float xOffset = player.getWidth() / 2 - player.nameLabel.getWidth() / 2;
 
 
-					((RemotePlayer) player).nameLabel.setPosition((float) (player.getPos().getX() - currentMap.mapPosX) + xOffset, (float) (player.getPos().getY() - currentMap.mapPosY) - 18);
+					player.nameLabel.setPosition((float) (player.getPos().getX() - currentMap.mapPosX) + xOffset, (float) (player.getPos().getY() - currentMap.mapPosY) - 18);
 				}
 			}
 		}
@@ -372,17 +395,44 @@ public class TheGame extends ApplicationAdapter {
 				
 				
 	public void addInGameActors() {
+		stage.clear();
 		stage.addInGameActors();
+	}
+	
+	private void setupInGameInputProcessors() {
 		gameInputProcessor = new GameInputProcessor(localPlayer);
 		inputMultiplexer.addProcessor(gameInputProcessor);
 	}
 	
-	RemotePlayer addRemotePlayerToList(String playerName, int uid) {
-		RemotePlayer remotePlayer = new RemotePlayer(playerShape, true);
+	public LobbyManager getLobbyManager() {
+		return lobbyManager;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * setup the stage and the map for in game
+	 */
+	public void transitionFromLobbyToInGame() {
+		TheGame.gameState = GameState.GAME_STARTED;
+		setupForInGame();
+		addInGameActors();
+		setupInGameInputProcessors();
+		
+	}
+	
+	/*Player addRemotePlayerToList(String playerName, int uid) {
+		Player remotePlayer = new Player(playerShape, true);
 		remotePlayer.uid = uid;
 		remotePlayer.username = playerName;
 		currentMap.players.add(remotePlayer);
 		remotePlayer.setPos(new Point(-100, -100));
 		return remotePlayer;
-	}
+	}*/
 }

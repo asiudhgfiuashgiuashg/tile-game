@@ -10,18 +10,18 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.mygdx.game.Communicator;
 import com.mygdx.game.ExtendedStage;
-import com.mygdx.game.LocalPlayer;
+import com.mygdx.game.player.Player;
 
 public class InLobbyMessageTextFieldListener extends InputListener {
 	private TextField messageTextField;
 	private Communicator communicator;
-	private LocalPlayer localPlayer;
+	private Player localPlayer;
 	private ExtendedStage stage;
 	
-	public InLobbyMessageTextFieldListener(TextField messageTextField, Communicator communicator, LocalPlayer player, ExtendedStage stage) {
+	public InLobbyMessageTextFieldListener(TextField messageTextField, Communicator communicator, Player localPlayer, ExtendedStage stage) {
 		this.communicator = communicator;
 		this.messageTextField = messageTextField;
-		this.localPlayer = player;
+		this.localPlayer = localPlayer;
 		this.stage = stage;
 	}
 	

@@ -38,7 +38,14 @@ import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.listeners.InLobbyMessageTextFieldListener;
 import com.mygdx.game.listeners.InventoryButtonListener;
 import com.mygdx.game.listeners.ItemListListener;
+import com.mygdx.game.lobby.LobbyPlayer;
+import com.mygdx.game.player.Player;
 
+/**
+ * contains the GUI
+ * @author elimonent
+ *
+ */
 public class ExtendedStage extends Stage {
 	
 	/**
@@ -58,7 +65,7 @@ public class ExtendedStage extends Stage {
     private InputListener inLobbyMessageTextFieldListener;
     private InputListener inGameMessageTextFieldListener;
 	private Table lobbyTable;
-	Map<Player, CheckBox> playerToCheckBoxMap;
+	Map<LobbyPlayer, CheckBox> playerToCheckBoxMap;
 
 	
 	private Preferences preferences;
@@ -88,7 +95,7 @@ public class ExtendedStage extends Stage {
 					//view items on ground nearby
 					itemList = new List<Item>(skin);
 					itemList.setItems(items.itemList);
-					itemList.setPosition((float) currentMap.player.getPos().getX(), (float) currentMap.player.getPos().getY());
+					itemList.setPosition((float) currentMap.localPlayer.getPos().getX(), (float) currentMap.localPlayer.getPos().getY());
 					itemList.addListener(new ItemListListener(itemList, currentMap));
 					
 					itemList.debug();
@@ -142,7 +149,7 @@ public class ExtendedStage extends Stage {
 	
 	public void setupLobby() {
 		TheGame.gameState = TheGame.GameState.IN_LOBBY;
-		playerToCheckBoxMap = new HashMap<Player, CheckBox>();
+		playerToCheckBoxMap = new HashMap<LobbyPlayer, CheckBox>();
 		//create local player
 		//currentMap.players.add(player);
 		
@@ -153,43 +160,26 @@ public class ExtendedStage extends Stage {
 		skin.add("default", checkBoxStyle);
 		
 		final CheckBox readyCheckBox = new CheckBox("", checkBoxStyle);
-		playerToCheckBoxMap.put(currentMap.player, readyCheckBox);
+		//playerToCheckBoxMap.put(currentMap.localPlayer, readyCheckBox);
 		readyCheckBox.setPosition(600, 70);
 		//readyCheckBox.setWidth(100);
 		//readyCheckBox.setHeight(30);
 		//readyCheckBox.debug();
 		//readyCheckBox.setSize(100, 50);
-		final LocalPlayer localPlayer = currentMap.player;
+
 		
 		readyCheckBox.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) { //notify server of readynes or unreadyness
 				boolean ready = readyCheckBox.isChecked();
 				communicator.setReady(ready);
-				//check the box by name as well
-				playerToCheckBoxMap.get(localPlayer).setChecked(readyCheckBox.isChecked());
 			}
 		});
 		final Label readyCheckBoxLabel = new Label("Ready?", skin);
 		readyCheckBoxLabel.setPosition(520,  70);
 		
-		//Creating checkboxes for the costume options while in lobby
-		final Label costumeCheckBoxLabel = new Label("Costumes", skin);
-		final CheckBox costumeCheckBox1 = new CheckBox(" 1", checkBoxStyle);
-		final CheckBox costumeCheckBox2 = new CheckBox(" 2", checkBoxStyle);
-		final CheckBox costumeCheckBox3 = new CheckBox(" 3", checkBoxStyle);
-		final CheckBox costumeCheckBox4 = new CheckBox(" 4", checkBoxStyle);
+
 		
-		
-		costumeCheckBoxLabel.setPosition(600, 350);
-		costumeCheckBox1.setPosition(600, 330);
-		costumeCheckBox2.setPosition(600, 310);
-		costumeCheckBox3.setPosition(600, 290);
-		costumeCheckBox4.setPosition(600, 270);
-		
-		ButtonGroup<CheckBox> costumeButtons = new ButtonGroup<CheckBox>(costumeCheckBox1, costumeCheckBox2, costumeCheckBox3, costumeCheckBox4);
-		costumeButtons.setMaxCheckCount(1);
-		costumeButtons.setUncheckLast(true);
-		costumeCheckBox1.setChecked(true);
+
 
 			
 
@@ -198,11 +188,7 @@ public class ExtendedStage extends Stage {
 		this.clear();
 		this.addActor(readyCheckBox);
 		this.addActor(readyCheckBoxLabel);
-		this.addActor(costumeCheckBoxLabel);
-		this.addActor(costumeCheckBox1);
-		this.addActor(costumeCheckBox2);
-		this.addActor(costumeCheckBox3);
-		this.addActor(costumeCheckBox4);
+
 		
 		lobbyTable = new Table();
 		lobbyTable.debugAll();
@@ -210,12 +196,12 @@ public class ExtendedStage extends Stage {
 		lobbyTable.setSize(200, 300);
 		lobbyTable.center();
 		this.addActor(lobbyTable);
-		addPlayerToLobbyStage(localPlayer);
+
 		lobbyTable.row();
 		
 		addChatBox();
 		
-		inLobbyMessageTextFieldListener  = new InLobbyMessageTextFieldListener(messageTextField, communicator, localPlayer, this);
+		//inLobbyMessageTextFieldListener  = new InLobbyMessageTextFieldListener(messageTextField, communicator, localPlayer, this);
 		
 		messageTextField.addListener(inLobbyMessageTextFieldListener);
 	}
@@ -225,8 +211,8 @@ public class ExtendedStage extends Stage {
 	 * 
 	 * @param player
 	 */
-	public void addPlayerToLobbyStage(Player player) {
-		Label playerNameLabel = new Label(player.username, skin.get("default", LabelStyle.class));
+	public void addPlayerToLobbyStage(LobbyPlayer player) {
+		Label playerNameLabel = new Label(player.getUsername(), skin.get("default", LabelStyle.class));
 		final CheckBox readyCheckBox = new CheckBox("", skin);
 		readyCheckBox.setDisabled(true);
 		playerToCheckBoxMap.put(player, readyCheckBox);
@@ -359,7 +345,7 @@ public class ExtendedStage extends Stage {
 					preferences.put("serverAddressField", serverAddressField.getText());
 
 					
-					setupLobby();
+					theGame.setupLobby();
 				}
 			}
 		});
@@ -510,7 +496,7 @@ public class ExtendedStage extends Stage {
 						//send the text as a message
 						if (messageTextField.getText().length() > 0) {
 							String message = messageTextField.getText();
-							addMessageToChatbox(currentMap.player.username + ": " + messageTextField.getText());
+							addMessageToChatbox(currentMap.localPlayer.username + ": " + messageTextField.getText());
 							communicator.sendChatMessage(message);
 							messageTextField.setText("");
 						}
@@ -533,7 +519,7 @@ public class ExtendedStage extends Stage {
 					messageTextField.setVisible(true); //open up text field for message entry
 					messageTextField.setDisabled(false);
 					ExtendedStage.this.setKeyboardFocus(messageTextField);
-					currentMap.player.directionStack.clear();
+					//currentMap.localPlayer.directionStack.clear();
 					return true;
 				}
 				return false;
@@ -542,14 +528,14 @@ public class ExtendedStage extends Stage {
 		
 		
 		for (Player player: currentMap.players) {
-			if (player != this.currentMap.player) { //!= localPlayer
+			if (player != this.currentMap.localPlayer) { //!= localPlayer
 				LabelStyle labelStyle = new LabelStyle();
 				labelStyle.font = skin.getFont("default");
 				labelStyle.fontColor = Color.WHITE;
 				Label playerNameLabel = new Label(player.username, labelStyle);
 				/////System.out.println("position: " + player.getXPos());
 				playerNameLabel.setPosition((float) player.getXPos(), (float) player.getYPos());
-				((RemotePlayer) player).nameLabel = playerNameLabel;
+				(player).nameLabel = playerNameLabel;
 				this.addActor(playerNameLabel);
 			}
 		}
@@ -558,10 +544,7 @@ public class ExtendedStage extends Stage {
 		Table horizontalGuiTable = new Table();
 		horizontalGuiTable.padLeft(3);
 		horizontalGuiTable.align(Align.topLeft);
-		TextButton inventoryButton = new TextButton("inv", skin);
-		inventoryButton.align(Align.bottom);
-		inventoryButton.addListener(new InventoryButtonListener(this, currentMap.player, skin));
-		horizontalGuiTable.add(inventoryButton).width(50).height(30); //parents set the position and height of children
+		
 		horizontalGuiTable.setPosition(chatMessagesVGroup.getX() + chatMessagesVGroup.getWidth(), chatMessagesVGroup.getHeight() + chatMessagesVGroup.getY());
 		
 		this.addActor(horizontalGuiTable);
@@ -569,7 +552,12 @@ public class ExtendedStage extends Stage {
 	
 	
 	public void openInventoryOverlay() {
-		inventoryGroup = new InventoryGroup(skin, currentMap.player.inv.itemList);
+		inventoryGroup = new InventoryGroup(skin, currentMap.localPlayer.inv.itemList);
 		this.addActor(inventoryGroup);
+	}
+
+	public void setClass(String className) {
+		
+		
 	}
 }

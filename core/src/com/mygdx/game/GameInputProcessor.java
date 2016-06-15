@@ -1,6 +1,7 @@
 package com.mygdx.game;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.mygdx.game.player.Player;
 
 /**
  * handle input associated with controlling character
@@ -9,21 +10,33 @@ import com.badlogic.gdx.InputProcessor;
  */
 public class GameInputProcessor implements InputProcessor {
 
-	private LocalPlayer localPlayer;
+	private Player localPlayer;
 	
-	public GameInputProcessor(LocalPlayer localPlayer) {
+	public GameInputProcessor(Player localPlayer) {
 		this.localPlayer = localPlayer;
 	}
 	
 	@Override
 	public boolean keyDown(int keycode) {
-		localPlayer.handleKeyDown(keycode);
+		/*
+		 * first handle basic inputs that will do the same thing for every class 
+		 */
+		/*
+		 * next give everything unhandled to the handler for the localplayer's specific class (mage, ranger, shield)
+		 */
+
 		return true;
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
-		localPlayer.handleKeyUp(keycode);
+		/*
+		 * first handle basic inputs that will do the same thing for every class 
+		 */
+		/*
+		 * next give everything unhandled to the handler for the localplayer's specific class (mage, ranger, shield)
+		 */
+
 		return false;
 	}
 
