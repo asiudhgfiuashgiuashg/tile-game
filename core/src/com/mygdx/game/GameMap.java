@@ -84,6 +84,12 @@ public class GameMap implements JSONable {
 
     private int winX = 400;
     private int winY = 240;
+    
+    /**
+     * the local player who is controlled by the keyboard and whose actions are sent to the server
+     * 
+     * needed by the GameMap for displaying itself and collision checking (consider separating these things if they make the class too bulky)
+     */
     public Player localPlayer;
 
     boolean multiplayerEnabled = true;
@@ -325,13 +331,11 @@ public class GameMap implements JSONable {
                 }
             }
         }
-        if (multiplayerEnabled) {
-            for (Player player: players) {
-                if (player != this.localPlayer) {
-                    player.drawAtPos(batch, (float) player.getPos().getX() - mapPosX, (float) player.getPos().getY() - mapPosY);
-                }
-            }
+        
+        for (Player player: players) {
+        	player.drawAtPos(batch, (float) player.getPos().getX() - mapPosX, (float) player.getPos().getY() - mapPosY);
         }
+       
         
         
         for (Agent agent: agents) {
@@ -552,6 +556,7 @@ public class GameMap implements JSONable {
     ///////////////////////////////////////////
 
     public boolean moveLeft() throws Exception {
+    	System.out.println("moving left");
         boolean success = false;
         float deltaX = localPlayer.getMoveDist();
         if (!collides(Direction.LEFT, deltaX) && localPlayer.getPos().getX() > -localPlayer.getLeft()) {
@@ -804,7 +809,7 @@ public class GameMap implements JSONable {
 	 * @param player the player to add
 	 */
 	public void addPlayer(Player player) {
-		player.setPos(new Point(0, 0));
+		player.setPos(new Point(200, 200));
 		this.players.add(player);
 	}
 }

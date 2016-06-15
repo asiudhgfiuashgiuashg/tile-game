@@ -176,6 +176,11 @@ public class Server {
 				sendClassAssignment(playerClient);
 				
 				
+				/*
+				 * add the new player to the map
+				 */
+				gameMap.addPlayer(playerClient.player);
+				
         	}
     	}
 	}
@@ -289,24 +294,9 @@ public class Server {
 	    		// send coordinates to other clients
 	    		sendToAllFrom(received, receiveFromClient);
 
-			} else if (received.get("type").equals(("direction"))) { //direction updates, need to update animations accordingly
-				DirectionOfTravel direction = DirectionOfTravel.valueOf(DirectionOfTravel.class, ((String) received.get("direction")));
-
-				JSONObject animationObj = new JSONObject(); //represents a message signalling an animation change in the RemotePlayer
-				animationObj.put("type", "animation");
-				if (DirectionOfTravel.LEFT == direction) {
-					animationObj.put("animationName", "walkLeft"); // these Animation names are recognized by the setAnimation method of RemotePlayer and signal it what animation to change the remotePlayer to
-				} else if (DirectionOfTravel.RIGHT == direction) {
-					animationObj.put("animationName", "walkRight");
-				} else if (DirectionOfTravel.DOWN == direction) {
-					animationObj.put("animationName", "walkDown");
-				} else if (DirectionOfTravel.UP == direction) {
-					animationObj.put("animationName", "walkUp");
-				} else if (DirectionOfTravel.IDLE == direction) { //standing still
-					animationObj.put("animationName", "idle");
-				}
-				animationObj.put("uid", receiveFromClient.uid);
-				sendToAllFrom(animationObj, receiveFromClient);
+			} else if (received.get("type").equals(("direction"))) { //direction updates
+				received.put("uid", receiveFromClient.uid); //so thhe clients know what client this direction update is from
+				sendToAllFrom(received, receiveFromClient);
 
 			} else if (received.get("type").equals("playerInfo")) {
 				receiveFromClient.username = (String) received.get("username");

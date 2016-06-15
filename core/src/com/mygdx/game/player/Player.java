@@ -34,12 +34,16 @@ public abstract class Player extends Entity {
     
     public ItemCollector inv;
     
+    /*
+     * the direction the player is traveling
+     */
     private DirectionOfTravel direction;
 	public Label nameLabel;
 
 	public Player(int uid, ObjectShape shape) {
 		this.uid = uid;
 		this.shape = shape;
+		this.direction = DirectionOfTravel.IDLE; //set default direction
 	}
 
     @Override
@@ -94,10 +98,33 @@ public abstract class Player extends Entity {
 
 	/**
 	 * TODO
-	 * make this per class (mage, ranger, shield)
+	 * make this per class (mage, ranger, shield) and possibly specified in JSON
 	 * @return
 	 */
 	public float getMoveDist() {
 		return 7;
+	}
+	
+	/**
+	 * animation updates and stuff here
+	 * this will probably be overriden per class
+	 */
+	@Override
+	public void update(float stateTime) {
+		try {
+			//Each direction has preset limits for the character pos to help prevent outofbounds errors and to smoothen movement along the edges. Once collision is perfected, these should'nt be necessary
+			if (DirectionOfTravel.LEFT == direction) {
+				currentFrame = moveLeft.getKeyFrame(stateTime, true);
+			} else if (DirectionOfTravel.RIGHT == direction) {
+				currentFrame = moveRight.getKeyFrame(stateTime, true);
+			} else if (DirectionOfTravel.UP == direction) {
+				currentFrame = moveUp.getKeyFrame(stateTime, true);
+			} else if (DirectionOfTravel.DOWN == direction) {
+				currentFrame = moveDown.getKeyFrame(stateTime, true);
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+			e.printStackTrace();
+		}
 	}
 }

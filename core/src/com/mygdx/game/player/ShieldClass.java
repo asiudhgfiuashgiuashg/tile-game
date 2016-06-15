@@ -35,10 +35,13 @@ public class ShieldClass extends Player {
 		Gdx.app.log(getClass().getSimpleName(), "instance of shield class created");
 	}
 
+	/**
+	 * animation updates and stuff here
+	 */
 	@Override
-	protected void update(float stateTime) {
+	public void update(float stateTime) {
 		// TODO Auto-generated method stub
-		
+		super.update(stateTime);	
 	}
 
 }

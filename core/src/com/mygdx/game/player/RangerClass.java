@@ -33,10 +33,13 @@ public class RangerClass extends Player {
 		System.out.println("instance of ranger class created");
 	}
 	
+	/**
+	 * animation updates and stuff here
+	 */
 	@Override
-	protected void update(float stateTime) {
+	public void update(float stateTime) {
 		// TODO Auto-generated method stub
-		
+		super.update(stateTime);	
 	}
 
 }

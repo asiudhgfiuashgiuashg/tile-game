@@ -52,6 +52,14 @@ public class Communicator {
 	 */
 	private TheGame theGame;
 	
+	/*
+	 * variables used to avoid flooding the server with position updates
+	 * 
+	 * in the future, more complicated/involved rate limited will be nice
+	 */
+	private long timeLastSentPosition;
+	private static final int MAX_POSITION_UPDATES_SENT_PER_SECOND = 10;
+	
 	
 	public Communicator(TheGame theGame) {
 		this.theGame = theGame;
@@ -119,20 +127,37 @@ public class Communicator {
 	 * @param pos the new position of the player
 	 */
 	public void sendLocalPlayerPosition() {
-		/*
-		 * construct the message
-		 */
-		JSONObject message = new JSONObject();
-		double charX = TheGame.currentMap.localPlayer.getXPos();
-    	double charY = TheGame.currentMap.localPlayer.getYPos();
-    	message.put("type", "position"); //let server know that this message specifies a position update
-        message.put("charX", charX);
-        message.put("charY", charY);
-        message.put("uid", TheGame.currentMap.localPlayer.uid);
-        /*
-         * send the message
-         */
-    	out.println(message.toString());
+		if (canSendPosition()) {
+			/*
+			 * construct the message
+			 */
+			JSONObject message = new JSONObject();
+			double charX = TheGame.currentMap.localPlayer.getXPos();
+	    	double charY = TheGame.currentMap.localPlayer.getYPos();
+	    	message.put("type", "position"); //let server know that this message specifies a position update
+	        message.put("charX", charX);
+	        message.put("charY", charY);
+	        message.put("uid", TheGame.currentMap.localPlayer.uid);
+	        /*
+	         * send the message
+	         */
+	    	out.println(message.toString());
+		}
+	}
+	
+	/**
+	 * used to check if the position can be sent or if it is too soon
+	 * used to avoid flooding the server with position messages
+	 * @return
+	 */
+	private boolean canSendPosition() {
+		int oneSecond = 1000; //1000 ms
+		int delayBetweenMsgs = oneSecond / MAX_POSITION_UPDATES_SENT_PER_SECOND;
+		if (System.currentTimeMillis() - timeLastSentPosition >= delayBetweenMsgs) {
+			timeLastSentPosition = System.currentTimeMillis();
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -260,12 +285,15 @@ public class Communicator {
 			        		theGame.currentMap.getPlayerByUid(uid).setPos(new Point(otherPlayerX, otherPlayerY));
 			        		
 			        	/*
-			        	 * receive information about what animation another player is playing
+			        	 * receive information about what direction another player is facing
 			        	 */
-		        		} else if (messageType.equals("animation")) { //animation updates;
-		        			throw new UnsupportedOperationException();
-		        			/*int uid = ((Number) received.get("uid")).intValue();
-		        			((Player) theGame.currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));*/
+		        		} else if (messageType.equals("direction")) {
+		        			int uid = ((Number) received.get("uid")).intValue();
+		        			
+		        			String directionStr = (String) received.get("direction");
+		        			DirectionOfTravel direction = DirectionOfTravel.valueOf(directionStr);
+		        			
+		        			((Player) theGame.currentMap.getPlayerByUid(uid)).setDirection(direction);
 		        			
 		        		/*
 		        		 * receive message that an item has been removed from the ground
@@ -280,7 +308,8 @@ public class Communicator {
 		        		 */
 		        		} else if (messageType.equals("inventoryAddition")) { //arrives before the removedItem message
 		        			int uid = ((Number) received.get("uid")).intValue();
-		        			theGame.localPlayer.inv.addItem(theGame.currentMap.itemsOnField.getByUid(uid));
+		        			//TODO AAAAAAAAA THE CHAINING
+		        			theGame.currentMap.localPlayer.inv.addItem(theGame.currentMap.itemsOnField.getByUid(uid));
 		        			
 		        		/*
 		        		 * receive message that an item has appeared on the ground

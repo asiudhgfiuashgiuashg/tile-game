@@ -96,10 +96,7 @@ public class TheGame extends ApplicationAdapter {
 
     
     
-    /**
-     * the local player who is controlled by the keyboard and whose actions are sent to the server
-     */
-    protected Player localPlayer;
+    
     
     protected static enum GameState {
     	MAIN_MENU,
@@ -319,7 +316,7 @@ public class TheGame extends ApplicationAdapter {
             	currentMap.initializeGraph();
             	if (debug) {
             		TestAi testAi = new TestAi(playerShape, true, currentMap);
-	                testAi.setFollowPlayer(localPlayer, true);
+	                testAi.setFollowPlayer(currentMap.localPlayer, true);
 	                currentMap.agents.add(testAi);
             	}
                  
@@ -339,6 +336,12 @@ public class TheGame extends ApplicationAdapter {
 		for (LobbyPlayer lobbyPlayer: lobbyManager.getLobbyPlayers()) {
 			Player player = getPlayer(lobbyPlayer);
 			currentMap.addPlayer(player);
+			/*
+			 * keep track of the local player since the gameMap needs to know who the local player is to display correctly
+			 */
+			if (lobbyPlayer.equals(lobbyManager.getLocalLobbyPlayer())) {
+				currentMap.localPlayer = player;
+			}
 		}
 		
 		//player.create(); responsibilities for create() moved to constructor
@@ -380,6 +383,23 @@ public class TheGame extends ApplicationAdapter {
 			batch.end();
 			
 			currentMap.update();
+			
+			/*
+			 * have the gameinputprocessor move the player every frame according to wsad input
+			 */
+			try {
+				gameInputProcessor.moveLocalPlayer(Gdx.graphics.getDeltaTime());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			/*
+			 * send the position and direction of the local player to the server so that it can distribute them to everyone
+			 */
+			communicator.sendLocalPlayerPosition();
+			communicator.sendLocalPlayerDirection();
+			
 			
 			
 			if (debug) {
@@ -429,7 +449,7 @@ public class TheGame extends ApplicationAdapter {
 	}
 	
 	private void setupInGameInputProcessors() {
-		gameInputProcessor = new GameInputProcessor(localPlayer);
+		gameInputProcessor = new GameInputProcessor(currentMap.localPlayer);
 		inputMultiplexer.addProcessor(gameInputProcessor);
 	}
 	

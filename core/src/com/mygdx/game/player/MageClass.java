@@ -35,10 +35,13 @@ public class MageClass extends Player {
 		System.out.println ("instance of mage class created");
 	}
 	
+	/**
+	 * animation updates and stuff here
+	 */
 	@Override
-	protected void update(float stateTime) {
+	public void update(float stateTime) {
 		// TODO Auto-generated method stub
-		
+		super.update(stateTime);	
 	}
 
 }
