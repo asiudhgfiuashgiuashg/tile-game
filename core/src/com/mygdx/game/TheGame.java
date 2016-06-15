@@ -72,6 +72,9 @@ import com.mygdx.game.player.MageClass;
 import com.mygdx.game.player.Player;
 import com.mygdx.game.player.RangerClass;
 import com.mygdx.game.player.ShieldClass;
+import com.mygdx.game.player.class_input_processors.MageInputProcessor;
+import com.mygdx.game.player.class_input_processors.RangerInputProcessor;
+import com.mygdx.game.player.class_input_processors.ShieldInputProcessor;
 import com.mygdx.server.Server;
 
 
@@ -112,12 +115,13 @@ public class TheGame extends ApplicationAdapter {
     static GameState gameState;
     
     /**
-     * will first give events to the gui input processor
+     *  the inputmultiplexer will first give events to the gui input processor
      * Events which are unprocessed by the gui input processor will be given to the gameInputProcessor.
-     * Events which are unprocessed by the gameInputProcessor will be
+     * Events which are unprocessed by the gameInputProcessor will be given to thhe classSpecificProcessor to handle class-specific input behaviors
      */
     private InputMultiplexer inputMultiplexer;
     private GameInputProcessor gameInputProcessor;
+    private InputProcessor classSpecificInputProcessor;
     
     /**
      * if this client is also hosting, this field will be used to refer to the server
@@ -151,6 +155,8 @@ public class TheGame extends ApplicationAdapter {
 	 * we need to keep this around so that the stage can reference it
 	 */
 	private String username;
+
+	
 	
     
 	@Override
@@ -448,9 +454,30 @@ public class TheGame extends ApplicationAdapter {
 		stage.addInGameActors();
 	}
 	
-	private void setupInGameInputProcessors() {
+	 /*
+	  * the inputmultiplexer will first give events to the gui input processor
+	  * Events which are unprocessed by the gui input processor will be given to the gameInputProcessor.
+      * Events which are unprocessed by the gameInputProcessor will be given to thhe classSpecificProcessor to handle class-specific input behaviors
+	  * thus thhere must be an inputprocessor for each class
+	  */
+    
+	private void setupInGameInputProcessors() throws Exception {
 		gameInputProcessor = new GameInputProcessor(currentMap.localPlayer);
 		inputMultiplexer.addProcessor(gameInputProcessor);
+		/*
+		 * now add the per-class input processor which will handle class(mage, rangger, shield)-specific inputs
+		 */
+		Player localPlayer = currentMap.localPlayer;
+		if (localPlayer instanceof RangerClass) {
+			classSpecificInputProcessor = new RangerInputProcessor();
+		} else if (localPlayer instanceof MageClass) {
+			classSpecificInputProcessor = new MageInputProcessor();
+		} else if (localPlayer instanceof ShieldClass) {
+			classSpecificInputProcessor = new ShieldInputProcessor();
+		} else {
+			throw new Exception("the local player has some class for which there is no class-specific input processor hooked up");
+		}
+		inputMultiplexer.addProcessor(classSpecificInputProcessor);
 	}
 	
 	public LobbyManager getLobbyManager() {
@@ -472,7 +499,12 @@ public class TheGame extends ApplicationAdapter {
 		TheGame.gameState = GameState.GAME_STARTED;
 		setupForInGame();
 		addInGameActors();
-		setupInGameInputProcessors();
+		try {
+			setupInGameInputProcessors();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	
