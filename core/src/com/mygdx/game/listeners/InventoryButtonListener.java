@@ -23,22 +23,21 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 import com.mygdx.game.ExtendedStage;
 import com.mygdx.game.Item;
-import com.mygdx.game.LocalPlayer;
-import com.mygdx.game.Player;
 import com.mygdx.game.TheGame;
+import com.mygdx.game.player.Player;
 
 public class InventoryButtonListener extends InputListener {
 	private ExtendedStage stage;
 	
-	private LocalPlayer player;
+	private Player localPlayer;
 	private Skin skin;
 	private static List<Texture> toDisposeOf;
 	private static List<Actor> toRemove;
 	
 	
-	public InventoryButtonListener(ExtendedStage stage, LocalPlayer player, Skin skin) {
+	public InventoryButtonListener(ExtendedStage stage, Player localPlayer, Skin skin) {
 		this.stage = stage;
-		this.player = player;
+		this.localPlayer = localPlayer;
 		toDisposeOf = new ArrayList<Texture>();
 		toRemove = new ArrayList<Actor>();
 		this.skin = skin;

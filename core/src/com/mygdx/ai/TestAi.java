@@ -9,9 +9,9 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.DirectionOfTravel;
 import com.mygdx.game.GameMap;
 import com.mygdx.game.ObjectShape;
-import com.mygdx.game.Player;
 import com.mygdx.game.Point;
 import com.mygdx.game.Shape;
+import com.mygdx.game.player.Player;
 
 import java.util.Random;
 

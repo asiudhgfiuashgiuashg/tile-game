@@ -19,11 +19,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.spritesheet_utils.SpritesheetMetadataParser;
 
-public abstract class Entity extends GameObject
-{
-	public Entity(ObjectShape shape, boolean passable) {
-		super(shape, passable);
-	}
+public abstract class Entity extends GameObject {
 	
     protected int FRAME_COLS = 13;
     protected int FRAME_ROWS = 21;
@@ -51,10 +47,10 @@ public abstract class Entity extends GameObject
     protected float drawPosX;
     protected float drawPosY;
     //pixels relative to bottom left corner of current frame image
-    float up;
-    float down;
-    float left;
-    float right;
+    protected float up;
+    protected float down;
+    protected float left;
+    protected float right;
     
     //abstract void create(); why do we even have this instead of a constructor?
     protected abstract void update(float stateTime);              // updates it in the case of movement or status changes

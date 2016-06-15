@@ -44,6 +44,7 @@ import com.mygdx.ai.Agent;
 import com.mygdx.ai.DefaultIndexedGraphWithPublicNodes;
 import com.mygdx.ai.GraphCreator;
 import com.mygdx.ai.PositionIndexedNode;
+import com.mygdx.game.player.Player;
 
 
 public class GameMap implements JSONable {
@@ -72,6 +73,10 @@ public class GameMap implements JSONable {
     float stateTime;
     private static final JSONParser parser = new JSONParser();
     
+    /**
+     * list of players who are on the map
+     * These players are generated from the LobbyPlayers upon transition from lobby to in-game
+     */
     public List<Player> players;
 
     protected int mapPosX;
@@ -79,7 +84,13 @@ public class GameMap implements JSONable {
 
     private int winX = 400;
     private int winY = 240;
-    public LocalPlayer player;
+    
+    /**
+     * the local player who is controlled by the keyboard and whose actions are sent to the server
+     * 
+     * needed by the GameMap for displaying itself and collision checking (consider separating these things if they make the class too bulky)
+     */
+    public Player localPlayer;
 
     boolean multiplayerEnabled = true;
 
@@ -99,84 +110,112 @@ public class GameMap implements JSONable {
 	protected List<Agent> agents;
 	private static final String TILEART_DIRECTORY = "tileart";
 	
-    public GameMap(FileHandle mapFile, LocalPlayer player, SpriteBatch batch) throws IOException {
+	
+	/**
+	 * constructor used by the server
+	 * also forms the base of thhe constructor used by the client
+	 * @param mapFile
+	 */
+	public GameMap(FileHandle mapFile) {
+		agents = new ArrayList<Agent>();
+		players = new ArrayList<Player>();
+		
+		
+		///////////////////////////////////
+		// convert mapFile into Tile[][] //
+		///////////////////////////////////
+		
+		JSONObject mapJSON = null;
+		try {
+			mapJSON = (JSONObject) parser.parse(mapFile.reader());
+		} catch (ParseException e) {
+			System.exit(-1);
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.exit(-1);
+			e.printStackTrace();
+		}
+		
+		title = "TITLE GOES HERE"; //TODO: map titles included in map json
+		numRows = ((Number) mapJSON.get("height")).intValue();
+		numCols = ((Number) mapJSON.get("width")).intValue();
+		
+		mapTiles = new Tile[numRows][numCols];
+		stateTime = 0f;
+		JSONArray tiles = (JSONArray) mapJSON.get("tiles");
+		
+		System.out.println("numrows: " + numRows);
+		
+		for (int r = 0; r < numRows; r++) {
+			JSONArray row = (JSONArray) tiles.get(r);
+			for (int c = 0; c < numCols; c++ /* ha */) {
+				String currTileArtURI = (String) row.get(c);
+				String imageURI = currTileArtURI;
+				String name = currTileArtURI.substring(0,
+						currTileArtURI.indexOf('.')); // for now, the tile's
+														// name can be its URI
+														// without the extension
+				boolean passable = true; // all tiles are passable for now
+
+				Tile newTile = new Tile(c * TILE_WIDTH, r * TILE_HEIGHT,
+						imageURI, name, passable);
+
+				mapTiles[numRows - 1 - r][c] = newTile;
+
+			}
+		}
+		
+		
+		// Initializes the ItemCollector object before giving it the information
+		// to create an array list of items.
+		itemsOnField = new ItemCollector();
+
+		// FIX adding items to a map is not currently supported by map-maker
+		/*
+		 * String className; int id; Point pos;
+		 * 
+		 * 
+		 * for (int x = 0; x < itemIndex; x++) { className =
+		 * currentAttributes[0]; id = Integer.parseInt(currentAttributes[1]);
+		 * pos = new Point(Float.parseFloat(currentAttributes[2]),
+		 * Float.parseFloat(currentAttributes[3]));
+		 * itemsOnField.addItem(className, id, pos); }
+		 */
+		// Creates the ObjectCollector...object (kek) before giving it the
+		// information to create an array list of objects
+		JSONArray objects = (JSONArray) mapJSON.get("objects");
+		objectList = new ObjectCollector(TILE_WIDTH, TILE_HEIGHT, numCols,
+				numRows, mapTiles);
+		for (Object object : objects) {
+			JSONObject objectMap = (JSONObject) object;
+			objectList.addObject(objectMap);
+		}
+		
+        mapWidth = TILE_WIDTH * numCols;
+        mapHeight = TILE_HEIGHT * numRows;
+
+
+
+	}
+	
+	/**
+	 * a constructor used by a client to specify the local player as well as the spritebatch to draw on
+	 * @param mapFile
+	 * @param player the local player
+	 * @param batch the batch for the map to draw itself on
+	 * @throws IOException
+	 */
+    public GameMap(FileHandle mapFile, SpriteBatch batch) throws IOException {
     	
-    	agents = new ArrayList<Agent>();
+    	this(mapFile);
     	
     	shapeRenderer = new ShapeRenderer();
     	defaultNodeTextureRegion = new TextureRegion(new Texture(Gdx.files.internal("art/node_circle_default.png")));
     	
         thingToTextureMap = new HashMap < Object, Texture > ();
-        players = new ArrayList<Player>();
-        players.add(player);
-        this.player = player;
-        player.setCurrentMap(this);
-
-        ///////////////////////////////////
-        // convert mapFile into Tile[][] //
-        ///////////////////////////////////
-
-        JSONObject mapJSON = null;
-		try {
-			mapJSON = (JSONObject) parser.parse(mapFile.reader());
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-        title = "TITLE GOES HERE"; //TODO: map titles included in map json
-        numRows = ((Number) mapJSON.get("height")).intValue();
-        numCols = ((Number) mapJSON.get("width")).intValue();
-
-        mapTiles = new Tile[numRows][numCols];
-        stateTime = 0f;
-        JSONArray tiles = (JSONArray) mapJSON.get("tiles");
         
-        System.out.println("numrows: " + numRows);
 
-        for (int r = 0; r < numRows; r++) {
-        	JSONArray row = (JSONArray) tiles.get(r);
-            for (int c = 0; c < numCols; c++ /*ha*/ ) {
-            	String currTileArtURI = (String) row.get(c);
-                String imageURI = currTileArtURI;
-                String name = currTileArtURI.substring(0, currTileArtURI.indexOf('.')); //for now, the tile's name can be its URI without the extension
-                boolean passable = true; //all tiles are passable for now
-
-                Tile newTile = new Tile(c * TILE_WIDTH, r * TILE_HEIGHT, imageURI, name, passable);
-
-                mapTiles[numRows - 1 - r][c] = newTile;
-
-            }
-        }
-
-
-
-        //Initializes the ItemCollector object before giving it the information to create an array list of items.
-        itemsOnField = new ItemCollector();
-
-        //FIX adding items to a map is not currently supported by map-maker
-/*        String className;
-        int id;
-        Point pos;
         
-        
-        for (int x = 0; x < itemIndex; x++) {
-            className = currentAttributes[0];
-            id = Integer.parseInt(currentAttributes[1]);
-            pos = new Point(Float.parseFloat(currentAttributes[2]), Float.parseFloat(currentAttributes[3]));
-            itemsOnField.addItem(className, id, pos);
-        }
-
-*/
-        //Creates the ObjectCollector...object (kek) before giving it the information to create an array list of objects
-        JSONArray objects = (JSONArray) mapJSON.get("objects");
-        objectList = new ObjectCollector(TILE_WIDTH, TILE_HEIGHT, numCols, numRows, mapTiles);
-        for (Object object: objects) {
-        	JSONObject objectMap = (JSONObject) object;
-            objectList.addObject(objectMap);
-        }
-
-
         ///////////////////////////////////////////////////////////
         // create and save png which is composite of tile images //
         ///////////////////////////////////////////////////////////
@@ -220,12 +259,7 @@ public class GameMap implements JSONable {
         	texture.dispose();
         }
 
-        mapWidth = TILE_WIDTH * numCols;
-        mapHeight = TILE_HEIGHT * numRows;
 
-        initialCharPos();
-        updatePosY(0);
-        updatePosX(0);
 
 
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
@@ -297,13 +331,11 @@ public class GameMap implements JSONable {
                 }
             }
         }
-        if (multiplayerEnabled) {
-            for (Player player: players) {
-                if (player instanceof RemotePlayer) {
-                    player.drawAtPos(batch, (float) player.getPos().getX() - mapPosX, (float) player.getPos().getY() - mapPosY);
-                }
-            }
+        
+        for (Player player: players) {
+        	player.drawAtPos(batch, (float) player.getPos().getX() - mapPosX, (float) player.getPos().getY() - mapPosY);
         }
+       
         
         
         for (Agent agent: agents) {
@@ -311,7 +343,7 @@ public class GameMap implements JSONable {
         	agent.update(stateTime);
         }
         
-        player.draw(batch);
+
     }
 
     //////////////////////////
@@ -325,23 +357,23 @@ public class GameMap implements JSONable {
     public ItemCollector getNearbyItemList() {
         double itemRefPosX;
         double itemRefPosY;
-        double charRefPosX = player.getPos().getX() + player.getLeft();
-        double charRefPosY = player.getPos().getY() + player.getBottom();
+        double charRefPosX = localPlayer.getPos().getX() + localPlayer.getLeft();
+        double charRefPosY = localPlayer.getPos().getY() + localPlayer.getBottom();
         Array < Integer > indexValues = new Array < Integer > ();
 
         for (int x = 0; x < itemsOnField.getListSize(); x++) {
-            if (player.getPos().getX() > itemsOnField.getXPos(x) + itemsOnField.getWidth(x)) {
+            if (localPlayer.getPos().getX() > itemsOnField.getXPos(x) + itemsOnField.getWidth(x)) {
                 itemRefPosX = itemsOnField.getXPos(x) + itemsOnField.getWidth(x);
             } else {
                 itemRefPosX = itemsOnField.getXPos(x);
-                charRefPosX = player.getPos().getX() + player.getRight();
+                charRefPosX = localPlayer.getPos().getX() + localPlayer.getRight();
             }
 
-            if (player.getPos().getY() > itemsOnField.getYPos(x) + itemsOnField.getHeight(x)) {
+            if (localPlayer.getPos().getY() > itemsOnField.getYPos(x) + itemsOnField.getHeight(x)) {
                 itemRefPosY = itemsOnField.getYPos(x) + itemsOnField.getHeight(x);
             } else {
                 itemRefPosY = itemsOnField.getYPos(x);
-                charRefPosY = player.getPos().getY() + player.getTop();
+                charRefPosY = localPlayer.getPos().getY() + localPlayer.getTop();
             }
 
             if (Math.sqrt(Math.pow(itemRefPosX - charRefPosX, 2) + Math.pow(itemRefPosY - charRefPosY, 2)) <= 100) {
@@ -413,17 +445,17 @@ public class GameMap implements JSONable {
         //as this method just provides a fail safe in case the char is placed off the map
 
 
-        if (player.getPos().getX() < winX && smallWidth == false) {
-            player.drawPosX = (float) player.getPos().getX();
-        } else if (player.getPos().getX() > mapWidth - winX && smallWidth == false) {
-            player.drawPosX = (float)(player.getPos().getX() - mapWidth + 2 * winX);
+        if (localPlayer.getPos().getX() < winX && smallWidth == false) {
+            localPlayer.drawPosX = (float) localPlayer.getPos().getX();
+        } else if (localPlayer.getPos().getX() > mapWidth - winX && smallWidth == false) {
+            localPlayer.drawPosX = (float)(localPlayer.getPos().getX() - mapWidth + 2 * winX);
         }
 
 
-        if (player.getPos().getY() < winY && smallHeight == false) {
-            player.drawPosY = (float) player.getPos().getY();
-        } else if (player.getPos().getY() > mapHeight - winY && smallHeight == false) {
-            player.drawPosY = (float)(player.getPos().getY() - (mapHeight - winY) + winY);
+        if (localPlayer.getPos().getY() < winY && smallHeight == false) {
+            localPlayer.drawPosY = (float) localPlayer.getPos().getY();
+        } else if (localPlayer.getPos().getY() > mapHeight - winY && smallHeight == false) {
+            localPlayer.drawPosY = (float)(localPlayer.getPos().getY() - (mapHeight - winY) + winY);
         }
         if (smallWidth == true) {
             mapPosX = mapWidth / 2 - winX;
@@ -435,22 +467,22 @@ public class GameMap implements JSONable {
 
 
     public void adjustCharPlacement() {
-        Point playerPos = player.getPos();
+        Point playerPos = localPlayer.getPos();
         if (playerPos.getX() < -15) {
-            player.setX(-15);
+            localPlayer.setX(-15);
         } else if (playerPos.getX() > mapWidth - 50) {
-            player.setX(mapWidth - 50);
+            localPlayer.setX(mapWidth - 50);
         }
         if (playerPos.getY() < 5) {
-            player.setY(5);
+            localPlayer.setY(5);
         } else if (playerPos.getY() > mapHeight - 55) {
-            player.setY(mapHeight - 55);
+            localPlayer.setY(mapHeight - 55);
         }
         if (smallWidth) {
-            player.drawPosX = (float) playerPos.getX() + (winX - mapWidth / 2);
+            localPlayer.drawPosX = (float) playerPos.getX() + (winX - mapWidth / 2);
         }
         if (smallHeight) {
-            player.drawPosY = (float) playerPos.getY() + (winY - mapHeight / 2);
+            localPlayer.drawPosY = (float) playerPos.getY() + (winY - mapHeight / 2);
         }
         boolean enclosed = true;
         while (enclosed == true) {
@@ -467,13 +499,13 @@ public class GameMap implements JSONable {
 
     public void updatePosX(float movement) {
         if (smallWidth == false) {
-            if (player.getPos().getX() < winX) {
+            if (localPlayer.getPos().getX() < winX) {
                 mapPosX = 0;
-            } else if (player.getPos().getX() > winX) {
-                mapPosX = (int) player.getPos().getX() - winX;
+            } else if (localPlayer.getPos().getX() > winX) {
+                mapPosX = (int) localPlayer.getPos().getX() - winX;
             }
 
-            if (player.getPos().getX() + winX > mapWidth) {
+            if (localPlayer.getPos().getX() + winX > mapWidth) {
                 mapPosX = mapWidth - 2 * winX;
             }
 
@@ -483,25 +515,25 @@ public class GameMap implements JSONable {
             mapMoveRight = (mapPosX == (mapWidth - 2 * winX)) ? false : true;
 
             if (mapMoveLeft == true && mapMoveRight == true) {
-                player.drawPosX = 400;
+                localPlayer.drawPosX = 400;
             } else {
                 if (mapMoveLeft == false || mapMoveRight == false) {
-                    player.drawPosX += movement;
+                    localPlayer.drawPosX += movement;
                 }
             }
         } else {
-            player.drawPosX += movement;
+            localPlayer.drawPosX += movement;
         }
     }
 
     public void updatePosY(float movement) {
         if (smallHeight == false) {
-            if (player.getPos().getY() < winY) {
+            if (localPlayer.getPos().getY() < winY) {
                 mapPosY = 0;
-            } else if (player.getPos().getY() > winY) {
-                mapPosY = (int) player.getPos().getY() - winY;
+            } else if (localPlayer.getPos().getY() > winY) {
+                mapPosY = (int) localPlayer.getPos().getY() - winY;
             }
-            if (player.getPos().getY() + winY > mapHeight) {
+            if (localPlayer.getPos().getY() + winY > mapHeight) {
                 mapPosY = mapHeight - 2 * winY;
             }
 
@@ -509,12 +541,12 @@ public class GameMap implements JSONable {
             mapMoveUp = (mapPosY == (mapHeight - 2 * winY)) ? false : true;
 
             if (mapMoveUp == true && mapMoveDown == true) {
-                player.drawPosY = 240;
+                localPlayer.drawPosY = 240;
             } else if (mapMoveUp == false || mapMoveDown == false) {
-                player.drawPosY += movement;
+                localPlayer.drawPosY += movement;
             }
         } else {
-            player.drawPosY += movement;
+            localPlayer.drawPosY += movement;
         }
     }
 
@@ -524,11 +556,12 @@ public class GameMap implements JSONable {
     ///////////////////////////////////////////
 
     public boolean moveLeft() throws Exception {
+    	System.out.println("moving left");
         boolean success = false;
-        float deltaX = player.getMoveDist();
-        if (!collides(Direction.LEFT, deltaX) && player.getPos().getX() > -player.getLeft()) {
+        float deltaX = localPlayer.getMoveDist();
+        if (!collides(Direction.LEFT, deltaX) && localPlayer.getPos().getX() > -localPlayer.getLeft()) {
             //player.getPos().getX() -= deltaX;
-            player.setX((double)(player.getPos().getX() - deltaX));
+            localPlayer.setX((double)(localPlayer.getPos().getX() - deltaX));
             success = true;
 
             updatePosX(-deltaX);
@@ -539,10 +572,10 @@ public class GameMap implements JSONable {
     public boolean moveRight() throws Exception {
 
         boolean success = false;
-        float deltaX = player.getMoveDist();
-        if (!collides(Direction.RIGHT, deltaX) && player.getPos().getX() < mapWidth - player.getRight()) {
+        float deltaX = localPlayer.getMoveDist();
+        if (!collides(Direction.RIGHT, deltaX) && localPlayer.getPos().getX() < mapWidth - localPlayer.getRight()) {
             //player.getPos().getX() += deltaX;
-            player.setX(player.getPos().getX() + deltaX);
+            localPlayer.setX(localPlayer.getPos().getX() + deltaX);
             success = true;
             updatePosX(deltaX);
         }
@@ -550,10 +583,10 @@ public class GameMap implements JSONable {
     }
     public boolean moveUp() throws Exception {
         boolean success = false;
-        float deltaY = player.getMoveDist();
-        if (!collides(Direction.UP, deltaY) && player.getPos().getY() < mapHeight - player.getTop()) {
+        float deltaY = localPlayer.getMoveDist();
+        if (!collides(Direction.UP, deltaY) && localPlayer.getPos().getY() < mapHeight - localPlayer.getTop()) {
             //player.getPos().getY() += deltaY;
-            player.setY(player.getPos().getY() + deltaY);
+            localPlayer.setY(localPlayer.getPos().getY() + deltaY);
             success = true;
             updatePosY(deltaY);
         }
@@ -561,10 +594,10 @@ public class GameMap implements JSONable {
     }
     public boolean moveDown() throws Exception {
         boolean success = false;
-        float deltaY = player.getMoveDist();
-        if (!collides(Direction.DOWN, deltaY) && player.getPos().getY() > player.getBottom()) {
+        float deltaY = localPlayer.getMoveDist();
+        if (!collides(Direction.DOWN, deltaY) && localPlayer.getPos().getY() > localPlayer.getBottom()) {
             //player.getPos().getY() -= deltaY;
-            player.setY(player.getPos().getY() - deltaY);
+            localPlayer.setY(localPlayer.getPos().getY() - deltaY);
             success = true;
             updatePosY(-deltaY);
         }
@@ -577,15 +610,15 @@ public class GameMap implements JSONable {
         //MAP IS INDEXED WITH (0,0) IN TOP LEFT         //
         //CHAR POS STARTS WITH (0,0) IN BOTTOM LEFT     //
         //////////////////////////////////////////////////
-        double playerLeftSide = player.getPos().getX() + player.getLeft();
-        double playerRightSide = player.getPos().getX() + player.getRight();
-        double playerBottomSide = player.getPos().getY() + player.getBottom();
-        double playerTopSide = player.getPos().getY() + player.getTop();
+        double playerLeftSide = localPlayer.getPos().getX() + localPlayer.getLeft();
+        double playerRightSide = localPlayer.getPos().getX() + localPlayer.getRight();
+        double playerBottomSide = localPlayer.getPos().getY() + localPlayer.getBottom();
+        double playerTopSide = localPlayer.getPos().getY() + localPlayer.getTop();
 
 
         int row0, col0, row1, col1;
 
-        Shape playerShape = player.getShape();
+        Shape playerShape = localPlayer.getShape();
         Shape futurePlayerShape = playerShape.deepCopy();
         Point moveDist;
         //calculate requested new position of character and the rows and cols of tiles to check for collision
@@ -707,6 +740,11 @@ public class GameMap implements JSONable {
 		}
 	}
 	
+	/**
+	 * draw a pathway through the graph
+	 * Used to debug pathfinding.
+	 * @param graphPath
+	 */
 	private void drawGraphPath(GraphPath<PositionIndexedNode> graphPath) {
 		shapeRenderer.setAutoShapeType(true);
 		shapeRenderer.begin(ShapeType.Line);
@@ -742,15 +780,36 @@ public class GameMap implements JSONable {
     	
 	}
 
+	/**
+	 * @return a full json representation of the map
+	 */
 	@Override
 	public JSONObject toJSON() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * create a map from json
+	 */
 	@Override
 	public JSONable fromJSON(JSONObject json) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * add a player to the map
+	 * 
+	 * for now, this is only called upon transition from lobby to in-game when lobbyplayers are converted to players
+	 *  and need placed on the map
+	 * 
+	 * TODO this is where the json map file should be referenced to know where to spawn the player
+	 * For now, players will just spawn at a hardcoded position
+	 * @param player the player to add
+	 */
+	public void addPlayer(Player player) {
+		player.setPos(new Point(200, 200));
+		this.players.add(player);
 	}
 }

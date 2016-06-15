@@ -11,6 +11,9 @@ import org.json.simple.JSONValue;
 
 import com.badlogic.gdx.Gdx;
 import com.mygdx.game.TheGame.GameState;
+import com.mygdx.game.lobby.LobbyPlayer;
+import com.mygdx.game.player.*;
+import com.mygdx.game.lobby.CurrentClass;
 
 /**
  * the purpose of this class is to translate from the protocol used to communicate over the network to model
@@ -48,6 +51,14 @@ public class Communicator {
 	 * and so the communicator must have a reference to theGame in order to let it know about these messages
 	 */
 	private TheGame theGame;
+	
+	/*
+	 * variables used to avoid flooding the server with position updates
+	 * 
+	 * in the future, more complicated/involved rate limited will be nice
+	 */
+	private long timeLastSentPosition;
+	private static final int MAX_POSITION_UPDATES_SENT_PER_SECOND = 10;
 	
 	
 	public Communicator(TheGame theGame) {
@@ -116,20 +127,37 @@ public class Communicator {
 	 * @param pos the new position of the player
 	 */
 	public void sendLocalPlayerPosition() {
-		/*
-		 * construct the message
-		 */
-		JSONObject message = new JSONObject();
-		double charX = TheGame.currentMap.player.getXPos();
-    	double charY = TheGame.currentMap.player.getYPos();
-    	message.put("type", "position"); //let server know that this message specifies a position update
-        message.put("charX", charX);
-        message.put("charY", charY);
-        message.put("uid", TheGame.currentMap.player.uid);
-        /*
-         * send the message
-         */
-    	out.println(message.toString());
+		if (canSendPosition()) {
+			/*
+			 * construct the message
+			 */
+			JSONObject message = new JSONObject();
+			double charX = TheGame.currentMap.localPlayer.getXPos();
+	    	double charY = TheGame.currentMap.localPlayer.getYPos();
+	    	message.put("type", "position"); //let server know that this message specifies a position update
+	        message.put("charX", charX);
+	        message.put("charY", charY);
+	        message.put("uid", TheGame.currentMap.localPlayer.uid);
+	        /*
+	         * send the message
+	         */
+	    	out.println(message.toString());
+		}
+	}
+	
+	/**
+	 * used to check if the position can be sent or if it is too soon
+	 * used to avoid flooding the server with position messages
+	 * @return
+	 */
+	private boolean canSendPosition() {
+		int oneSecond = 1000; //1000 ms
+		int delayBetweenMsgs = oneSecond / MAX_POSITION_UPDATES_SENT_PER_SECOND;
+		if (System.currentTimeMillis() - timeLastSentPosition >= delayBetweenMsgs) {
+			timeLastSentPosition = System.currentTimeMillis();
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -142,7 +170,7 @@ public class Communicator {
 		 * construct the message 
 		 */
 		message.put("type", "direction");
-    	message.put("direction", TheGame.currentMap.player.direction.toString());
+    	message.put("direction", TheGame.currentMap.localPlayer.getDirection().toString());
     	/*
     	 * send the message
     	 */
@@ -151,7 +179,7 @@ public class Communicator {
 
 	/**
 	 * receive message from server and take the appropriate action based on the message
-	 * basically a huge case statement/demultiplexer at this time
+	 * basically a huge case statement/demultiplexer at this time that could stand to be split up
 	 */
 	public void receiveMessage() {
 		if (TheGame.GameState.SERVER_CONNECT_SCREEN != TheGame.gameState) {
@@ -178,40 +206,71 @@ public class Communicator {
 						 * upon receiving a network message that the game has started, change the game state
 						 */
 						if (received.get("type").equals("gameStartSignal")) {
-							TheGame.gameState = GameState.GAME_STARTED;
-							stage.clear();
-							theGame.addInGameActors();
-							
+							theGame.transitionFromLobbyToInGame();
 					
 						/*
 						 * upon receiving a network message that a remote player has joined the game
 						 */
 						} else if (received.get("type").equals("playerInfo")) {
-							String playerName = (String) received.get("username");
-							int uid = ((Number) received.get("uid")).intValue();
-							RemotePlayer remotePlayer = theGame.addRemotePlayerToList(playerName, uid);
+							String remotePlayerName = (String) received.get("username");
+							int remotePlayerUid = ((Number) received.get("uid")).intValue();
+							//Player remotePlayer = theGame.addRemotePlayerToList(playerName, uid);
+							LobbyPlayer remotePlayer = new LobbyPlayer(remotePlayerName, remotePlayerUid);
 
 							stage.addPlayerToLobbyStage(remotePlayer);
+							theGame.getLobbyManager().getLobbyPlayers().add(remotePlayer);
 							System.out.println("added remotePlayer: " + remotePlayer);
 							
 						/*
 						 * receive a network message that another player has changed their ready status, update the lobby UI
 						 */
 						} else if (received.get("type").equals("readyStatus")) {
-							int uid = ((Number) received.get("uid")).intValue();
+							/*int uid = ((Number) received.get("uid")).intValue();
 							boolean isReady = (Boolean) received.get("readyStatus");
 							for (Player player: stage.playerToCheckBoxMap.keySet()) {
 								if (player.uid == uid) {
 									stage.playerToCheckBoxMap.get(player).setChecked(isReady);
 								}
-							}
+							}*/
+							
+
+						/*
+						 * receive the class of a player (potentially the local player) from the server (mage, ranger, shield)
+						 */
+						} else if (received.get("type").equals("classAssignment")) {
+							String newClassName = (String) received.get("class");
+
+							
+							int uid = ((Number) received.get("uid")).intValue();
+							CurrentClass newClass = convertClassStringToEnum(newClassName);
+							theGame.getLobbyManager().setClassByUid(uid, newClass);
+							
+							//stage.setClass(className);
 							
 						/*
-						 * receive the uid of the local player from the server
+						 * get your uid (the unique identifier that the server refers to thhis client by)
+					     * you should receive your uid soon after connecting to the server
+						 * this is where you instantiate the local lobbyplayer
 						 */
 						} else if (received.get("type").equals("uidUpdate")) {
-							theGame.localPlayer.uid = ((Number) received.get("uid")).intValue();	
+							int uid = ((Number) received.get("uid")).intValue();
+							LobbyPlayer localLobbyPlayer = new LobbyPlayer(theGame.getUsername(), uid);
+							theGame.getLobbyManager().setLocalLobbyPlayer(localLobbyPlayer);
+							stage.addPlayerToLobbyStage(localLobbyPlayer);
+						/*
+						 * receive information about what a connected player's username is
+						 */
+						} else if (received.get("type").equals("username")) {
+							String username = (String) received.get("username");
+							int uid = ((Number) received.get("uid")).intValue();
+							theGame.getLobbyManager().setUsernameByUid(username, uid);
+							stage.updateLobbyPlayerTable(uid);
 						}
+						
+						
+						
+						
+						
 						
 					} else if (GameState.GAME_STARTED == TheGame.gameState) { //handle messages that come during game play, after the game has started
 		        		String messageType = (String) received.get("type");
@@ -226,12 +285,15 @@ public class Communicator {
 			        		theGame.currentMap.getPlayerByUid(uid).setPos(new Point(otherPlayerX, otherPlayerY));
 			        		
 			        	/*
-			        	 * receive information about what animation another player is playing
+			        	 * receive information about what direction another player is facing
 			        	 */
-		        		} else if (messageType.equals("animation")) { //animation updates
-		        			//System.out.println("animation: " + received);
+		        		} else if (messageType.equals("direction")) {
 		        			int uid = ((Number) received.get("uid")).intValue();
-		        			((RemotePlayer) theGame.currentMap.getPlayerByUid(uid)).setAnimation((String) received.get("animationName"));
+		        			
+		        			String directionStr = (String) received.get("direction");
+		        			DirectionOfTravel direction = DirectionOfTravel.valueOf(directionStr);
+		        			
+		        			((Player) theGame.currentMap.getPlayerByUid(uid)).setDirection(direction);
 		        			
 		        		/*
 		        		 * receive message that an item has been removed from the ground
@@ -246,7 +308,8 @@ public class Communicator {
 		        		 */
 		        		} else if (messageType.equals("inventoryAddition")) { //arrives before the removedItem message
 		        			int uid = ((Number) received.get("uid")).intValue();
-		        			theGame.localPlayer.inv.addItem(theGame.currentMap.itemsOnField.getByUid(uid));
+		        			//TODO AAAAAAAAA THE CHAINING
+		        			theGame.currentMap.localPlayer.inv.addItem(theGame.currentMap.itemsOnField.getByUid(uid));
 		        			
 		        		/*
 		        		 * receive message that an item has appeared on the ground
@@ -265,6 +328,24 @@ public class Communicator {
 		}
 	}
 	
+	/**
+	 * take the string representing the new class of the player given to us in a network message and map it to a field
+	 *  of the enum which represents the selected class of a lobby player
+	 * @param newClassName the name of the class received in the network message
+	 * @return the CurrentClass equivalent
+	 */
+	private CurrentClass convertClassStringToEnum(String newClassName) {
+		if (newClassName.equals("ranger")) {
+			return CurrentClass.RANGER;
+		} else if (newClassName.equals("mage")) {
+			return CurrentClass.MAGE;
+		} else if (newClassName.equals("shield")) {
+			return CurrentClass.SHIELD;
+		}
+		throw new IllegalArgumentException("ERROR! " + newClassName + " is not a supported class, please make sure the network message is correct");
+		
+	}
+
 	public void setStage(ExtendedStage stage) {
 		this.stage = stage;
 	}
