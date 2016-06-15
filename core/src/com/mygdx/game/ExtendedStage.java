@@ -202,10 +202,11 @@ public class ExtendedStage extends Stage {
 		lobbyTable.row();
 		
 		addChatBox();
+		messageTextField.addListener(new InLobbyMessageTextFieldListener(messageTextField, communicator, this));
 		
 		//inLobbyMessageTextFieldListener  = new InLobbyMessageTextFieldListener(messageTextField, communicator, localPlayer, this);
 		
-		messageTextField.addListener(inLobbyMessageTextFieldListener);
+		//messageTextField.addListener(inLobbyMessageTextFieldListener);
 	}
 	
 	

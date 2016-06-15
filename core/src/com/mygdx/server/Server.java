@@ -44,8 +44,14 @@ public class Server {
 	 * the port that the server listens on
 	 */
 	private int port;
+	/**
+	 * the remote clients who are connected to the server
+	 */
 	List<PlayerClient> clients;
 	private int numClientsConnected;
+	/**
+	 * the server listens for connections on this channel
+	 */
 	private ServerSocketChannel serverSocketChannel;
 	int currentUID; //used to give each client a  unique id (an integer which is incremented for every new connection)
 	/**
@@ -314,13 +320,16 @@ public class Server {
 					endLobby();
 				}
 			} else if (received.get("type").equals("chatMessage")) {
+				/*
+				 * chat messages are broadcast to everyone including the sender
+				 *  the sender wont display the message they send until it is received from the server (just simpler that way)
+				 */
 				String message = (String) received.get("message");
 				message = receiveFromClient.username + ": " + message;
 				received.clear();
 				received.put("type", "chatMessage");
 				received.put("message", message);
-				//System.out.println("sending chat message: " + received);
-				sendToAllFrom(received, receiveFromClient);
+				sendToAll(received);
 				
 			} else if (received.get("type").equals("sprite")) {
 				JSONObject spriteInfo = new JSONObject();
