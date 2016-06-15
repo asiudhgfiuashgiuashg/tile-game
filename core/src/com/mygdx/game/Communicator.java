@@ -239,6 +239,7 @@ public class Communicator {
 							String username = (String) received.get("username");
 							int uid = ((Number) received.get("uid")).intValue();
 							theGame.getLobbyManager().setUsernameByUid(username, uid);
+							stage.updateLobbyPlayerTable(uid);
 						}
 						
 						

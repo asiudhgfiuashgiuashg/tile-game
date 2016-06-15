@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -39,6 +40,7 @@ import com.mygdx.game.listeners.InLobbyMessageTextFieldListener;
 import com.mygdx.game.listeners.InventoryButtonListener;
 import com.mygdx.game.listeners.ItemListListener;
 import com.mygdx.game.lobby.LobbyPlayer;
+import com.mygdx.game.lobby.ui.LobbyPlayerTable;
 import com.mygdx.game.player.Player;
 
 /**
@@ -212,15 +214,18 @@ public class ExtendedStage extends Stage {
 	 * @param player
 	 */
 	public void addPlayerToLobbyStage(LobbyPlayer player) {
-		Label playerNameLabel = new Label(player.getUsername(), skin.get("default", LabelStyle.class));
-		final CheckBox readyCheckBox = new CheckBox("", skin);
+		LobbyPlayerTable playerTable = new LobbyPlayerTable(player, skin);
+		
+		
+/*		final CheckBox readyCheckBox = new CheckBox("", skin);
 		readyCheckBox.setDisabled(true);
-		playerToCheckBoxMap.put(player, readyCheckBox);
-		lobbyTable.add(playerNameLabel).padTop(15).padRight(20);
-		lobbyTable.add(readyCheckBox);
+		playerToCheckBoxMap.put(player, readyCheckBox);*/
+		lobbyTable.add(playerTable);
+		//lobbyTable.add(readyCheckBox);
 		lobbyTable.row();
 		///System.out.println("added player to lobby stage: " + player.username);
 	}
+	
 	
 	protected void setupConnectMenu() {
 		
@@ -559,5 +564,21 @@ public class ExtendedStage extends Stage {
 	public void setClass(String className) {
 		
 		
+	}
+
+
+	/**
+	 * refresh a lobby player's label and stuff like that
+	 * 
+	 * call this when the lobby player's username or other displayed info has changed
+	 * @param uid the uid of the player whose graphhical reprsentation in the lobby needs updated
+	 */
+	public void updateLobbyPlayerTable(int uid) {
+		for (Actor child: lobbyTable.getChildren())  {
+			LobbyPlayerTable playerTable = (LobbyPlayerTable) child;
+			if (playerTable.getLobbyPlayer().getUid() == uid) {
+				playerTable.refreshUsername();
+			}
+		}
 	}
 }
