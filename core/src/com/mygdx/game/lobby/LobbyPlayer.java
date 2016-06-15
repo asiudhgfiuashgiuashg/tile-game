@@ -39,7 +39,7 @@ public class LobbyPlayer {
 	 * 
 	 * @return the class that this player has selected
 	 */
-	private CurrentClass getCurrentClass() {
+	public CurrentClass getCurrentClass() {
 		return currentClass;
 	}
 	

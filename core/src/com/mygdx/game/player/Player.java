@@ -21,7 +21,9 @@ import com.mygdx.game.DirectionOfTravel;
 import com.mygdx.game.Entity;
 import com.mygdx.game.GameMap;
 import com.mygdx.game.ItemCollector;
+import com.mygdx.game.ObjectShape;
 import com.mygdx.game.Point;
+import com.mygdx.game.Shape;
 
 public abstract class Player extends Entity {
 
@@ -35,6 +37,10 @@ public abstract class Player extends Entity {
     private DirectionOfTravel direction;
 	public Label nameLabel;
 
+	public Player(int uid, ObjectShape shape) {
+		this.uid = uid;
+		this.shape = shape;
+	}
 
     @Override
     public float getRight() {

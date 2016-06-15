@@ -65,8 +65,13 @@ import com.mygdx.ai.PositionIndexedNode;
 import com.mygdx.ai.TestAi;
 import com.mygdx.game.listeners.InLobbyMessageTextFieldListener;
 import com.mygdx.game.listeners.InventoryButtonListener;
+import com.mygdx.game.lobby.CurrentClass;
 import com.mygdx.game.lobby.LobbyManager;
+import com.mygdx.game.lobby.LobbyPlayer;
+import com.mygdx.game.player.MageClass;
 import com.mygdx.game.player.Player;
+import com.mygdx.game.player.RangerClass;
+import com.mygdx.game.player.ShieldClass;
 import com.mygdx.server.Server;
 
 
@@ -328,12 +333,36 @@ public class TheGame extends ApplicationAdapter {
             e.printStackTrace();
         }
 		
+		/*
+		 * convert lobbyplayers to players
+		 */
+		for (LobbyPlayer lobbyPlayer: lobbyManager.getLobbyPlayers()) {
+			Player player = getPlayer(lobbyPlayer);
+			currentMap.addPlayer(player);
+		}
+		
 		//player.create(); responsibilities for create() moved to constructor
 		//localPlayer.setFOV(localPlayer.sightX, localPlayer.sightY);
-		
-		//initialize various GuiManagers, giving them appropriate GuiElements
-		
-
+	}
+	
+	/**
+	 * A conversion method.
+	 * takes lobby player when the lobby is ending
+	 *  and returns an instance of the appropriate subclass of Player
+	 * @param className the name of the class from the network class assignment message
+	 * @return an instance of the appropriate subclass of Player
+	 */
+	private Player getPlayer(LobbyPlayer thePlayer) {
+		System.out.println("lobbyplayer uid: " + thePlayer.getUid());
+		CurrentClass theClass = thePlayer.getCurrentClass();
+		if (theClass == CurrentClass.RANGER) {
+			return new RangerClass(thePlayer.getUid());
+		} else if (theClass == CurrentClass.MAGE) {
+			return new MageClass(thePlayer.getUid());
+		} else if (theClass == CurrentClass.SHIELD) {
+			return new ShieldClass(thePlayer.getUid());
+		}
+		throw new IllegalArgumentException("unsupported class!" + " You tried to use the following class: " + theClass);
 	}
 
 	@Override

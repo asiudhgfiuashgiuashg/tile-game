@@ -73,6 +73,10 @@ public class GameMap implements JSONable {
     float stateTime;
     private static final JSONParser parser = new JSONParser();
     
+    /**
+     * list of players who are on the map
+     * These players are generated from the LobbyPlayers upon transition from lobby to in-game
+     */
     public List<Player> players;
 
     protected int mapPosX;
@@ -731,6 +735,11 @@ public class GameMap implements JSONable {
 		}
 	}
 	
+	/**
+	 * draw a pathway through the graph
+	 * Used to debug pathfinding.
+	 * @param graphPath
+	 */
 	private void drawGraphPath(GraphPath<PositionIndexedNode> graphPath) {
 		shapeRenderer.setAutoShapeType(true);
 		shapeRenderer.begin(ShapeType.Line);
@@ -766,15 +775,36 @@ public class GameMap implements JSONable {
     	
 	}
 
+	/**
+	 * @return a full json representation of the map
+	 */
 	@Override
 	public JSONObject toJSON() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * create a map from json
+	 */
 	@Override
 	public JSONable fromJSON(JSONObject json) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * add a player to the map
+	 * 
+	 * for now, this is only called upon transition from lobby to in-game when lobbyplayers are converted to players
+	 *  and need placed on the map
+	 * 
+	 * TODO this is where the json map file should be referenced to know where to spawn the player
+	 * For now, players will just spawn at a hardcoded position
+	 * @param player the player to add
+	 */
+	public void addPlayer(Player player) {
+		player.setPos(new Point(0, 0));
+		this.players.add(player);
 	}
 }

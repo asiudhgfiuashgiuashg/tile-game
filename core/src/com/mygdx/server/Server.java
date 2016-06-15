@@ -125,11 +125,11 @@ public class Server {
         		 *  later implement players able to choose classes
         		 */
         		if (0 == numClientsConnected) {
-        			playerClient.player = new RangerClass();
+        			playerClient.player = new RangerClass(playerClient.uid);
         		} else if (1 == numClientsConnected) {
-        			playerClient.player = new MageClass();
+        			playerClient.player = new MageClass(playerClient.uid);
         		} else if (2 == numClientsConnected) {
-        			playerClient.player = new ShieldClass();
+        			playerClient.player = new ShieldClass(playerClient.uid);
         		}
         		
         		clients.add(playerClient);
@@ -146,6 +146,12 @@ public class Server {
 						playerInfo.put("uid", client.uid);
 						sendJSONOnSocketChannel(playerInfo, playerClient.socketChannel);
 						playerInfo.clear();
+						
+						/*
+						 * let everyone (especially the newly-connected client) know what the class assignment of this player is
+						 * in the future, this will be called as players change their selected classes
+						 */
+						sendClassAssignment(client);
 					}
 				}
 				
@@ -165,7 +171,7 @@ public class Server {
 				
 				/*
 				 * let everyone know what the class assignment of this player is
-				 * in the future, this will be called multiple times as players change their selected classes
+				 * in the future, this will be called as players change their selected classes
 				 */
 				sendClassAssignment(playerClient);
 				
@@ -266,6 +272,7 @@ public class Server {
      * aka take the appropriate action based on the message
      * For example, if the message is an update on the client's position, send the new position to other players
      *  and update the Server's model of the map
+     * Currently a big case statement. Could be split up.
      * @param client
      */
     public void handleMessageFrom(PlayerClient client) {

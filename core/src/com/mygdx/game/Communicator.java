@@ -154,7 +154,7 @@ public class Communicator {
 
 	/**
 	 * receive message from server and take the appropriate action based on the message
-	 * basically a huge case statement/demultiplexer at this time
+	 * basically a huge case statement/demultiplexer at this time that could stand to be split up
 	 */
 	public void receiveMessage() {
 		if (TheGame.GameState.SERVER_CONNECT_SCREEN != TheGame.gameState) {
@@ -319,22 +319,5 @@ public class Communicator {
 
 	public void setStage(ExtendedStage stage) {
 		this.stage = stage;
-	}
-	
-	/**
-	 * takes the name of a class assigned to one of the players by a network message when the lobby is ending
-	 *  and returns an instance of the appropriate subclass of Player
-	 * @param className the name of the class from the network class assignment message
-	 * @return an instance of the appropriate subclass of Player
-	 */
-	private Player getPlayer(String className) {
-		if (className.equals("ranger")) {
-			return new RangerClass();
-		} else if (className.equals("mage")) {
-			return new MageClass();
-		} else if (className.equals("shield")) {
-			return new ShieldClass();
-		}
-		return null;
 	}
 }
