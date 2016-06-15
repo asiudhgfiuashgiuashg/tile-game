@@ -149,6 +149,9 @@ public class ExtendedStage extends Stage {
 		this.addActor(messageTextField);
 	}
 	
+	/**
+	 * set up the ui elements and their listeners for the lobby
+	 */
 	public void setupLobby() {
 		TheGame.gameState = TheGame.GameState.IN_LOBBY;
 		playerToCheckBoxMap = new HashMap<LobbyPlayer, CheckBox>();
@@ -202,11 +205,12 @@ public class ExtendedStage extends Stage {
 		lobbyTable.row();
 		
 		addChatBox();
-		messageTextField.addListener(new InLobbyMessageTextFieldListener(messageTextField, communicator, this));
-		
-		//inLobbyMessageTextFieldListener  = new InLobbyMessageTextFieldListener(messageTextField, communicator, localPlayer, this);
-		
-		//messageTextField.addListener(inLobbyMessageTextFieldListener);
+		/*
+		 * save this listener so it can be removed later and replaced with a listener for in-game
+		 */
+		inLobbyMessageTextFieldListener = new InLobbyMessageTextFieldListener(messageTextField, communicator, this);
+		messageTextField.addListener(inLobbyMessageTextFieldListener);
+
 	}
 	
 	
@@ -490,9 +494,16 @@ public class ExtendedStage extends Stage {
 		this.addActor(errorTextField);
 	}
 	
+	/**
+	 * add the ui elements for in-game
+	 */
 	public void addInGameActors() {
 		addChatBox();
 		messageTextField.setVisible(false);
+		
+		/**
+		 * replace the chatbox listener from the lobby with a new one for in-game
+		 */
 		messageTextField.removeListener(inLobbyMessageTextFieldListener);
 		inGameMessageTextFieldListener = new InputListener() {
 			@Override
@@ -502,7 +513,6 @@ public class ExtendedStage extends Stage {
 						//send the text as a message
 						if (messageTextField.getText().length() > 0) {
 							String message = messageTextField.getText();
-							addMessageToChatbox(currentMap.localPlayer.username + ": " + messageTextField.getText());
 							communicator.sendChatMessage(message);
 							messageTextField.setText("");
 						}
