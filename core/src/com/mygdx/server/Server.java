@@ -8,10 +8,12 @@ import org.json.simple.JSONValue;
 import org.json.simple.JSONArray;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Json;
 import com.mygdx.game.ExtendedStage;
 import com.mygdx.game.GameMap;
 import com.mygdx.game.Item;
 import com.mygdx.game.player.*;
+import com.mygdx.game.serializers.GameMapSerializer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,14 +61,20 @@ public class Server {
 	 */
 	private GameMap gameMap;
 	ExtendedStage stage;
-	
+	/**
+	 * the name of the map.
+	 * change this to change what map is loaded.
+	 */
+	private final String mapName = "test";
 
 	
 	public Server(int port, ExtendedStage stage) {
 		setupServer(port);
 		currentUID = 0;
 		this.stage = stage;
-		this.gameMap = new GameMap(Gdx.files.internal("test.json"));
+		Json json = new Json();
+		json.setSerializer(GameMap.class, new GameMapSerializer());
+        this.gameMap = json.fromJson(GameMap.class, Gdx.files.internal(mapName + ".json"));
 	}
 	
 	/**

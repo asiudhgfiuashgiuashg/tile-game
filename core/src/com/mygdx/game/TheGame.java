@@ -57,6 +57,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -75,6 +76,7 @@ import com.mygdx.game.player.ShieldClass;
 import com.mygdx.game.player.class_input_processors.MageInputProcessor;
 import com.mygdx.game.player.class_input_processors.RangerInputProcessor;
 import com.mygdx.game.player.class_input_processors.ShieldInputProcessor;
+import com.mygdx.game.serializers.GameMapSerializer;
 import com.mygdx.server.Server;
 
 
@@ -313,28 +315,27 @@ public class TheGame extends ApplicationAdapter {
         
         sc.close();
         
-		try {
-            ///System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
-            currentMap = new GameMap(Gdx.files.internal(mapName + ".json"), batch);
+		Json json = new Json();
+		json.setSerializer(GameMap.class, new GameMapSerializer());
+        currentMap = json.fromJson(GameMap.class, Gdx.files.internal(mapName + ".json"));
+        /*
+         * since we are on a client and the map will need to draw itself, call this function to set it up to do that
+         */
+        currentMap.setupMapForClient(batch);
 
-            if (hosting) {
-            	currentMap.initializeGraph();
-            	if (debug) {
-            		TestAi testAi = new TestAi(playerShape, true, currentMap);
-	                testAi.setFollowPlayer(currentMap.localPlayer, true);
-	                currentMap.agents.add(testAi);
-            	}
-                 
-                 //server.gameMap = currentMap;
-            }
-            stage.currentMap = currentMap;
-            
+        if (hosting) {
+        	currentMap.initializeGraph();
+        	if (debug) {
+        		TestAi testAi = new TestAi(playerShape, true, currentMap);
+                testAi.setFollowPlayer(currentMap.localPlayer, true);
+                currentMap.agents.add(testAi);
+        	}
+             
+             //server.gameMap = currentMap;
         }
-        catch(IOException e) {
-        	System.out.println("Failed to create map object");
-            e.printStackTrace();
-        }
+        stage.currentMap = currentMap;
+
 		
 		/*
 		 * convert lobbyplayers to players

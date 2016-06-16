@@ -108,113 +108,33 @@ public class GameMap {
 	protected List<Agent> agents;
 	private static final String TILEART_DIRECTORY = "tileart";
 	
-	
-	/**
-	 * constructor used by the server
-	 * also forms the base of thhe constructor used by the client
-	 * @param mapFile
-	 */
-	public GameMap(FileHandle mapFile) {
+	public GameMap() {
 		agents = new ArrayList<Agent>();
 		players = new ArrayList<Player>();
-		
-		
-		///////////////////////////////////
-		// convert mapFile into Tile[][] //
-		///////////////////////////////////
-		
-		JSONObject mapJSON = null;
-		try {
-			mapJSON = (JSONObject) parser.parse(mapFile.reader());
-		} catch (ParseException e) {
-			System.exit(-1);
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.exit(-1);
-			e.printStackTrace();
-		}
-		
-		title = "TITLE GOES HERE"; //TODO: map titles included in map json
-		numRows = ((Number) mapJSON.get("height")).intValue();
-		numCols = ((Number) mapJSON.get("width")).intValue();
-		
-		mapTiles = new Tile[numRows][numCols];
-		stateTime = 0f;
-		JSONArray tiles = (JSONArray) mapJSON.get("tiles");
-		
-		System.out.println("numrows: " + numRows);
-		
-		for (int r = 0; r < numRows; r++) {
-			JSONArray row = (JSONArray) tiles.get(r);
-			for (int c = 0; c < numCols; c++ /* ha */) {
-				String currTileArtURI = (String) row.get(c);
-				String imageURI = currTileArtURI;
-				String name = currTileArtURI.substring(0,
-						currTileArtURI.indexOf('.')); // for now, the tile's
-														// name can be its URI
-														// without the extension
-				boolean passable = true; // all tiles are passable for now
-
-				Tile newTile = new Tile(c * TILE_WIDTH, r * TILE_HEIGHT,
-						imageURI, name, passable);
-
-				mapTiles[numRows - 1 - r][c] = newTile;
-
-			}
-		}
-		
 		
 		// Initializes the ItemCollector object before giving it the information
 		// to create an array list of items.
 		itemsOnField = new ItemCollector();
-
-		// FIX adding items to a map is not currently supported by map-maker
-		/*
-		 * String className; int id; Point pos;
-		 * 
-		 * 
-		 * for (int x = 0; x < itemIndex; x++) { className =
-		 * currentAttributes[0]; id = Integer.parseInt(currentAttributes[1]);
-		 * pos = new Point(Float.parseFloat(currentAttributes[2]),
-		 * Float.parseFloat(currentAttributes[3]));
-		 * itemsOnField.addItem(className, id, pos); }
-		 */
-		// Creates the ObjectCollector...object (kek) before giving it the
-		// information to create an array list of objects
-		JSONArray objects = (JSONArray) mapJSON.get("objects");
-		objectList = new ObjectCollector(TILE_WIDTH, TILE_HEIGHT, numCols,
-				numRows, mapTiles);
-		for (Object object : objects) {
-			JSONObject objectMap = (JSONObject) object;
-			objectList.addObject(objectMap);
-		}
 		
-        mapWidth = TILE_WIDTH * numCols;
-        mapHeight = TILE_HEIGHT * numRows;
-
-
-
+		stateTime = 0f;
 	}
 	
-	/**
-	 * a constructor used by a client to specify the local player as well as the spritebatch to draw on
-	 * @param mapFile
-	 * @param player the local player
-	 * @param batch the batch for the map to draw itself on
-	 * @throws IOException
-	 */
-    public GameMap(FileHandle mapFile, SpriteBatch batch) throws IOException {
-    	
-    	this(mapFile);
+	
+
+    
+    /**
+     * setup stuff thaht the client will need to draw the map
+     * don't call this for the Server's instance of gameMap
+     * @param batch
+     */
+    protected void setupMapForClient(SpriteBatch batch) {
     	
     	shapeRenderer = new ShapeRenderer();
     	defaultNodeTextureRegion = new TextureRegion(new Texture(Gdx.files.internal("art/node_circle_default.png")));
     	
         thingToTextureMap = new HashMap < Object, Texture > ();
         
-
-        
-        ///////////////////////////////////////////////////////////
+    	 ///////////////////////////////////////////////////////////
         // create and save png which is composite of tile images //
         ///////////////////////////////////////////////////////////
         System.out.println("CREATING COMPOSITE MAP IMAGE");
@@ -261,13 +181,8 @@ public class GameMap {
 
 
         fov = new TextureRegion(mapImage, mapPosX, mapPosY, 2 * winX, 2 * winY);
-
     }
     
-    public GameMap() {
-		// TODO Auto-generated constructor stub
-	}
-
 	public void initializeGraph() {
         nodeGraph = GraphCreator.graphFromMap(this);
         System.out.println("initialized graph: " + nodeGraph);
@@ -793,4 +708,57 @@ public class GameMap {
 		player.setPos(new Point(200, 200));
 		this.players.add(player);
 	}
+	
+	/*
+	 * getters and setters
+	 */
+
+	public int getMapWidth() {
+		return mapWidth;
+	}
+
+	public void setMapWidth(int mapWidth) {
+		this.mapWidth = mapWidth;
+	}
+
+	public int getMapHeight() {
+		return mapHeight;
+	}
+
+	public void setMapHeight(int mapHeight) {
+		this.mapHeight = mapHeight;
+	}
+
+	public ObjectCollector getObjectList() {
+		return objectList;
+	}
+
+	public void setObjectList(ObjectCollector objectList) {
+		this.objectList = objectList;
+	}
+
+	public Tile[][] getMapTiles() {
+		return mapTiles;
+	}
+
+	public void setMapTiles(Tile[][] mapTiles) {
+		this.mapTiles = mapTiles;
+	}
+
+	public int getNumRows() {
+		return numRows;
+	}
+
+	public void setNumRows(int numRows) {
+		this.numRows = numRows;
+	}
+
+	public int getNumCols() {
+		return numCols;
+	}
+
+	public void setNumCols(int numCols) {
+		this.numCols = numCols;
+	}
+
 }
