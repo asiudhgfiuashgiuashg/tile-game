@@ -5,25 +5,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 package com.mygdx.game;
 
-import java.awt.Graphics;
+
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 
-import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.Connection;
@@ -40,6 +35,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.Json.Serializable;
+import com.badlogic.gdx.utils.JsonValue;
 import com.mygdx.ai.Agent;
 import com.mygdx.ai.DefaultIndexedGraphWithPublicNodes;
 import com.mygdx.ai.GraphCreator;
@@ -47,7 +45,7 @@ import com.mygdx.ai.PositionIndexedNode;
 import com.mygdx.game.player.Player;
 
 
-public class GameMap implements JSONable {
+public class GameMap {
 	
 	/**
 	 * a dummy instance from which fromJSON() may be called
@@ -556,7 +554,6 @@ public class GameMap implements JSONable {
     ///////////////////////////////////////////
 
     public boolean moveLeft() throws Exception {
-    	System.out.println("moving left");
         boolean success = false;
         float deltaX = localPlayer.getMoveDist();
         if (!collides(Direction.LEFT, deltaX) && localPlayer.getPos().getX() > -localPlayer.getLeft()) {
@@ -780,23 +777,7 @@ public class GameMap implements JSONable {
     	
 	}
 
-	/**
-	 * @return a full json representation of the map
-	 */
-	@Override
-	public JSONObject toJSON() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * create a map from json
-	 */
-	@Override
-	public JSONable fromJSON(JSONObject json) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	/**
 	 * add a player to the map

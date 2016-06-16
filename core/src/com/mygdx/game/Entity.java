@@ -33,8 +33,7 @@ public abstract class Entity extends GameObject {
     protected Animation moveUp;
     protected Animation moveDown;
     protected Texture spriteSheet;
-    protected TextureRegion[][] tmp;
-    protected TextureRegion[] animationFrames;
+
     protected TextureRegion currentFrame;
     
     protected Animation idleRight;
