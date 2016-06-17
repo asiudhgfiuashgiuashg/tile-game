@@ -27,6 +27,10 @@ public class GameInputProcessor implements InputProcessor {
 	 */
 	private Player localPlayer;
 	
+	/**
+	 * 
+	 */
+	
 
 	public GameInputProcessor(Player localPlayer) {
 		this.localPlayer = localPlayer;
@@ -38,6 +42,7 @@ public class GameInputProcessor implements InputProcessor {
 	 * @throws Exception 
 	 */
 	protected void moveLocalPlayer(float stateTime) throws Exception {
+		localPlayer.setDirection(directionStack.peek());
 		if (DirectionOfTravel.LEFT == localPlayer.getDirection()) {
 			TheGame.currentMap.moveLeft();
 		} else if (DirectionOfTravel.RIGHT == localPlayer.getDirection()) {
@@ -63,7 +68,6 @@ public class GameInputProcessor implements InputProcessor {
 		} else if ((Input.Keys.DOWN == keycode) || (Input.Keys.S == keycode)) {
 			directionStack.add(DirectionOfTravel.DOWN);
 		}
-		localPlayer.setDirection(directionStack.peek());
 		/*
 		 * next give everything unhandled to the handler for the localplayer's specific class (mage, ranger, shield)
 		 */
@@ -87,9 +91,7 @@ public class GameInputProcessor implements InputProcessor {
 			directionStack.remove(DirectionOfTravel.DOWN);
 		}
 		if (directionStack.isEmpty()) {
-			localPlayer.setDirection(DirectionOfTravel.IDLE);
-		} else {
-			localPlayer.setDirection(directionStack.peek());
+			directionStack.push(DirectionOfTravel.IDLE);
 		}
 		/*
 		 * next give everything unhandled to the handler for the localplayer's specific class (mage, ranger, shield)
