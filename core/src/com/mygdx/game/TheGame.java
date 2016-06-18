@@ -1,71 +1,30 @@
 package com.mygdx.game;
 
-import java.io.IOException;
-import java.util.ArrayList;
+
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.prefs.Preferences;
 import java.util.Scanner;
-import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-
-import org.json.simple.JSONValue;
-import org.json.simple.JSONObject;
-
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.List.ListStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.mygdx.ai.Agent;
-import com.mygdx.ai.PositionIndexedNode;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.ai.TestAi;
-import com.mygdx.game.listeners.InLobbyMessageTextFieldListener;
-import com.mygdx.game.listeners.InventoryButtonListener;
 import com.mygdx.game.lobby.CurrentClass;
 import com.mygdx.game.lobby.LobbyManager;
 import com.mygdx.game.lobby.LobbyPlayer;
@@ -158,11 +117,30 @@ public class TheGame extends ApplicationAdapter {
 	 */
 	private String username;
 
-	
+	/**
+	 * used to scale the game
+	 */
+	private OrthographicCamera camera;
+
+	/**
+	 * how much the camera is zoomed
+	 * .5 = 200% zoom
+	 * 2 = 50% zoom
+	 */
+	private final float CAM_ZOOM = 1f;
 	
     
 	@Override
 	public void create() {
+		// Constructs a new OrthographicCamera, using the given viewport width and height
+        // Height is multiplied by aspect ratio.
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
+        camera.update();
+        
+
+
+		
 		debug = false;
 		
 		setupSkin();
@@ -376,12 +354,15 @@ public class TheGame extends ApplicationAdapter {
 	}
 
 	@Override
-	public void render()
-	{
+	public void render() {
+		Gdx.gl20.glClearColor(0, 0, 0, 1);
+		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if (GameState.GAME_STARTED == gameState) {
+			camera.zoom = CAM_ZOOM;
+			camera.update();
+			batch.setProjectionMatrix(camera.combined);
+			
 			batch.begin();
 
 			currentMap.draw(batch); //draw things which don't cast shadows (tiles)

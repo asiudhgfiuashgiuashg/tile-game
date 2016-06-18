@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.GraphPath;
@@ -28,6 +27,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -135,7 +135,8 @@ public class GameMap {
         thingToTextureMap = new HashMap < Object, Texture > ();
         
     	 ///////////////////////////////////////////////////////////
-        // create and save png which is composite of tile images //
+        // create a single texture which is a  composite of tile images //
+        // moving over the map will sample a textureregion from this texture
         ///////////////////////////////////////////////////////////
         System.out.println("CREATING COMPOSITE MAP IMAGE");
         FrameBuffer mapFB = new FrameBuffer(Format.RGBA8888, TILE_WIDTH * numCols, TILE_HEIGHT * numRows, false);
@@ -168,9 +169,12 @@ public class GameMap {
         batch.setProjectionMatrix(projectionMatrix);
 
 
-        System.out.println("))))))))))))))))))))))))");
         mapImage = mapFB.getColorBufferTexture();
-        System.out.println("((((((((((((((((((((((((");
+        /*
+         * this function call makes the texture able to be zoomed in on without blurring
+         */
+        mapImage.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+
         
         //stop using memory for temporary tile textures
         for (Texture texture: imageTexturesToDisposeOf) {
