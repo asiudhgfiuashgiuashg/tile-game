@@ -483,10 +483,10 @@ public class GameMap {
             updatePosX(-deltaX);
         }
         return success;
+
     }
 
     public boolean moveRight() throws Exception {
-
         boolean success = false;
         float deltaX = localPlayer.getMoveDist();
         if (!collides(Direction.RIGHT, deltaX) && localPlayer.getPos().getX() < mapWidth - localPlayer.getRight()) {

@@ -4,6 +4,8 @@ import java.util.Stack;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.player.Player;
 
 /**
@@ -27,9 +29,7 @@ public class GameInputProcessor implements InputProcessor {
 	 */
 	private Player localPlayer;
 	
-	/**
-	 * 
-	 */
+
 	
 
 	public GameInputProcessor(Player localPlayer) {
@@ -47,12 +47,16 @@ public class GameInputProcessor implements InputProcessor {
 		}
 		localPlayer.setDirection(directionStack.peek());
 		if (DirectionOfTravel.LEFT == localPlayer.getDirection()) {
+			localPlayer.getPos().translate(-localPlayer.getMoveDist() * Gdx.graphics.getDeltaTime(), 0);
 			TheGame.currentMap.moveLeft();
 		} else if (DirectionOfTravel.RIGHT == localPlayer.getDirection()) {
+			localPlayer.getPos().translate(localPlayer.getMoveDist() * Gdx.graphics.getDeltaTime(), 0);
 			TheGame.currentMap.moveRight();
 		} else if (DirectionOfTravel.UP == localPlayer.getDirection()) {
+			localPlayer.getPos().translate(0, localPlayer.getMoveDist() * Gdx.graphics.getDeltaTime());
 			TheGame.currentMap.moveUp();
 		} else if (DirectionOfTravel.DOWN == localPlayer.getDirection()) {
+			localPlayer.getPos().translate(0, -localPlayer.getMoveDist() * Gdx.graphics.getDeltaTime());
 			TheGame.currentMap.moveDown();
 		}
 	}

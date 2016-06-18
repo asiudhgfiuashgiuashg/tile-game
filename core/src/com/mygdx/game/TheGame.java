@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.List.ListStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -120,14 +121,14 @@ public class TheGame extends ApplicationAdapter {
 	/**
 	 * used to scale the game
 	 */
-	private OrthographicCamera camera;
+	protected OrthographicCamera camera;
 
 	/**
 	 * how much the camera is zoomed
 	 * .5 = 200% zoom
 	 * 2 = 50% zoom
 	 */
-	private final float CAM_ZOOM = 1f;
+	private final float CAM_ZOOM = 1 / 1f;
 	
     
 	@Override
@@ -135,6 +136,7 @@ public class TheGame extends ApplicationAdapter {
 		// Constructs a new OrthographicCamera, using the given viewport width and height
         // Height is multiplied by aspect ratio.
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.zoom = CAM_ZOOM;
         camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
         camera.update();
         
@@ -355,12 +357,15 @@ public class TheGame extends ApplicationAdapter {
 
 	@Override
 	public void render() {
+		/*
+		 * display the fps in the title of the game
+		 */
+		Gdx.graphics.setTitle("fps: " + Integer.toString(Gdx.graphics.getFramesPerSecond()));
+		
 		Gdx.gl20.glClearColor(0, 0, 0, 1);
 		Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		if (GameState.GAME_STARTED == gameState) {
-			camera.zoom = CAM_ZOOM;
-			camera.update();
 			batch.setProjectionMatrix(camera.combined);
 			
 			batch.begin();

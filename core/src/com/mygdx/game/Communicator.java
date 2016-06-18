@@ -58,7 +58,16 @@ public class Communicator {
 	 * in the future, more complicated/involved rate limited will be nice
 	 */
 	private long timeLastSentPosition;
-	private static final int MAX_POSITION_UPDATES_SENT_PER_SECOND = 10;
+	/*
+	 * variables used to avoid flooding the server with directioon updates
+	 * 
+	 * in the future, more complicated/involved rate limited will be nice
+	 */
+	private long timeLastSentDirection;
+	/*
+	 * max amt of time between position and direction updates
+	 */
+	private static final int MAX_POSITION_AND_DIRECTION_UPDATES_SENT_PER_SECOND = 20;
 	
 	
 	public Communicator(TheGame theGame) {
@@ -148,11 +157,11 @@ public class Communicator {
 	/**
 	 * used to check if the position can be sent or if it is too soon
 	 * used to avoid flooding the server with position messages
-	 * @return
+	 * @return true if can send 
 	 */
 	private boolean canSendPosition() {
 		int oneSecond = 1000; //1000 ms
-		int delayBetweenMsgs = oneSecond / MAX_POSITION_UPDATES_SENT_PER_SECOND;
+		int delayBetweenMsgs = oneSecond / MAX_POSITION_AND_DIRECTION_UPDATES_SENT_PER_SECOND;
 		if (System.currentTimeMillis() - timeLastSentPosition >= delayBetweenMsgs) {
 			timeLastSentPosition = System.currentTimeMillis();
 			return true;
@@ -161,20 +170,38 @@ public class Communicator {
 	}
 	
 	/**
+	 * used to check if the direction can be sent or if it is too soon
+	 * used to avoid flooding the server with position messages
+	 * @return true if can send 
+	 */
+	private boolean canSendDirection() {
+		int oneSecond = 1000; //1000 ms
+		int delayBetweenMsgs = oneSecond / MAX_POSITION_AND_DIRECTION_UPDATES_SENT_PER_SECOND;
+		if (System.currentTimeMillis() - timeLastSentDirection >= delayBetweenMsgs) {
+			timeLastSentDirection = System.currentTimeMillis();
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
 	 * send the local player's direction to the server
 	 * aka translate the local representation of the player's direction into a network message
 	 */
 	public void sendLocalPlayerDirection() {
-		JSONObject message = new JSONObject();
-		/*
-		 * construct the message 
-		 */
-		message.put("type", "direction");
-    	message.put("direction", TheGame.currentMap.localPlayer.getDirection().toString());
-    	/*
-    	 * send the message
-    	 */
-    	out.println(message.toString());
+		if (canSendDirection()) {
+			JSONObject message = new JSONObject();
+			/*
+			 * construct the message 
+			 */
+			message.put("type", "direction");
+	    	message.put("direction", TheGame.currentMap.localPlayer.getDirection().toString());
+	    	/*
+	    	 * send the message
+	    	 */
+	    	out.println(message.toString());
+		}
 	}
 
 	/**
@@ -187,7 +214,7 @@ public class Communicator {
 				if (in.ready()) { //if there is a message for us
 					String receivedStr = in.readLine();
 					JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
-					Gdx.app.log(getClass().getSimpleName(), "received: " + receivedStr);
+					//Gdx.app.log(getClass().getSimpleName(), "received: " + receivedStr);
 					
 					/*
 					 * deal with chat messages received from server
