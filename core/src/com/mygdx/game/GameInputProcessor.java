@@ -42,6 +42,9 @@ public class GameInputProcessor implements InputProcessor {
 	 * @throws Exception 
 	 */
 	protected void moveLocalPlayer(float stateTime) throws Exception {
+		if (directionStack.isEmpty()) {
+			directionStack.push(DirectionOfTravel.IDLE);
+		}
 		localPlayer.setDirection(directionStack.peek());
 		if (DirectionOfTravel.LEFT == localPlayer.getDirection()) {
 			TheGame.currentMap.moveLeft();
@@ -90,9 +93,7 @@ public class GameInputProcessor implements InputProcessor {
 		} else if ((Input.Keys.DOWN == keycode) || (Input.Keys.S == keycode)) {
 			directionStack.remove(DirectionOfTravel.DOWN);
 		}
-		if (directionStack.isEmpty()) {
-			directionStack.push(DirectionOfTravel.IDLE);
-		}
+		
 		/*
 		 * next give everything unhandled to the handler for the localplayer's specific class (mage, ranger, shield)
 		 */
