@@ -85,8 +85,8 @@ public class Server {
 		this.port = port;
 		clients = new ArrayList<PlayerClient>();
 	    
-	    int numClientsConnected = 0;
-	    int currentUID = 0;
+	    numClientsConnected = 0;
+	    currentUID = 0;
         
         try {
             serverSocketChannel =  ServerSocketChannel.open();
@@ -251,7 +251,7 @@ public class Server {
     public void attemptReadFrom(PlayerClient client) {
     	JSONObject receiveTo = new JSONObject();
     	try {
-    		ByteBuffer byteBuffer = ByteBuffer.allocate(1000);
+    		ByteBuffer byteBuffer = ByteBuffer.allocate(10000); //subbject to overflow
 			int numBytesRead = client.socketChannel.read(byteBuffer);
 			if (numBytesRead > 0) {
 				String receivedStr = new String(byteBuffer.array(), 0, numBytesRead, "ASCII");
