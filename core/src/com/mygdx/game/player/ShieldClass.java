@@ -29,9 +29,9 @@ public class ShieldClass extends Player {
 	public ShieldClass(int uid) {
 		super(uid, shieldShape);
 		/*
-		 * TODO set the appearance based on the class
+		 * set the appearance based on the class
 		 */
-		changeAppearance(Gdx.files.internal("character_art" + File.separator + "ranger" + File.separator + "ranger_spritesheet.png"));
+		setAppearance(Gdx.files.internal("character_art" + File.separator + "shield" + File.separator + "shield.png"));
 		Gdx.app.log(getClass().getSimpleName(), "instance of shield class created");
 	}
 

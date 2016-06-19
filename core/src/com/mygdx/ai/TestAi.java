@@ -31,7 +31,7 @@ public class TestAi extends Agent {
 	
 	public TestAi(ObjectShape shape, boolean passable, GameMap map) {
 		super(shape, passable);
-		changeAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.json"));
+		setAppearance(Gdx.files.internal("character_art/ranger/ranger_spritesheet.json"));
 		currentAnimation = moveLeft;
 		currentFrame = idleLeft.getKeyFrame(0);
 		setPos(new Point(100, 100));

@@ -157,6 +157,7 @@ public class Communicator {
 	/**
 	 * used to check if the position can be sent or if it is too soon
 	 * used to avoid flooding the server with position messages
+	 * eventually should be more intelligent
 	 * @return true if can send 
 	 */
 	private boolean canSendPosition() {
@@ -172,6 +173,7 @@ public class Communicator {
 	/**
 	 * used to check if the direction can be sent or if it is too soon
 	 * used to avoid flooding the server with position messages
+	 * eventually should be more intelligent
 	 * @return true if can send 
 	 */
 	private boolean canSendDirection() {

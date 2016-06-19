@@ -24,7 +24,7 @@ public abstract class Entity extends GameObject {
     protected int FRAME_COLS = 13;
     protected int FRAME_ROWS = 21;
     
-    private static final float ANIMATION_DURATION = .125f;
+    protected static final float ANIMATION_DURATION = .125f;
     private static final float SPRITE_SCALE = 5f;
     SpriteBatch batch;
 
@@ -65,22 +65,21 @@ public abstract class Entity extends GameObject {
     abstract public void setX(double newX);
     abstract public void setY(double newY);
     
-    protected void changeAppearance(FileHandle spritesheetFileHandle)
-    {
+    protected void setAppearance(FileHandle spritesheetFileHandle) {
         SpritesheetMetadataParser ssParser = new SpritesheetMetadataParser();
         Map<String, Animation> animations = ssParser.getAnimations(spritesheetFileHandle);
         for (String animationName: animations.keySet()) {
         	animations.get(animationName).setFrameDuration(ANIMATION_DURATION);
         }
         
-        moveLeft = animations.get("move_left");
-        idleLeft = animations.get("idle_left");
-        moveRight = animations.get("move_right");
-        idleRight = animations.get("idle_right");
-        moveUp = animations.get("move_up");
-        idleUp = animations.get("idle_up");
-        moveDown = animations.get("move_down");
-        idleDown = animations.get("idle_down");
+        moveLeft = animations.get("left_walk");
+        idleLeft = idleRight = idleUp = new Animation(1, moveLeft.getKeyFrame(0));
+        moveRight = animations.get("right_walk");
+        idleRight = idleUp = new Animation(1, moveRight.getKeyFrame(0));
+        moveUp = animations.get("up_walk");
+        idleUp = new Animation(1, moveUp.getKeyFrame(0));
+        moveDown = animations.get("down_walk");
+        idleDown = new Animation(1, moveDown.getKeyFrame(0));
         currentFrame = idleUp.getKeyFrame(0);
     }
     	

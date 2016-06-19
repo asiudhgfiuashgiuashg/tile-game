@@ -55,7 +55,7 @@ public class PositionIndexedNode implements IndexedNode<PositionIndexedNode> {
 		this.connections.add(outgoingConnection);
 	}
 	
-	public void draw(ShapeRenderer renderer, int xOffset, int yOffset) {
+	public void draw(ShapeRenderer renderer, float xOffset, float yOffset) {
 		renderer.circle(x + xOffset, y + yOffset, 6);
 	}
 	

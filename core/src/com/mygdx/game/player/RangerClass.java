@@ -27,9 +27,9 @@ public class RangerClass extends Player {
 	public RangerClass(int uid) {
 		super(uid, rangerShape);
 		/*
-		 * TODO set the appearance based on the class
+		 * set the appearance based on the class
 		 */
-		changeAppearance(Gdx.files.internal("character_art" + File.separator + "ranger" + File.separator + "ranger_spritesheet.png"));
+		setAppearance(Gdx.files.internal("character_art" + File.separator + "ranger" + File.separator + "ranger.png"));
 		System.out.println("instance of ranger class created");
 	}
 	

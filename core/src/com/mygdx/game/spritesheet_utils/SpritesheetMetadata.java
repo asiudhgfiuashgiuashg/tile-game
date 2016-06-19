@@ -12,17 +12,18 @@ import java.util.ArrayList;
  * represents metadata for a spritesheet
  */
 public class SpritesheetMetadata {
-	protected int width;
-	protected int height;
 	
-	protected HashMap<String, int[]> frameSets;
+	/**
+	 * list of frametags
+	 * a frame tag describes a sequence of frames which form an animation
+	 * a frame tag has a human-readable name
+	 */
+	List<FrameTagMetadata> frameTags;
 	
 	@Override
 	public String toString() {
 		String toReturn = "";
-		toReturn += "width: " + width + "\n";
-		toReturn += "height: " + height + "\n";
-		toReturn += "frameSets: " + frameSets;
+		toReturn += "frameTags: " + frameTags;
 		
 		return toReturn;
 	}
