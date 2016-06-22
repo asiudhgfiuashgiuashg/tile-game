@@ -67,15 +67,6 @@ public class Server {
 	 */
 	private final String mapName = "test";
 	
-	/**
-	 * if a position message is from > this long ago, throw it away and get another message
-	 */
-	private static final int MAX_POS_UPDATE_AGE = 200;
-	
-	/**
-	 * if a direction message is from > this long ago, throw it away and get another message
-	 */
-	private static final int MAX_DIR_UPDATE_AGE = 200;
 
 	
 	public Server(int port, ExtendedStage stage) {
@@ -273,15 +264,13 @@ public class Server {
 					/*
 					 * this value may be used to decide if a position or direction message is too old to be useful
 					 */
-					receiveTo.put("receivedTimeMillis", System.currentTimeMillis());
 					client.messageInQueue.add(receiveTo);
 
-                    if(receiveTo == null)
-                    {
+                    if(receiveTo == null) {
                         System.out.println("\nReceived a null error. Below is receivedStr, printed out");
                         System.out.println(receivedStr);
-                        for(int x = 0; x < lines.length; x++){
-                        System.out.printf("Line %d: %s\n", x, lines[x]);
+                        for (int x = 0; x < lines.length; x++) {
+                        	System.out.printf("Line %d: %s\n", x, lines[x]);
                         }
 
                     }
@@ -310,42 +299,25 @@ public class Server {
     	 * This way the
     	 *  message queue won't get backed up as easily
     	 */
-    	boolean messageHandled = false;
-        while (client.messageInQueue.peek() != null && false == messageHandled) { //something in queue
+        while (client.messageInQueue.peek() != null) { //something in queue
         	JSONObject received = client.messageInQueue.remove();
 			//System.out.println("handling: " + received.toString());
-			
-        	long timeMillis = System.currentTimeMillis();
-        	long receivedTime = ((Number) received.get("receivedTimeMillis")).longValue();
+
         	//position messages
 			if (received.get("type").equals("position")) {
-				/*
-				 * check how long ago this update was received and potentially ignore it
-				 */
-				if (timeMillis - receivedTime <= MAX_POS_UPDATE_AGE) {
-					//record position
-					receiveFromClient.player.setX(((Number) received.get("charX")).floatValue());
-					receiveFromClient.player.setY(((Number) received.get("charY")).floatValue());
-					//System.out.println(received);
-		    		// send coordinates to other clients
-		    		sendToAllFrom(received, receiveFromClient);
-		    		messageHandled = true;
-				} else {
-					messageHandled = false;
-				}
 
+
+				//record position
+				receiveFromClient.player.setX(((Number) received.get("charX")).floatValue());
+				receiveFromClient.player.setY(((Number) received.get("charY")).floatValue());
+				//System.out.println(received);
+	    		// send coordinates to other clients
+	    		sendToAllFrom(received, receiveFromClient);
 			} else if (received.get("type").equals(("direction"))) { //direction updates
-				/*
-				 * check how long ago this update was received and potentially ignore it
-				 */
-				if (timeMillis - receivedTime <= MAX_DIR_UPDATE_AGE) {
-					received.put("uid", receiveFromClient.uid); //so thhe clients know what client this direction update is from
-					sendToAllFrom(received, receiveFromClient);
-					messageHandled = true;
-				} else {
-					messageHandled = false;
-				}
 
+				received.put("uid", receiveFromClient.uid); //so thhe clients know what client this direction update is from
+				sendToAllFrom(received, receiveFromClient);
+				
 			} else if (received.get("type").equals("playerInfo")) {
 				receiveFromClient.username = (String) received.get("username");
 
@@ -355,7 +327,7 @@ public class Server {
 				playerInfo.put("username", receiveFromClient.username);
 				playerInfo.put("uid", receiveFromClient.uid);
 				sendToAllFrom(playerInfo, receiveFromClient);
-				messageHandled = true;
+
 
 			} else if (received.get("type").equals("readyStatus")) { //during lobby, wait for all players to be ready
 				boolean ready = (Boolean) received.get("readyStatus");
@@ -365,7 +337,7 @@ public class Server {
 				if (allAreReady()) {
 					endLobby();
 				}
-				messageHandled = true;
+
 			} else if (received.get("type").equals("chatMessage")) {
 				/*
 				 * chat messages are broadcast to everyone including the sender
@@ -377,14 +349,14 @@ public class Server {
 				received.put("type", "chatMessage");
 				received.put("message", message);
 				sendToAll(received);
-				messageHandled = true;
+
 			} else if (received.get("type").equals("sprite")) {
 				JSONObject spriteInfo = new JSONObject();
 				spriteInfo.put("type", "sprite");
 				spriteInfo.put("uid", receiveFromClient.uid);
 				spriteInfo.put("spriteID", (String) received.get("spriteID"));
 				sendToAllFrom(spriteInfo, receiveFromClient);
-				messageHandled = true;
+
 			} else if (received.get("type").equals("itemPickupRequest")) { //client asks to pick up an item on the ground
 				int uid = ((Number) received.get("uid")).intValue();
 				
@@ -412,13 +384,13 @@ public class Server {
 					removedItemMessage.put("uid", uid);
 					sendToAllExceptHost(removedItemMessage);
 				}
-				messageHandled = true;
+
 			} else if (received.get("type").equals("itemDrop")) {
 				//int itemUid = ((Number) received.get("uid")).intValue();
 				//Player playerWhoDroppedItem = gameMap.getPlayerByUid(receiveFromClient.uid);
 				//Item droppedItem = gameMap.getItemList().getByUid(itemUid);
 				sendToAll(received);
-				messageHandled = true;
+
 			}
 		}
     }

@@ -67,7 +67,7 @@ public class Communicator {
 	/*
 	 * max amt of time between position and direction updates
 	 */
-	private static final int MAX_POSITION_AND_DIRECTION_UPDATES_SENT_PER_SECOND = 30;
+	private static final int MAX_POSITION_AND_DIRECTION_UPDATES_SENT_PER_SECOND = 120;
 	
 	
 	public Communicator(TheGame theGame) {
