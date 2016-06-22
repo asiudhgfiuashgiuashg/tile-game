@@ -102,7 +102,7 @@ public abstract class Player extends Entity {
 	 * @return
 	 */
 	public float getMoveDist() {
-		return 7;
+		return 1;
 	}
 	
 	/**

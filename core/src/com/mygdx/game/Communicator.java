@@ -67,7 +67,7 @@ public class Communicator {
 	/*
 	 * max amt of time between position and direction updates
 	 */
-	private static final int MAX_POSITION_AND_DIRECTION_UPDATES_SENT_PER_SECOND = 20;
+	private static final int MAX_POSITION_AND_DIRECTION_UPDATES_SENT_PER_SECOND = 30;
 	
 	
 	public Communicator(TheGame theGame) {
@@ -213,7 +213,7 @@ public class Communicator {
 	public void receiveMessage() {
 		if (TheGame.GameState.SERVER_CONNECT_SCREEN != TheGame.gameState) {
 			try {
-				if (in.ready()) { //if there is a message for us
+				while (in.ready()) { //if there is a message for us
 					String receivedStr = in.readLine();
 					JSONObject received = (JSONObject) JSONValue.parse(receivedStr);
 					//Gdx.app.log(getClass().getSimpleName(), "received: " + receivedStr);
